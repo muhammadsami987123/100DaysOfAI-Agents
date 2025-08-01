@@ -1,0 +1,12 @@
+[
+  {
+    "id": 1,
+    "task": "buy groceries",
+    "priority": "medium",
+    "category": "other",
+    "due_date": null,
+    "status": "pending",
+    "created_at": "2025-08-01T21:05:05.149495",
+    "updated_at": "2025-08-01T21:05:05.149495"
+  }
+]
