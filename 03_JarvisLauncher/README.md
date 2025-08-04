@@ -44,7 +44,7 @@ A powerful, modern voice-controlled desktop assistant that allows you to control
 
 1. **Clone or download the project:**
    ```bash
-   cd 03_JarvisFileManager
+   cd 03_JarvisLauncher
    ```
 
 2. **Install dependencies:**
