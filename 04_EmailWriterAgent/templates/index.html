@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EmailWriterAgent - AI Email Composition</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="{{ url_for('static', path='/css/style.css') }}" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <h1><i class="fas fa-magic"></i> EmailWriterAgent</h1>
+                <p>Transform your ideas into professional emails with AI</p>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="email-form-container">
+                <!-- Email Form -->
+                <div class="email-form">
+                    <h2><i class="fas fa-pen-fancy"></i> Compose Email</h2>
+                    
+                    <form id="emailForm">
+                        <div class="form-group">
+                            <label for="prompt">
+                                <i class="fas fa-comment"></i> What would you like to write about?
+                            </label>
+                            <textarea 
+                                id="prompt" 
+                                name="prompt" 
+                                placeholder="Describe the email you want to write (e.g., 'meeting tomorrow at 2pm', 'thank you for the interview', 'follow up on project proposal')"
+                                required
+                            ></textarea>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="template">
+                                    <i class="fas fa-file-alt"></i> Template
+                                </label>
+                                <select id="template" name="template">
+                                    {% for key, template in templates.items() %}
+                                    <option value="{{ key }}">{{ template.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="tone">
+                                    <i class="fas fa-volume-up"></i> Tone (Optional)
+                                </label>
+                                <select id="tone" name="tone">
+                                    <option value="">Use template default</option>
+                                    <option value="formal">Formal</option>
+                                    <option value="casual">Casual</option>
+                                    <option value="professional">Professional</option>
+                                    <option value="friendly">Friendly</option>
+                                    <option value="urgent">Urgent</option>
+                                    <option value="appreciative">Appreciative</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="recipient">
+                                    <i class="fas fa-user"></i> Recipient (Optional)
+                                </label>
+                                <input type="text" id="recipient" name="recipient" placeholder="Recipient name or email">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="sender">
+                                    <i class="fas fa-user-tie"></i> Sender (Optional)
+                                </label>
+                                <input type="text" id="sender" name="sender" value="{{ default_from }}" placeholder="Your email">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="signature">
+                                <i class="fas fa-signature"></i> Signature (Optional)
+                            </label>
+                            <textarea 
+                                id="signature" 
+                                name="signature" 
+                                placeholder="Your signature"
+                                rows="3"
+                            >{{ default_signature }}</textarea>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-primary" id="generateBtn">
+                                <i class="fas fa-magic"></i> Generate Email
+                            </button>
+                            <button type="button" class="btn btn-secondary" id="clearBtn">
+                                <i class="fas fa-eraser"></i> Clear
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Email Preview -->
+                <div class="email-preview" id="emailPreview" style="display: none;">
+                    <h2><i class="fas fa-paper-plane"></i> Email Preview</h2>
+                    
+                    <div class="email-content">
+                        <div class="email-header">
+                            <div class="email-field">
+                                <strong>Subject:</strong> 
+                                <input type="text" id="previewSubject" class="editable-field" readonly>
+                            </div>
+                            <div class="email-field">
+                                <strong>To:</strong> 
+                                <input type="text" id="previewTo" class="editable-field" readonly>
+                            </div>
+                            <div class="email-field">
+                                <strong>From:</strong> 
+                                <input type="text" id="previewFrom" class="editable-field" readonly>
+                            </div>
+                        </div>
+                        
+                        <div class="email-body-container">
+                            <textarea id="previewBody" class="editable-body" readonly placeholder="Email body will appear here..."></textarea>
+                        </div>
+                    </div>
+
+                    <div class="preview-actions">
+                        <button class="btn btn-primary" id="editBtn">
+                            <i class="fas fa-edit"></i> Edit Email
+                        </button>
+                        <button class="btn btn-success" id="copyBtn">
+                            <i class="fas fa-copy"></i> Copy Email
+                        </button>
+                        <button class="btn btn-info" id="downloadBtn">
+                            <i class="fas fa-download"></i> Download
+                        </button>
+                        <button class="btn btn-secondary" id="regenerateBtn">
+                            <i class="fas fa-redo"></i> Regenerate
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sidebar -->
+            <div class="sidebar">
+                <!-- Templates Info -->
+                <div class="sidebar-section">
+                    <h3><i class="fas fa-file-alt"></i> Templates</h3>
+                    <div class="template-list">
+                        {% for key, template in templates.items() %}
+                        <div class="template-item" data-template="{{ key }}">
+                            <h4>{{ template.name }}</h4>
+                            <p>{{ template.description }}</p>
+                            <span class="template-tone">{{ template.tone }}</span>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- History -->
+                <div class="sidebar-section">
+                    <h3><i class="fas fa-history"></i> Recent Emails</h3>
+                    <div class="history-list" id="historyList">
+                        <p class="no-history">No emails generated yet</p>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Loading Overlay -->
+        <div class="loading-overlay" id="loadingOverlay" style="display: none;">
+            <div class="loading-content">
+                <div class="spinner"></div>
+                <p>Generating your email...</p>
+            </div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', path='/js/app.js') }}"></script>
+</body>
+</html> 
