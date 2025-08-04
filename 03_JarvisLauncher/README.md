@@ -1,4 +1,4 @@
-# Jarvis File Manager - Voice-Controlled Desktop Agent
+# JarvisLauncher - Voice-Controlled Desktop Agent
 
 A powerful, modern voice-controlled desktop assistant that allows you to control your entire PC through natural language commands. Built with Python, OpenAI GPT, and advanced speech recognition, this agent provides a seamless hands-free experience for managing files, folders, applications, and performing system operations.
 

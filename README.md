@@ -40,7 +40,7 @@ Build 100 useful, functional, and diverse AI agents in 100 days. Each agent will
 |-----|------------------------|------------------------------------------------------------------|
 | 01  | TodoAgent              | Manage tasks via natural language                               |
 | 02  | WeatherSpeaker         | Speak out real-time weather updates                             |
-| 03  | JarvisFileManager      | Open/delete files with voice                                    |
+| 03  | JarvisLauncher	      | Launch applications with voice                                    |
 | 04  | EmailWriterAgent       | Compose emails using GPT                                        |
 | 05  | TranslatorAgent        | Translate text/speech instantly                                 |
 | 06  | ReminderSetter         | Create reminders with Google Calendar                           |
@@ -51,7 +51,7 @@ Build 100 useful, functional, and diverse AI agents in 100 days. Each agent will
 | 11  | TextToSpeechAgent      | Convert GPT text responses to speech                            |
 | 12  | SpeechToTextAgent      | Convert speech to text                                          |
 | 13  | CodeReviewerBot        | Review code and give suggestions                                |
-| 14  | JarvisLauncher         | Launch applications with voice                                  |
+| 14  | JarvisFileManager      | Open/delete files with voice                                  |
 | 15  | BrowserOpenerAgent     | Open URLs by command                                            |
 | 16  | WhatsAppScheduler      | Auto-schedule WhatsApp messages                                 |
 | 17  | GmailOrganizer         | Label and archive emails with GPT                               |
