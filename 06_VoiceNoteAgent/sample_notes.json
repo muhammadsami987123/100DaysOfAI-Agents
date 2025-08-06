@@ -1,0 +1,52 @@
+[
+  {
+    "id": 1,
+    "title": "AI Project Ideas",
+    "content": "Create a voice-controlled smart home system that integrates with existing IoT devices and learns user preferences over time.",
+    "timestamp": "2024-01-15T10:30:00.000000",
+    "date": "2024-01-15",
+    "time": "10:30:00",
+    "length": 20,
+    "tags": ["ai", "project", "ideas"]
+  },
+  {
+    "id": 2,
+    "title": "Meeting Notes - Team Sync",
+    "content": "Discuss quarterly goals, assign tasks for the new AI agent project, and review progress on the voice recognition module.",
+    "timestamp": "2024-01-15T14:15:00.000000",
+    "date": "2024-01-15",
+    "time": "14:15:00",
+    "length": 18,
+    "tags": ["meeting", "work", "team"]
+  },
+  {
+    "id": 3,
+    "title": "Shopping List",
+    "content": "Buy groceries: milk, bread, eggs, vegetables, and some snacks for the weekend coding session.",
+    "timestamp": "2024-01-15T16:45:00.000000",
+    "date": "2024-01-15",
+    "time": "16:45:00",
+    "length": 15,
+    "tags": ["shopping", "personal"]
+  },
+  {
+    "id": 4,
+    "title": "Learning Goals",
+    "content": "Study advanced Python concepts, learn about machine learning algorithms, and practice building AI agents.",
+    "timestamp": "2024-01-16T09:00:00.000000",
+    "date": "2024-01-16",
+    "time": "09:00:00",
+    "length": 16,
+    "tags": ["learning", "python", "ai"]
+  },
+  {
+    "id": 5,
+    "title": "Reminder - Code Review",
+    "content": "Remember to review the VoiceNoteAgent code before submitting the pull request and test all functionality thoroughly.",
+    "timestamp": "2024-01-16T11:30:00.000000",
+    "date": "2024-01-16",
+    "time": "11:30:00",
+    "length": 19,
+    "tags": ["reminder", "work", "code"]
+  }
+] 

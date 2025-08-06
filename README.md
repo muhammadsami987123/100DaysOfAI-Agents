@@ -43,7 +43,7 @@ Build 100 useful, functional, and diverse AI agents in 100 days. Each agent will
 | 03  | JarvisLauncher	      | Launch applications with voice                                    |
 | 04  | EmailWriterAgent       | Compose emails using GPT                                        |
 | 05  | TranslatorAgent        | Translate text/speech instantly                                 |
-| 06  | ReminderSetter         | Create reminders with Google Calendar                           |
+| 06  | VoiceNoteAgent         | Take quick voice notes, transcribe them, and save locally                          |
 | 07  | YouTubeSummarizer      | Summarize YouTube video transcripts                             |
 | 08  | VoiceAssistantLite     | Minimal voice assistant for FAQs                                |
 | 09  | PDFQAAgent             | Answer questions from PDFs                                      |
