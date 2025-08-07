@@ -44,7 +44,7 @@ Build 100 useful, functional, and diverse AI agents in 100 days. Each agent will
 | 04  | EmailWriterAgent       | Compose emails using GPT                                        |
 | 05  | TranslatorAgent        | Translate text/speech instantly                                 |
 | 06  | VoiceNoteAgent         | Take quick voice notes, transcribe them, and save locally                          |
-| 07  | YouTubeSummarizer      | Summarize YouTube video transcripts                             |
+| 07  | YouTube InsightFetcher | Extract actionable takeaways, quotes, and stats from YouTube videos |
 | 08  | VoiceAssistantLite     | Minimal voice assistant for FAQs                                |
 | 09  | PDFQAAgent             | Answer questions from PDFs                                      |
 | 10  | ChatHistorySummarizer  | Summarize previous chat logs                                    |
@@ -157,3 +157,33 @@ Student | AI Agent Developer | Passionate About Web3, Generative AI & Automation
 ## 🚀 Let’s Build the Future – One Agent at a Time
 
 This challenge is part of my long-term dream to build a fully offline, autonomous AI assistant that understands and acts on natural language — no cloud required. Follow my journey and feel free to contribute, collaborate, or get inspired.
+
+### Day 07 – YouTube InsightFetcher
+
+**Description**  
+Enter a YouTube video URL, and the agent fetches its transcript and distills it into:
+- Actionable takeaways  
+- Memorable quotes  
+- Key data/statistics
+
+**Usage**  
+```python
+insight = youtube_insight_fetcher("https://www.youtube.com/watch?v=exampleID", openai_api_key)
+print(insight)
+```
+
+**Output**
+```
+**Actionable Takeaways**
+* Practice active recall after watching…
+* Use spaced repetition for concept retention…
+* Apply this mindset by setting “daily reflection” points…
+
+**“Memorable Quotes”**
+> “The best way to learn is to teach.”
+> “Consistency beats intensity.”
+
+**Key Stats**
+* 80% of learners improved retention by…
+* Studied for only 10 minutes/day led to…
+```
