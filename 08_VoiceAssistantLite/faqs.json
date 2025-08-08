@@ -1,0 +1,40 @@
+[
+  {
+    "id": 1,
+    "question": "What are your support hours?",
+    "aliases": [
+      "When is support available?",
+      "What time can I contact support?",
+      "Horario de soporte",
+      "Horas de soporte",
+      "Support timings",
+      "Customer service hours"
+    ],
+    "answer": "Our support is available 24/7 via email and chat."
+  },
+  {
+    "id": 2,
+    "question": "How can I reset my password?",
+    "aliases": [
+      "I forgot my password",
+      "Password reset",
+      "How to change my password",
+      "Restablecer contraseña",
+      "Forgot password"
+    ],
+    "answer": "Click 'Forgot password' on the login page and follow the instructions sent to your email."
+  },
+  {
+    "id": 3,
+    "question": "Do you support multiple languages?",
+    "aliases": [
+      "Is it multilingual?",
+      "Idioma soportado",
+      "What languages are available?",
+      "Language support"
+    ],
+    "answer": "Yes, we support multiple languages. Voice input works with Google STT or local Whisper."
+  }
+]
+
+

@@ -1,3 +1,46 @@
+# Python bytecode
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+venv/
+**/venv/
+.venv/
+**/.venv/
+
+# Environment files
+.env
+**/.env
+.env.*
+
+# Packaging / build
+build/
+dist/
+.eggs/
+*.egg-info/
+*.egg
+
+# Caches & testing
+.pytest_cache/
+.mypy_cache/
+.coverage
+coverage.xml
+htmlcov/
+
+# Logs
+**/logs/
+*.log
+
+# IDE / Editor
+.vscode/
+.idea/
+*.code-workspace
+
+# OS-specific
+.DS_Store
+Thumbs.db
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
