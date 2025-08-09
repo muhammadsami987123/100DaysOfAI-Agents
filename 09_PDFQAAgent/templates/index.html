@@ -1,0 +1,294 @@
+<!doctype html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>PDFQAAgent — Notebook / LLM Clone (Demo)</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    .scroll-smooth { scroll-behavior: smooth; }
+  </style>
+</head>
+<body class="min-h-screen bg-gradient-to-br from-slate-900 via-slate-900 to-slate-800 text-slate-100 font-inter">
+  <div class="max-w-7xl mx-auto px-6 py-6">
+    <header class="flex items-center justify-between mb-6">
+      <div class="flex items-center gap-3 select-none">
+        <div class="w-8 h-8 rounded-lg bg-indigo-500/90 shadow-lg flex items-center justify-center">🗂️</div>
+        <div>
+          <h1 class="text-2xl font-extrabold tracking-tight">PDFQAAgent</h1>
+          <p class="text-xs text-slate-400 mt-0.5">Notebook-style LLM clone · Day 9 demo</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-3">
+        <button id="themeBtn" class="px-3 py-2 rounded-lg bg-white/6 hover:bg-white/10">Toggle theme</button>
+        <button id="newDocBtn" class="btn-primary px-4 py-2 rounded-lg bg-indigo-500/90 shadow">New document</button>
+      </div>
+    </header>
+
+    <section class="rounded-2xl p-4 shadow card mb-6 bg-white/6 border border-white/6">
+      <div class="flex gap-2">
+        <button data-tab="upload" class="tab-btn px-4 py-2 rounded-xl bg-white text-slate-900 font-semibold">Upload PDF</button>
+        <button data-tab="url" class="tab-btn px-4 py-2 rounded-xl font-semibold text-slate-100/90">Enter URL</button>
+        <button data-tab="manual" class="tab-btn px-4 py-2 rounded-xl font-semibold text-slate-100/90">Paste text</button>
+      </div>
+
+      <div class="mt-4">
+        <div id="pane-upload" class="tab-pane space-y-4">
+          <form id="uploadForm" class="space-y-4">
+            <div id="dropZone" class="border-2 border-dashed rounded-xl p-8 text-center text-slate-300 sheen cursor-pointer bg-white/2">
+              <div class="text-sm">Drag & drop a file here, or click to choose</div>
+              <input id="fileInput" name="file" type="file" accept=".pdf,.docx,.txt" class="hidden"/>
+            </div>
+            <div class="flex gap-2">
+              <button class="px-4 py-2 rounded-lg bg-indigo-500/90 shadow" type="submit">Process File</button>
+              <button id="clearFiles" type="button" class="px-4 py-2 rounded-lg bg-white/6">Clear</button>
+            </div>
+          </form>
+        </div>
+
+        <div id="pane-url" class="tab-pane hidden space-y-4">
+          <form id="urlForm" class="space-y-4">
+            <input id="urlInput" class="w-full rounded-md p-3 bg-white text-slate-900 placeholder-slate-500 border border-white/6" type="url" placeholder="Paste a direct PDF link or webpage URL" />
+            <button class="px-4 py-2 rounded-lg bg-indigo-500/90 shadow" type="submit">Fetch & Process</button>
+          </form>
+        </div>
+
+        <div id="pane-manual" class="tab-pane hidden space-y-4">
+          <form id="textForm" class="space-y-4">
+            <textarea id="manualText" rows="6" class="w-full rounded-md p-3 bg-white text-slate-900 placeholder-slate-500 border border-white/6" placeholder="Paste document text here..."></textarea>
+            <button class="px-4 py-2 rounded-lg bg-indigo-500/90 shadow" type="submit">Ingest Text</button>
+          </form>
+        </div>
+      </div>
+    </section>
+
+    <div id="docInfo" class="hidden rounded-2xl p-5 shadow card mb-6 bg-white/6 border border-white/6"></div>
+
+    <div class="grid grid-cols-12 gap-6">
+      <aside class="col-span-12 md:col-span-3 rounded-2xl p-4 shadow card h-[70vh] bg-white/6 border border-white/6 overflow-hidden">
+        <div class="flex items-center justify-between mb-2">
+          <h3 class="text-sm font-bold uppercase tracking-wide text-slate-300">Sources</h3>
+          <button id="collapseSources" class="text-xs text-slate-400">Clear</button>
+        </div>
+        <div id="sourcesPanel" class="text-sm text-slate-300 overflow-y-auto h-[calc(70vh-6rem)] pr-2">
+          <p class="text-slate-400 text-sm">Add a PDF, URL, or paste text above to populate sources.</p>
+        </div>
+        <hr class="my-4 border-white/10" />
+        <div class="flex items-center justify-between mb-3">
+          <h3 class="text-sm font-bold uppercase tracking-wide text-slate-300">Chat History</h3>
+        </div>
+        <div id="historyList" class="overflow-y-auto h-[8rem] pr-2 text-slate-400 text-sm">
+          <p>No messages yet</p>
+        </div>
+      </aside>
+
+      <section id="chatContainer" class="col-span-12 md:col-span-6 rounded-2xl p-6 shadow card h-[70vh] bg-white/6 border border-white/6 flex flex-col">
+        <div class="flex items-center justify-between mb-3">
+          <h2 class="text-lg font-semibold">Chat</h2>
+          <div class="space-x-2 text-sm text-slate-400">
+            <span id="pagesBadge">0 pages</span>
+            <span id="tokensBadge">· ready</span>
+          </div>
+        </div>
+        <div id="chatBox" class="flex-1 overflow-y-auto rounded-xl p-4 bg-white/3 border border-white/6 mb-3 scroll-smooth"></div>
+
+        <form id="chatForm" class="mt-3 flex gap-2 items-center">
+          <input id="questionInput" class="input flex-1 rounded-md p-3 bg-white text-slate-900 placeholder-slate-500 border border-white/6" placeholder="Ask a question based on the document..." />
+          <button class="px-5 py-2 rounded-lg bg-indigo-500/90" type="submit">Ask</button>
+        </form>
+        <p class="text-xs text-slate-400 mt-2">Answers will include page numbers and snippets when available.</p>
+      </section>
+
+      <aside class="col-span-12 md:col-span-3 rounded-2xl p-4 shadow card h-[70vh] bg-white/6 border border-white/6 overflow-auto">
+        <h3 class="text-sm font-bold uppercase tracking-wide text-slate-300 mb-3">Studio</h3>
+        <div class="space-y-3 text-sm">
+          <div id="summaryBox" class="rounded-lg bg-white/4 border border-white/6 p-3">Summary (coming soon)</div>
+          <div id="outlineBox" class="rounded-lg bg-white/4 border border-white/6 p-3">Outline (coming soon)</div>
+          <div id="highlightsBox" class="rounded-lg bg-white/4 border border-white/6 p-3">Highlights (coming soon)</div>
+        </div>
+      </aside>
+    </div>
+  </div>
+
+  <!-- Toasts -->
+  <div id="toastHost" class="fixed top-4 right-4 z-50 space-y-2"></div>
+  <!-- Overlay loader -->
+  <div id="overlay" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-40 flex items-center justify-center">
+    <div class="rounded-xl bg-slate-800 border border-white/10 p-5 w-[320px] text-center">
+      <div class="mx-auto mb-3 h-8 w-8 border-4 border-white/20 border-t-indigo-400 rounded-full animate-spin"></div>
+      <div id="overlayText" class="text-slate-200 text-sm">Processing...</div>
+    </div>
+  </div>
+
+  <script>
+    let sessionId = null;
+    let docId = null;
+
+    function showToast(message, type = 'info') {
+      const host = document.getElementById('toastHost');
+      const el = document.createElement('div');
+      const color = type === 'success' ? 'bg-emerald-500/90' : type === 'error' ? 'bg-rose-500/90' : 'bg-slate-700/90';
+      el.className = `${color} text-white text-sm px-3 py-2 rounded-lg shadow`; el.textContent = message;
+      host.appendChild(el);
+      setTimeout(() => el.remove(), 2800);
+    }
+
+    function setLoading(isLoading, text = 'Processing...') {
+      const overlay = document.getElementById('overlay');
+      const t = document.getElementById('overlayText');
+      t.textContent = text;
+      overlay.classList.toggle('hidden', !isLoading);
+    }
+
+    async function postJSON(url, body) {
+      const res = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+      return res.json();
+    }
+
+    async function createSession() {
+      const res = await fetch('/api/session', { method: 'POST' });
+      const data = await res.json();
+      if (data.success) sessionId = data.session_id;
+    }
+
+    function setDocInfo(meta) {
+      const docInfo = document.getElementById('docInfo');
+      docInfo.classList.remove('hidden');
+      const pages = meta.num_pages ?? 1; const chars = meta.num_chars ?? 0;
+      docInfo.innerHTML = `
+        <div class="flex items-center justify-between">
+          <div>
+            <div class="text-sm text-slate-300">Loaded file</div>
+            <div class="font-semibold">${meta.title}</div>
+            <div class="text-xs text-slate-400 mt-1">Pages: ${pages} · Characters: ${chars} · Type: ${meta.media_type}</div>
+          </div>
+          <div>
+            <button id="openChat" class="px-3 py-2 rounded bg-indigo-500/90">Open chat</button>
+          </div>
+        </div>`;
+      document.getElementById('pagesBadge').textContent = `${pages} page${pages===1?'':'s'}`;
+      document.getElementById('openChat').addEventListener('click', () => {
+        document.getElementById('chatContainer').scrollIntoView({behavior:'smooth'});
+      });
+    }
+
+    function appendMessage(role, text, citations) {
+      const chatBox = document.getElementById('chatBox');
+      const wrap = document.createElement('div');
+      wrap.className = 'msg mb-3'; wrap.dataset.role = role;
+      const citeHtml = (citations && citations.length) ? `<div class=\"text-xs text-slate-400 mt-2\">Sources: ${citations.map(c=>`p.${c.page ?? '-'}#${c.chunk_index}`).join(', ')}</div>` : '';
+      if (role === 'user') {
+        wrap.innerHTML = `<div class=\"rounded-xl p-3 bg-white/5 self-end max-w-[90%] ml-auto\"><div class=\"text-sm font-medium\">You</div><div class=\"text-sm text-slate-200 mt-1\">${escapeHtml(text)}</div></div>`;
+      } else {
+        wrap.innerHTML = `<div class=\"rounded-xl p-3 bg-white/4 max-w-[90%]\"><div class=\"text-sm font-medium\">Agent</div><div class=\"text-sm text-slate-200 mt-1\">${escapeHtml(text)}</div>${citeHtml}</div>`;
+      }
+      chatBox.appendChild(wrap); chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    function renderHistory(history) {
+      const list = document.getElementById('historyList'); list.innerHTML = '';
+      if (!history || !history.length) { list.innerHTML = '<p>No messages yet</p>'; return; }
+      history.forEach((h, i) => {
+        const item = document.createElement('div');
+        item.className = 'py-2 border-b border-white/6 text-xs text-slate-300 cursor-pointer';
+        item.textContent = h.question;
+        item.onclick = () => {
+          const chatBox = document.getElementById('chatBox'); chatBox.innerHTML = '';
+          history.slice(0, i + 1).forEach(turn => { appendMessage('user', turn.question); appendMessage('assistant', turn.answer, turn.citations); });
+        }; list.prepend(item);
+      });
+    }
+
+    function escapeHtml(str) { return (str || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;'}[c])); }
+
+    // Tabs
+    const tabs = document.querySelectorAll('.tab-btn'); const panes = document.querySelectorAll('.tab-pane');
+    tabs.forEach(btn => btn.addEventListener('click', () => { tabs.forEach(b=>b.classList.remove('bg-white','text-slate-900')); btn.classList.add('bg-white','text-slate-900'); panes.forEach(p=>p.classList.add('hidden')); document.getElementById('pane-' + btn.dataset.tab).classList.remove('hidden'); }));
+
+    // Upload flow
+    const dropZone = document.getElementById('dropZone'); const fileInput = document.getElementById('fileInput');
+    dropZone.addEventListener('click', () => fileInput.click());
+    dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('border-white'); });
+    dropZone.addEventListener('dragleave', e => { e.preventDefault(); dropZone.classList.remove('border-white'); });
+    dropZone.addEventListener('drop', e => { e.preventDefault(); dropZone.classList.remove('border-white'); if (e.dataTransfer.files[0]) { fileInput.files = e.dataTransfer.files; showToast(`File received: ${e.dataTransfer.files[0].name}`); } });
+    fileInput.addEventListener('change', e => { if (e.target.files[0]) showToast(`File received: ${e.target.files[0].name}`); });
+
+    document.getElementById('uploadForm').addEventListener('submit', async (e) => {
+      e.preventDefault(); if (!sessionId) await createSession();
+      const file = fileInput.files[0]; if (!file) return alert('Choose a file');
+      setLoading(true, 'Uploading PDF and extracting text...');
+      const formData = new FormData(); formData.append('file', file); formData.append('session_id', sessionId);
+      try {
+        const res = await fetch('/api/upload', { method:'POST', body: formData }); const data = await res.json();
+        setLoading(false);
+        if (!data.success) { showToast(data.error || 'Upload failed','error'); return; }
+        docId = data.doc_id; setDocInfo(data); showToast('Document processed successfully','success');
+        const sourcesPanel = document.getElementById('sourcesPanel');
+        sourcesPanel.innerHTML = `<div class=\"mb-2 p-3 rounded bg-white/4 border border-white/6\"><div class=\"text-xs text-slate-300\">Source (upload)</div><div class=\"font-medium\">${data.title}</div></div>` + sourcesPanel.innerHTML;
+      } catch (err) { setLoading(false); showToast('Upload error','error'); }
+    });
+
+    // URL flow
+    const urlInput = document.getElementById('urlInput');
+    urlInput.addEventListener('paste', () => { showToast('URL pasted. Click Fetch to process.', 'info'); });
+
+    document.getElementById('urlForm').addEventListener('submit', async (e) => {
+      e.preventDefault(); if (!sessionId) await createSession();
+      const url = urlInput.value.trim(); if (!url) return alert('Enter a URL');
+      setLoading(true, 'Fetching URL and extracting text...');
+      const data = await postJSON('/api/fetch_url', { url, session_id: sessionId });
+      setLoading(false);
+      if (!data.success) { showToast(data.error || 'Fetch failed','error'); return; }
+      docId = data.doc_id; setDocInfo(data); showToast('URL processed successfully','success');
+      const sourcesPanel = document.getElementById('sourcesPanel');
+      sourcesPanel.innerHTML = `<div class=\"mb-2 p-3 rounded bg-white/4 border border-white/6\"><div class=\"text-xs text-slate-300\">Source (url)</div><div class=\"font-medium\">${data.title}</div></div>` + sourcesPanel.innerHTML;
+    });
+
+    // Paste text flow
+    document.getElementById('textForm').addEventListener('submit', async (e) => {
+      e.preventDefault(); if (!sessionId) await createSession();
+      const text = document.getElementById('manualText').value.trim(); if (!text) return;
+      setLoading(true, 'Indexing pasted text...');
+      const data = await postJSON('/api/ingest_text', { text, title: 'Manual document', session_id: sessionId });
+      setLoading(false);
+      if (!data.success) { showToast(data.error || 'Ingest failed','error'); return; }
+      docId = data.doc_id; setDocInfo(data); showToast('Text ingested successfully','success');
+      const sourcesPanel = document.getElementById('sourcesPanel');
+      sourcesPanel.innerHTML = `<div class=\"mb-2 p-3 rounded bg-white/4 border border-white/6\"><div class=\"text-xs text-slate-300\">Source (pasted)</div><div class=\"font-medium\">${data.title}</div></div>` + sourcesPanel.innerHTML;
+    });
+
+    // Chat submit
+    document.getElementById('chatForm').addEventListener('submit', async (e) => {
+      e.preventDefault(); if (!docId) return alert('Load a document first');
+      const q = document.getElementById('questionInput').value.trim(); if (!q) return;
+      appendMessage('user', q); document.getElementById('questionInput').value = '';
+      const thinking = document.createElement('div'); thinking.className = 'msg mb-3'; thinking.dataset.role = 'assistant';
+      thinking.innerHTML = '<div class="rounded-xl p-3 bg-white/4 max-w-[90%]"><div class="text-sm font-medium">Agent</div><div class="text-sm text-slate-200 mt-1"><span class="typing"><span class="dot"></span><span class="dot"></span><span class="dot"></span></span></div></div>';
+      const chatBox = document.getElementById('chatBox'); chatBox.appendChild(thinking); chatBox.scrollTop = chatBox.scrollHeight;
+      const data = await postJSON('/api/chat', { question: q, doc_id: docId, session_id: sessionId });
+      thinking.remove();
+      if (!data.success) { appendMessage('assistant', data.error || 'Error'); return; }
+      appendMessage('assistant', data.answer, data.citations); renderHistory(data.history || []);
+    });
+
+    // New document resets state
+    document.getElementById('newDocBtn').addEventListener('click', () => {
+      docId = null; document.getElementById('docInfo').classList.add('hidden');
+      document.getElementById('sourcesPanel').innerHTML = '<p class="text-slate-400 text-sm">Add a PDF, URL, or paste text above to populate sources.</p>';
+      document.getElementById('historyList').innerHTML = '<p>No messages yet</p>';
+      document.getElementById('chatBox').innerHTML = '';
+      document.getElementById('pagesBadge').textContent = '0 pages';
+      document.querySelector('[data-tab="upload"]').click();
+      showToast('Session cleared','info');
+    });
+
+    // Theme toggle
+    document.getElementById('themeBtn').addEventListener('click', () => { document.documentElement.classList.toggle('dark'); document.body.classList.toggle('bg-white'); });
+    document.getElementById('clearFiles').addEventListener('click', () => { document.getElementById('sourcesPanel').innerHTML = '<p class="text-slate-400 text-sm">Add a PDF, URL, or paste text above to populate sources.</p>'; document.getElementById('docInfo').classList.add('hidden'); document.getElementById('pagesBadge').textContent = '0 pages'; });
+
+    // Start
+    document.querySelector('[data-tab="upload"]').click(); createSession();
+  </script>
+</body>
+</html>
