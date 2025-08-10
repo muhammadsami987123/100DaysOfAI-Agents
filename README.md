@@ -47,7 +47,7 @@ Build 100 useful, functional, and diverse AI agents in 100 days. Each agent will
 | 07  | YouTube InsightFetcher | Extract actionable takeaways, quotes, and stats from YouTube videos |
 | 08  | VoiceAssistantLite     | Minimal voice assistant for FAQs                                |
 | 09  | PDFQAAgent             | Answer questions from PDFs                                      |
-| 10  | ChatHistorySummarizer  | Summarize previous chat logs                                    |
+| 10  | TextToSpeechAgent  | Convert GPT text responses                                     |
 | 11  | TextToSpeechAgent      | Convert GPT text responses to speech                            |
 | 12  | SpeechToTextAgent      | Convert speech to text                                          |
 | 13  | CodeReviewerBot        | Review code and give suggestions                                |

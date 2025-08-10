@@ -1,0 +1,548 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>TextToSpeechAgent — Premium UI</title>
+
+  <!-- Tailwind CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Custom styles for 3D, animations, waveform -->
+  <style>
+    :root{
+      --bg-1: #0f172a; /* deep navy */
+      --accent-1: #7c3aed; /* purple */
+      --accent-2: #06b6d4; /* teal */
+      --glass: rgba(255,255,255,0.06);
+      --card-grad: linear-gradient(135deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));
+    }
+
+    html,body{height:100%}
+    body {
+      background: radial-gradient(1200px 600px at 10% 10%, rgba(124,58,237,0.08), transparent 8%),
+                  radial-gradient(1000px 600px at 90% 90%, rgba(6,182,212,0.06), transparent 8%),
+                  linear-gradient(180deg,#020617 0%, #071129 60%, #0b1220 100%);
+      color: #e6eef8;
+      -webkit-font-smoothing:antialiased;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    }
+
+    /* 3D container tilt */
+    .scene {
+      perspective: 1400px;
+    }
+    .card {
+      transform-style: preserve-3d;
+      transition: transform 0.45s cubic-bezier(.2,.9,.3,1), box-shadow 0.35s;
+      will-change: transform;
+      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      border: 1px solid rgba(255,255,255,0.04);
+      backdrop-filter: blur(8px) saturate(140%);
+    }
+
+    /* Animated title */
+    .logo {
+      display:inline-block;
+      transform-origin:center;
+      animation: floatTitle 6s ease-in-out infinite;
+      text-shadow: 0 6px 22px rgba(0,0,0,0.6);
+    }
+    @keyframes floatTitle {
+      0%{ transform: translateY(0) rotate(-0.6deg) scale(1) }
+      50%{ transform: translateY(-6px) rotate(0.6deg) scale(1.02)}
+      100%{ transform: translateY(0) rotate(-0.6deg) scale(1)}
+    }
+
+    /* Fancy button micro interactions */
+    .btn-prim{
+      background-image: linear-gradient(90deg,var(--accent-1), #5b21b6 60%, var(--accent-2));
+      box-shadow: 0 8px 30px rgba(124,58,237,0.18), inset 0 -2px 0 rgba(0,0,0,0.12);
+      transition: transform .14s ease, box-shadow .14s ease, filter .14s;
+    }
+    .btn-prim:active{ transform: translateY(1px) scale(.998) }
+    .btn-prim:hover{ filter: brightness(1.06); transform: translateY(-2px) scale(1.003); }
+
+    /* Secondary ghost */
+    .btn-ghost{
+      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      border: 1px solid rgba(255,255,255,0.06);
+    }
+
+    /* Input chrome */
+    .input-elite{
+      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      border: 1px solid rgba(255,255,255,0.04);
+      transition: box-shadow .12s, transform .12s;
+    }
+    .input-elite:focus{
+      box-shadow: 0 6px 28px rgba(99,102,241,0.12);
+      transform: translateY(-2px);
+    }
+
+    /* dropzone */
+    .dropzone {
+      border: 1px dashed rgba(255,255,255,0.06);
+      background: linear-gradient(180deg, rgba(255,255,255,0.01), transparent);
+      transition: background .15s, border-color .15s, transform .12s;
+    }
+    .dropzone.dragover {
+      background: linear-gradient(90deg, rgba(124,58,237,0.06), rgba(6,182,212,0.04));
+      border-color: rgba(124,58,237,0.55);
+      transform: translateY(-3px) scale(1.002);
+    }
+
+    /* waveform (loading) */
+    .wave {
+      display:flex; gap:6px; align-items:end;
+      height:36px;
+    }
+    .bar{
+      width:6px; background: linear-gradient(180deg, var(--accent-2), var(--accent-1));
+      border-radius: 3px;
+      transform-origin: bottom;
+      opacity:0.95;
+      animation: bounce 800ms infinite ease-in-out;
+    }
+    .bar:nth-child(1){ animation-delay: -120ms }
+    .bar:nth-child(2){ animation-delay: -240ms }
+    .bar:nth-child(3){ animation-delay: -360ms }
+    .bar:nth-child(4){ animation-delay: -480ms }
+    .bar:nth-child(5){ animation-delay: -600ms }
+
+    @keyframes bounce {
+      0%{ transform: scaleY(.2) }
+      50%{ transform: scaleY(1.6) }
+      100%{ transform: scaleY(.2) }
+    }
+
+    /* subtle floating orb decor */
+    .orb {
+      position:absolute; width:220px; height:220px; border-radius:50%;
+      filter: blur(36px) saturate(140%); opacity:.7; mix-blend-mode:screen;
+      pointer-events:none;
+    }
+
+    /* minor responsive tweaks */
+    @media (max-width:768px){ .scene { padding: 18px } .logo h1{font-size:1.6rem} }
+  </style>
+</head>
+<body>
+
+  <!-- decorative orbs -->
+  <div class="orb" style="left:6%; top:6%; background: linear-gradient(135deg, rgba(124,58,237,0.26), rgba(6,182,212,0.12));"></div>
+  <div class="orb" style="right:2%; bottom:8%; background: linear-gradient(135deg, rgba(6,182,212,0.16), rgba(124,58,237,0.08));"></div>
+
+  <main class="min-h-screen flex items-center justify-center px-6">
+    <section class="scene w-full max-w-4xl">
+      <div id="card" class="card relative rounded-3xl p-8 md:p-10 shadow-2xl">
+        <!-- Header -->
+        <div class="flex items-center justify-between gap-6 mb-6">
+          <div>
+            <div class="logo">
+              <h1 class="text-4xl md:text-5xl font-extrabold tracking-tight leading-tight">
+                <span class="inline-block mr-2">🎙️</span>
+                <span class="bg-clip-text text-transparent bg-gradient-to-r from-white to-slate-200">TextToSpeech</span>
+                <span class="text-indigo-300">Agent</span>
+              </h1>
+            </div>
+            <p class="mt-2 text-sm text-slate-300/80 max-w-xl">
+              A premium, production-ready text → lifelike speech interface. Upload, paste or fetch from a URL — choose voice options and generate.
+            </p>
+          </div>
+
+          <!-- small actions -->
+          <div class="flex items-center gap-3">
+            <button id="clearAll" class="btn-ghost px-3 py-2 rounded-lg text-sm hover:opacity-95" title="Clear text & reset">
+              Clear
+            </button>
+            <button id="downloadBtn" class="btn-prim px-4 py-2 rounded-lg text-sm hidden" title="Download latest audio">
+              ⬇ Download
+            </button>
+          </div>
+        </div>
+
+        <!-- Main layout -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <!-- Left column: Content input + dropzone -->
+          <div class="lg:col-span-2 space-y-4">
+            <!-- Input mode toggles -->
+            <div class="flex items-center gap-3 p-3 rounded-xl drop-shadow-sm bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.03)]">
+              <label class="inline-flex items-center gap-2 text-sm cursor-pointer">
+                <input type="radio" name="mode" value="text" checked class="accent-indigo-400"/>
+                <span class="text-slate-300">Text</span>
+              </label>
+              <label class="inline-flex items-center gap-2 text-sm cursor-pointer">
+                <input type="radio" name="mode" value="file" class="accent-indigo-400"/>
+                <span class="text-slate-300">File</span>
+              </label>
+              <label class="inline-flex items-center gap-2 text-sm cursor-pointer">
+                <input type="radio" name="mode" value="url" class="accent-indigo-400"/>
+                <span class="text-slate-300">URL</span>
+              </label>
+
+              <div class="ml-auto text-xs text-slate-400">Premium voices • Fast generation</div>
+            </div>
+
+            <!-- Text area with interactive controls -->
+            <div id="text-area" class="relative">
+              <textarea id="text" rows="7" placeholder="Type or paste text here. Use up to 10,000 characters."
+                class="input-elite w-full p-4 rounded-2xl text-slate-100 placeholder-slate-400 min-h-[150px] resize-none"></textarea>
+
+              <!-- tiny toolbar -->
+              <div class="absolute right-3 bottom-3 flex items-center gap-2">
+                <button id="copyText" class="btn-ghost px-3 py-1 rounded-md text-xs">Copy</button>
+                <button id="clearText" class="btn-ghost px-3 py-1 rounded-md text-xs">Clear</button>
+                <div id="charCount" class="text-xs text-slate-400 px-2">0 / 10000</div>
+              </div>
+            </div>
+
+            <!-- Dropzone (shown for file) and URL row (hidden by default) -->
+            <div id="drop-url-area" class="grid grid-cols-1 gap-4">
+              <div id="dropzone" class="dropzone p-4 rounded-2xl flex items-center justify-between">
+                <div class="flex items-center gap-4">
+                  <div class="flex flex-col">
+                    <div class="text-sm font-semibold">Upload .txt</div>
+                    <div class="text-xs text-slate-400">Drag & drop or click to choose</div>
+                  </div>
+                </div>
+
+                <div class="flex items-center gap-3">
+                  <input id="file" type="file" accept=".txt" class="hidden"/>
+                  <label for="file" id="fileBtn" class="btn-prim px-4 py-2 rounded-full cursor-pointer text-sm">Choose file</label>
+                </div>
+              </div>
+
+              <div id="urlInput" class="hidden">
+                <input id="url" type="url" placeholder="Paste public article URL"
+                  class="input-elite w-full p-3 rounded-2xl text-slate-100 placeholder-slate-400" />
+              </div>
+            </div>
+
+            <!-- Small helper -->
+            <div class="text-xs text-slate-400/80">Tip: For best audio results keep paragraphs concise (1–3 sentences).</div>
+          </div>
+
+          <!-- Right column: Options, generate, player -->
+          <aside class="space-y-4">
+            <div class="p-4 rounded-2xl bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.03)]">
+              <label class="text-xs text-slate-300 font-semibold">Language</label>
+              <select id="language" class="w-full mt-2 p-2 rounded-lg input-elite text-slate-100 bg-slate-800">
+                <!-- example options; replace server-side templating as needed -->
+                <option value="auto">Auto-detect</option>
+                <option value="en-US" selected>English (US)</option>
+                <option value="en-GB">English (UK)</option>
+                <option value="ur-PK">Urdu (PK)</option>
+                <option value="hi-IN">Hindi (IN)</option>
+              </select>
+
+              <label class="text-xs text-slate-300 font-semibold mt-4 block">Voice</label>
+              <select id="gender" class="w-full mt-2 p-2 rounded-lg input-elite text-slate-100 bg-slate-800">
+                <option value="neutral">Neutral</option>
+                <option value="female" selected>Female</option>
+                <option value="male">Male</option>
+                <option value="expressive">Expressive</option>
+              </select>
+
+              <div class="mt-4 grid grid-cols-2 gap-3">
+                <button id="generate" class="btn-prim w-full px-4 py-3 rounded-xl text-sm font-semibold transform transition" title="Generate speech">
+                  <span id="genLabel">🔊 Generate</span>
+                </button>
+                <button id="preview" class="btn-ghost w-full px-4 py-3 rounded-xl text-sm">▶ Preview</button>
+              </div>
+
+              <!-- advanced options -->
+              <details class="mt-3 text-xs text-slate-400">
+                <summary class="cursor-pointer">Advanced options</summary>
+                <div class="mt-3">
+                  <label class="text-xs text-slate-300 block">Pitch</label>
+                  <input id="pitch" type="range" min="0.6" max="1.6" step="0.05" value="1" class="w-full" />
+                  <label class="text-xs text-slate-300 block mt-2">Rate</label>
+                  <input id="rate" type="range" min="0.6" max="1.4" step="0.05" value="1" class="w-full" />
+                </div>
+              </details>
+            </div>
+
+            <!-- Player + waveform -->
+            <div class="p-4 rounded-2xl bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.03)] space-y-3">
+              <div class="flex items-center justify-between">
+                <div class="text-sm text-slate-200 font-medium">Output</div>
+                <div id="statusTag" class="text-xs text-slate-400">Idle</div>
+              </div>
+
+              <div id="playerArea" class="hidden space-y-2">
+                <audio id="audio" controls class="w-full rounded-lg bg-black/20"></audio>
+                <div class="flex items-center justify-between">
+                  <div id="duration" class="text-xs text-slate-400">00:00</div>
+                  <a id="download" class="text-xs text-indigo-200 hover:underline">Download MP3</a>
+                </div>
+              </div>
+
+              <!-- waveform loader (animated) -->
+              <div id="loader" class="flex items-center justify-center py-2 hidden">
+                <div class="wave" aria-hidden="true">
+                  <span class="bar" style="height:16px"></span>
+                  <span class="bar" style="height:28px"></span>
+                  <span class="bar" style="height:22px"></span>
+                  <span class="bar" style="height:30px"></span>
+                  <span class="bar" style="height:14px"></span>
+                </div>
+              </div>
+
+              <div class="flex gap-2">
+                <button id="stop" class="btn-ghost w-full px-4 py-2 rounded-lg hidden">■ Stop</button>
+                <button id="clearOutput" class="btn-ghost w-full px-4 py-2 rounded-lg">✕ Clear</button>
+              </div>
+            </div>
+
+          </aside>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Inline JS handles advanced UI & interactions (drag/drop, previews, waveform toggles) -->
+  <script>
+    // Elements
+    const form = document.getElementById('tts-form'); // not used but kept for compatibility
+    const modeRadios = document.querySelectorAll('input[name="mode"]');
+    const textArea = document.getElementById('text');
+    const charCount = document.getElementById('charCount');
+    const copyText = document.getElementById('copyText');
+    const clearText = document.getElementById('clearText');
+    const clearAll = document.getElementById('clearAll');
+
+    const dropzone = document.getElementById('dropzone');
+    const fileInput = document.getElementById('file');
+    const urlInputEl = document.getElementById('urlInput');
+    const urlField = document.getElementById('url');
+
+    const generateBtn = document.getElementById('generate');
+    const previewBtn = document.getElementById('preview');
+    const loader = document.getElementById('loader');
+    const statusTag = document.getElementById('statusTag');
+    const playerArea = document.getElementById('playerArea');
+    const audioEl = document.getElementById('audio');
+    const download = document.getElementById('download');
+    const downloadBtn = document.getElementById('downloadBtn');
+    const stopBtn = document.getElementById('stop');
+    const clearOutput = document.getElementById('clearOutput');
+
+    // State
+    let lastAudioUrl = null;
+    let currentMode = 'text';
+
+    // Helpers
+    function setStatus(text){
+      statusTag.textContent = text;
+    }
+    function showLoader(on){
+      loader.classList.toggle('hidden', !on);
+      generateBtn.disabled = on;
+      previewBtn.disabled = on;
+      setStatus(on ? 'Processing...' : 'Idle');
+      if(on) {
+        document.getElementById('genLabel').textContent = '⏳ Generating...';
+      } else {
+        document.getElementById('genLabel').textContent = '🔊 Generate';
+      }
+    }
+    function showPlayer(url){
+      playerArea.classList.remove('hidden');
+      audioEl.src = url;
+      download.href = url;
+      download.setAttribute('download','speech.mp3');
+      downloadBtn.classList.remove('hidden');
+      lastAudioUrl = url;
+      setStatus('Ready');
+    }
+    function clearPlayer(){
+      playerArea.classList.add('hidden');
+      audioEl.src = '';
+      download.href = '#';
+      downloadBtn.classList.add('hidden');
+      lastAudioUrl = null;
+      setStatus('Idle');
+    }
+
+    // Mode switching
+    function updateMode(){
+      currentMode = document.querySelector('input[name="mode"]:checked').value;
+      if(currentMode === 'text'){
+        document.getElementById('text-area').classList.remove('hidden');
+        dropzone.classList.remove('hidden');
+        urlInputEl.classList.add('hidden');
+      } else if(currentMode === 'file'){
+        document.getElementById('text-area').classList.remove('hidden');
+        dropzone.classList.remove('hidden');
+        urlInputEl.classList.add('hidden');
+      } else {
+        document.getElementById('text-area').classList.remove('hidden');
+        dropzone.classList.add('hidden');
+        urlInputEl.classList.remove('hidden');
+      }
+    }
+    modeRadios.forEach(r=>{
+      r.addEventListener('change', updateMode);
+    });
+
+    // Text toolbar
+    textArea.addEventListener('input', ()=> {
+      const len = textArea.value.length;
+      charCount.textContent = `${len} / 10000`;
+    });
+    copyText.addEventListener('click', async ()=>{
+      try{
+        await navigator.clipboard.writeText(textArea.value || '');
+        copyText.textContent = 'Copied';
+        setTimeout(()=> copyText.textContent='Copy', 1200);
+      }catch(e){ copyText.textContent = 'Failed'; setTimeout(()=> copyText.textContent='Copy', 1200); }
+    });
+    clearText.addEventListener('click', ()=> {
+      textArea.value = '';
+      charCount.textContent = '0 / 10000';
+    });
+    clearAll.addEventListener('click', ()=> {
+      textArea.value=''; charCount.textContent='0 / 10000';
+      urlField.value=''; fileInput.value='';
+      clearPlayer();
+    });
+
+    // Drag & drop
+    ['dragenter','dragover'].forEach(ev=>{
+      dropzone.addEventListener(ev, (e)=>{
+        e.preventDefault(); e.stopPropagation();
+        dropzone.classList.add('dragover');
+      });
+    });
+    ['dragleave','drop'].forEach(ev=>{
+      dropzone.addEventListener(ev, (e)=>{
+        e.preventDefault(); e.stopPropagation();
+        dropzone.classList.remove('dragover');
+      });
+    });
+    dropzone.addEventListener('drop', (e)=>{
+      const f = e.dataTransfer.files?.[0];
+      if(f) handleFile(f);
+    });
+    // file chooser
+    fileInput.addEventListener('change', (e)=> {
+      const f = e.target.files[0];
+      if(f) handleFile(f);
+    });
+    document.getElementById('fileBtn').addEventListener('click', ()=> fileInput.click());
+
+    async function handleFile(file){
+      if(!file) return;
+      if(file.type && file.type !== 'text/plain' && !file.name.endsWith('.txt')){
+        alert('Please upload a .txt file.');
+        return;
+      }
+      const text = await file.text();
+      textArea.value = text.slice(0,10000);
+      charCount.textContent = `${textArea.value.length} / 10000`;
+    }
+
+    // Generate / Preview logic — uses same /api/tts POST behavior as your backend
+    async function doGenerate(preview = false){
+      // validation
+      if(currentMode === 'text'){
+        if(!textArea.value.trim()){ alert('Enter some text.'); return; }
+      } else if(currentMode === 'file'){
+        if(!fileInput.files?.[0]){ alert('Choose a file first.'); return; }
+      } else {
+        if(!urlField.value.trim()){ alert('Enter a URL.'); return; }
+      }
+
+      // start UI
+      showLoader(true);
+      clearPlayer();
+
+      const form = new FormData();
+      form.append('language', document.getElementById('language').value);
+      form.append('gender', document.getElementById('gender').value);
+      form.append('pitch', document.getElementById('pitch')?.value || 1);
+      form.append('rate', document.getElementById('rate')?.value || 1);
+      form.append('preview', preview ? '1' : '0');
+
+      if(currentMode === 'text') form.append('text', textArea.value);
+      if(currentMode === 'file') form.append('file', fileInput.files[0]);
+      if(currentMode === 'url') form.append('url', urlField.value);
+
+      try{
+        // POST to backend
+        const resp = await fetch('/api/tts', { method: 'POST', body: form });
+
+        if(!resp.ok){
+          const body = await resp.json().catch(()=>({}));
+          throw new Error(body.error || 'Server error: ' + resp.status);
+        }
+
+        const blob = await resp.blob();
+        const url = URL.createObjectURL(blob);
+        showPlayer(url);
+        // set duration display when metadata loads
+        audioEl.onloadedmetadata = ()=> {
+          const d = audioEl.duration || 0;
+          const mm = String(Math.floor(d/60)).padStart(2,'0');
+          const ss = String(Math.floor(d%60)).padStart(2,'0');
+          document.getElementById('duration').textContent = `${mm}:${ss}`;
+        };
+      }catch(err){
+        alert(err.message || 'Generation failed');
+        setStatus('Error');
+      }finally{
+        showLoader(false);
+      }
+    }
+
+    // Buttons
+    generateBtn.addEventListener('click', (e)=>{ e.preventDefault(); doGenerate(false); });
+    previewBtn.addEventListener('click', (e)=>{ e.preventDefault(); doGenerate(true); });
+
+    stopBtn.addEventListener('click', ()=>{
+      audioEl.pause();
+      audioEl.currentTime = 0;
+      setStatus('Stopped');
+    });
+    clearOutput.addEventListener('click', ()=> {
+      clearPlayer();
+    });
+
+    downloadBtn.addEventListener('click', ()=>{
+      if(lastAudioUrl){
+        const a = document.createElement('a');
+        a.href = lastAudioUrl; a.download = 'speech.mp3'; document.body.appendChild(a); a.click(); a.remove();
+      }
+    });
+
+    // initial mode
+    updateMode();
+
+    // small tilt effect on mouse move to amplify 3D feel
+    const card = document.getElementById('card');
+    let rect;
+    document.querySelector('.scene').addEventListener('mousemove', (e)=>{
+      rect = rect || card.getBoundingClientRect();
+      const cx = rect.left + rect.width/2;
+      const cy = rect.top + rect.height/2;
+      const dx = (e.clientX - cx) / (rect.width/2);
+      const dy = (e.clientY - cy) / (rect.height/2);
+      card.style.transform = `rotateX(${dy * 4}deg) rotateY(${dx * 8}deg) translateZ(8px)`;
+      card.style.boxShadow = `${-dx*20}px ${dy*20}px 80px rgba(2,8,23,0.6)`;
+    });
+    document.querySelector('.scene').addEventListener('mouseleave', ()=> {
+      card.style.transform = '';
+      card.style.boxShadow = '';
+    });
+
+    // accessibility: keyboard shortcut Ctrl+Enter to generate
+    window.addEventListener('keydown', (e)=>{
+      if((e.ctrlKey || e.metaKey) && e.key === 'Enter'){
+        doGenerate(false);
+      }
+    });
+
+  </script>
+</body>
+</html>
