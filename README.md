@@ -48,8 +48,8 @@ Build 100 useful, functional, and diverse AI agents in 100 days. Each agent will
 | 08  | VoiceAssistantLite     | Minimal voice assistant for FAQs                                |
 | 09  | PDFQAAgent             | Answer questions from PDFs                                      |
 | 10  | TextToSpeechAgent  | Convert GPT text responses                                     |
-| 11  | TextToSpeechAgent      | Convert GPT text responses to speech                            |
-| 12  | SpeechToTextAgent      | Convert speech to text                                          |
+| 11  | SpeechToTextAgent      | Convert speech to text                     |
+| 12  | not ideo      | Convert speech to text                                          |
 | 13  | CodeReviewerBot        | Review code and give suggestions                                |
 | 14  | JarvisFileManager      | Open/delete files with voice                                  |
 | 15  | BrowserOpenerAgent     | Open URLs by command                                            |
