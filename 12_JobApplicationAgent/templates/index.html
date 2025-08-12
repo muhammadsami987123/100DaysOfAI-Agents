@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JobApplicationAgent - AI-Powered Job Application Generator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/static/css/style.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    animation: {
+                        'fade-in': 'fadeIn 0.5s ease-in-out',
+                        'slide-up': 'slideUp 0.5s ease-out',
+                        'pulse-slow': 'pulse 3s infinite',
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
+    <!-- Header -->
+    <header class="bg-white/80 backdrop-blur-md border-b border-gray-200 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center py-4">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-briefcase text-white text-lg"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-xl font-bold text-gray-900">JobApplicationAgent</h1>
+                        <p class="text-sm text-gray-600">AI-Powered Job Application Generator</p>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <a href="https://github.com/muhammadsami987123" class="text-gray-600 hover:text-gray-900 transition-colors">
+                        <i class="fab fa-github text-xl"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Hero Section -->
+        <div class="text-center mb-12 animate-fade-in">
+            <h2 class="text-4xl font-bold text-gray-900 mb-4">
+                Transform Your Job Search with AI
+            </h2>
+            <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+                Upload your resume, paste a job description, and let AI generate customized applications 
+                that increase your chances of landing interviews.
+            </p>
+        </div>
+
+        <!-- Main Form -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+            <!-- Resume Upload Section -->
+            <div class="bg-white/80 backdrop-blur-md rounded-2xl shadow-xl border border-gray-200 p-6 animate-slide-up">
+                <div class="flex items-center mb-6">
+                    <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mr-4">
+                        <i class="fas fa-file-upload text-blue-600 text-xl"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-semibold text-gray-900">Upload Your Resume</h3>
+                        <p class="text-gray-600">PDF or DOCX format, max 10MB</p>
+                    </div>
+                </div>
+
+                <div class="space-y-4">
+                    <div class="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center hover:border-blue-400 transition-colors cursor-pointer" id="uploadZone">
+                        <div class="space-y-4">
+                            <i class="fas fa-cloud-upload-alt text-4xl text-gray-400"></i>
+                            <div>
+                                <p class="text-lg font-medium text-gray-900">Drop your resume here</p>
+                                <p class="text-gray-500">or click to browse</p>
+                            </div>
+                            <p class="text-sm text-gray-400">Supports PDF and DOCX files</p>
+                        </div>
+                        <input type="file" id="resumeFile" accept=".pdf,.docx,.doc" class="hidden">
+                    </div>
+                    
+                    <div id="fileInfo" class="hidden">
+                        <div class="bg-green-50 border border-green-200 rounded-lg p-4">
+                            <div class="flex items-center">
+                                <i class="fas fa-check-circle text-green-500 mr-3"></i>
+                                <div>
+                                    <p class="font-medium text-green-800" id="fileName"></p>
+                                    <p class="text-sm text-green-600" id="fileSize"></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Job Description Section -->
+            <div class="bg-white/80 backdrop-blur-md rounded-2xl shadow-xl border border-gray-200 p-6 animate-slide-up">
+                <div class="flex items-center mb-6">
+                    <div class="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center mr-4">
+                        <i class="fas fa-search text-purple-600 text-xl"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-semibold text-gray-900">Job Description</h3>
+                        <p class="text-gray-600">Paste the job posting details or URL</p>
+                    </div>
+                </div>
+
+                <div class="space-y-4">
+                    <!-- Input Mode Toggle -->
+                    <div class="flex items-center space-x-4 mb-4">
+                        <label class="inline-flex items-center">
+                            <input type="radio" name="inputMode" value="text" checked class="form-radio text-blue-600">
+                            <span class="ml-2 text-sm font-medium text-gray-700">Manual Input</span>
+                        </label>
+                        <label class="inline-flex items-center">
+                            <input type="radio" name="inputMode" value="url" class="form-radio text-blue-600">
+                            <span class="ml-2 text-sm font-medium text-gray-700">Job URL</span>
+                        </label>
+                    </div>
+
+                    <!-- Manual Input Mode -->
+                    <div id="manualInputMode">
+                        <textarea 
+                            id="jobDescription" 
+                            rows="8" 
+                            class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+                            placeholder="Paste the job description here...&#10;&#10;Example:&#10;We are looking for a Software Engineer with 3+ years of experience in Python, JavaScript, and cloud technologies. The ideal candidate will have experience with React, Node.js, and AWS..."
+                        ></textarea>
+                        
+                        <div class="flex items-center justify-between text-sm text-gray-500 mt-2">
+                            <span id="charCount">0 characters</span>
+                            <span>Minimum 50 characters</span>
+                        </div>
+                    </div>
+
+                    <!-- URL Input Mode -->
+                    <div id="urlInputMode" class="hidden">
+                        <div class="space-y-4">
+                            <input 
+                                type="url" 
+                                id="jobUrl" 
+                                class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                placeholder="Paste job posting URL (LinkedIn, Indeed, Glassdoor, etc.)"
+                            >
+                            <button 
+                                id="extractUrlBtn" 
+                                class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+                            >
+                                <i class="fas fa-download mr-2"></i>Extract Job Description
+                            </button>
+                            
+                            <div id="urlExtractionStatus" class="hidden">
+                                <div class="flex items-center space-x-2">
+                                    <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+                                    <span class="text-sm text-gray-600">Extracting job description...</span>
+                                </div>
+                            </div>
+                            
+                            <div id="extractedContent" class="hidden">
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Extracted Content (you can edit):</label>
+                                <textarea 
+                                    id="extractedJobDescription" 
+                                    rows="8" 
+                                    class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+                                ></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Options Section -->
+        <div class="bg-white/80 backdrop-blur-md rounded-2xl shadow-xl border border-gray-200 p-6 mb-8 animate-slide-up">
+            <h3 class="text-xl font-semibold text-gray-900 mb-6">Generation Options</h3>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                <!-- Language Selection -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Language</label>
+                    <select id="language" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        {% for code, name in languages.items() %}
+                        <option value="{{ code }}" {% if code == 'en' %}selected{% endif %}>{{ name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- Cover Letter Length -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Cover Letter Length</label>
+                    <select id="coverLetterLength" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        {% for code, name in cover_letter_lengths.items() %}
+                        <option value="{{ code }}" {% if code == 'medium' %}selected{% endif %}>{{ name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+
+            <!-- Additional Documents Selection -->
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-3">Additional Documents (Optional)</label>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                    <label class="flex items-center p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer">
+                        <input type="checkbox" name="additionalDocs" value="personal_statement" class="form-checkbox text-blue-600 mr-3">
+                        <div>
+                            <div class="font-medium text-gray-900">Personal Statement</div>
+                            <div class="text-sm text-gray-500">Professional summary</div>
+                        </div>
+                    </label>
+                    
+                    <label class="flex items-center p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer">
+                        <input type="checkbox" name="additionalDocs" value="reference_page" class="form-checkbox text-blue-600 mr-3">
+                        <div>
+                            <div class="font-medium text-gray-900">Reference Page</div>
+                            <div class="text-sm text-gray-500">Professional references</div>
+                        </div>
+                    </label>
+                    
+                    <label class="flex items-center p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer">
+                        <input type="checkbox" name="additionalDocs" value="thank_you_note" class="form-checkbox text-blue-600 mr-3">
+                        <div>
+                            <div class="font-medium text-gray-900">Thank You Note</div>
+                            <div class="text-sm text-gray-500">Post-interview follow-up</div>
+                        </div>
+                    </label>
+                    
+                    <label class="flex items-center p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer">
+                        <input type="checkbox" name="additionalDocs" value="motivation_letter" class="form-checkbox text-blue-600 mr-3">
+                        <div>
+                            <div class="font-medium text-gray-900">Motivation Letter</div>
+                            <div class="text-sm text-gray-500">Detailed interest explanation</div>
+                        </div>
+                    </label>
+                    
+                    <label class="flex items-center p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer">
+                        <input type="checkbox" name="additionalDocs" value="linkedin_bio" class="form-checkbox text-blue-600 mr-3">
+                        <div>
+                            <div class="font-medium text-gray-900">LinkedIn Bio</div>
+                            <div class="text-sm text-gray-500">Professional profile</div>
+                        </div>
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <!-- Generate Button -->
+        <div class="text-center mb-8">
+            <button 
+                id="generateBtn" 
+                class="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-4 rounded-xl font-semibold text-lg hover:from-blue-700 hover:to-purple-700 transform hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+                disabled
+            >
+                <i class="fas fa-magic mr-2"></i>
+                Generate Application
+            </button>
+        </div>
+
+        <!-- Loading Section -->
+        <div id="loadingSection" class="hidden text-center mb-8">
+            <div class="bg-white/80 backdrop-blur-md rounded-2xl shadow-xl border border-gray-200 p-8">
+                <div class="animate-pulse-slow">
+                    <i class="fas fa-cog text-4xl text-blue-600 mb-4"></i>
+                    <h3 class="text-xl font-semibold text-gray-900 mb-2">Generating Your Application</h3>
+                    <p class="text-gray-600 mb-4">This may take 30-60 seconds...</p>
+                    
+                    <!-- Progress Steps -->
+                    <div id="progressSteps" class="mb-6">
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                            <div class="progress-step" data-step="resume">
+                                <div class="flex items-center justify-center w-8 h-8 bg-gray-200 rounded-full mx-auto mb-2">
+                                    <i class="fas fa-file-alt text-gray-500"></i>
+                                </div>
+                                <p class="text-sm text-gray-600">Resume Analysis</p>
+                            </div>
+                            <div class="progress-step" data-step="cover">
+                                <div class="flex items-center justify-center w-8 h-8 bg-gray-200 rounded-full mx-auto mb-2">
+                                    <i class="fas fa-envelope text-gray-500"></i>
+                                </div>
+                                <p class="text-sm text-gray-600">Cover Letter</p>
+                            </div>
+                            <div class="progress-step" data-step="additional">
+                                <div class="flex items-center justify-center w-8 h-8 bg-gray-200 rounded-full mx-auto mb-2">
+                                    <i class="fas fa-file-plus text-gray-500"></i>
+                                </div>
+                                <p class="text-sm text-gray-600">Additional Docs</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Current Step Indicator -->
+                    <div id="currentStep" class="mb-4">
+                        <p class="text-sm font-medium text-blue-600" id="currentStepText">Analyzing resume...</p>
+                    </div>
+                    
+                    <!-- Progress Bar -->
+                    <div class="w-full bg-gray-200 rounded-full h-3 mb-4">
+                        <div id="progressBar" class="bg-gradient-to-r from-blue-500 to-purple-600 h-3 rounded-full transition-all duration-500" style="width: 0%"></div>
+                    </div>
+                    
+                    <!-- Estimated Time -->
+                    <p class="text-xs text-gray-500" id="estimatedTime">Estimated time: 30-60 seconds</p>
+                    
+                    <!-- Document Count (for multi-document generation) -->
+                    <div id="documentCount" class="hidden mt-4 p-3 bg-blue-50 rounded-lg">
+                        <p class="text-sm text-blue-700">
+                            <i class="fas fa-info-circle mr-2"></i>
+                            <span id="documentCountText">Generating multiple documents...</span>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Results Section -->
+        <div id="resultsSection" class="hidden space-y-8">
+            <!-- Job Fit Summary -->
+            <div class="bg-white/80 backdrop-blur-md rounded-2xl shadow-xl border border-gray-200 p-6">
+                <div class="flex items-center mb-6">
+                    <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center mr-4">
+                        <i class="fas fa-chart-pie text-green-600 text-xl"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-semibold text-gray-900">Job Fit Analysis</h3>
+                        <p class="text-gray-600">How well you match the position</p>
+                    </div>
+                </div>
+
+                <div id="fitSummary" class="space-y-4">
+                    <!-- Content will be populated by JavaScript -->
+                </div>
+            </div>
+
+            <!-- Customized Resume -->
+            <div class="bg-white/80 backdrop-blur-md rounded-2xl shadow-xl border border-gray-200 p-6">
+                <div class="flex items-center justify-between mb-6">
+                    <div class="flex items-center">
+                        <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mr-4">
+                            <i class="fas fa-file-alt text-blue-600 text-xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-semibold text-gray-900">Customized Resume</h3>
+                            <p class="text-gray-600">Tailored to match the job requirements</p>
+                        </div>
+                    </div>
+                    <div class="flex space-x-2">
+                        <button id="downloadResumePdf" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors">
+                            <i class="fas fa-file-pdf mr-2"></i>PDF
+                        </button>
+                        <button id="downloadResumeDocx" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
+                            <i class="fas fa-file-word mr-2"></i>DOCX
+                        </button>
+                    </div>
+                </div>
+
+                <div class="bg-gray-50 rounded-xl p-6 max-h-96 overflow-y-auto">
+                    <pre id="customizedResume" class="whitespace-pre-wrap text-sm text-gray-800 font-mono"></pre>
+                </div>
+            </div>
+
+            <!-- Cover Letter -->
+            <div class="bg-white/80 backdrop-blur-md rounded-2xl shadow-xl border border-gray-200 p-6">
+                <div class="flex items-center justify-between mb-6">
+                    <div class="flex items-center">
+                        <div class="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center mr-4">
+                            <i class="fas fa-envelope text-purple-600 text-xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-semibold text-gray-900">Cover Letter</h3>
+                            <p class="text-gray-600">Personalized for the position</p>
+                        </div>
+                    </div>
+                    <div class="flex space-x-2">
+                        <button id="downloadCoverLetterPdf" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors">
+                            <i class="fas fa-file-pdf mr-2"></i>PDF
+                        </button>
+                        <button id="downloadCoverLetterDocx" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
+                            <i class="fas fa-file-word mr-2"></i>DOCX
+                        </button>
+                    </div>
+                </div>
+
+                <div class="bg-gray-50 rounded-xl p-6 max-h-96 overflow-y-auto">
+                    <pre id="coverLetter" class="whitespace-pre-wrap text-sm text-gray-800 font-mono"></pre>
+                </div>
+            </div>
+
+            <!-- Additional Documents -->
+            <div id="additionalDocumentsSection" class="hidden">
+                <h3 class="text-xl font-semibold text-gray-900 mb-6">Additional Documents</h3>
+                
+                <!-- Personal Statement -->
+                <div id="personalStatementCard" class="bg-white/80 backdrop-blur-md rounded-2xl shadow-xl border border-gray-200 p-6 mb-6 hidden">
+                    <div class="flex items-center justify-between mb-6">
+                        <div class="flex items-center">
+                            <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center mr-4">
+                                <i class="fas fa-user text-green-600 text-xl"></i>
+                            </div>
+                            <div>
+                                <h4 class="text-lg font-semibold text-gray-900">Personal Statement</h4>
+                                <p class="text-gray-600">Professional summary</p>
+                            </div>
+                        </div>
+                        <div class="flex space-x-2">
+                            <button onclick="downloadAdditionalDocument('personal_statement', 'pdf')" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors">
+                                <i class="fas fa-file-pdf mr-2"></i>PDF
+                            </button>
+                            <button onclick="downloadAdditionalDocument('personal_statement', 'docx')" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
+                                <i class="fas fa-file-word mr-2"></i>DOCX
+                            </button>
+                        </div>
+                    </div>
+                    <div class="bg-gray-50 rounded-xl p-6 max-h-96 overflow-y-auto">
+                        <pre id="personalStatement" class="whitespace-pre-wrap text-sm text-gray-800 font-mono"></pre>
+                    </div>
+                </div>
+
+                <!-- Reference Page -->
+                <div id="referencePageCard" class="bg-white/80 backdrop-blur-md rounded-2xl shadow-xl border border-gray-200 p-6 mb-6 hidden">
+                    <div class="flex items-center justify-between mb-6">
+                        <div class="flex items-center">
+                            <div class="w-12 h-12 bg-yellow-100 rounded-xl flex items-center justify-center mr-4">
+                                <i class="fas fa-users text-yellow-600 text-xl"></i>
+                            </div>
+                            <div>
+                                <h4 class="text-lg font-semibold text-gray-900">Reference Page</h4>
+                                <p class="text-gray-600">Professional references</p>
+                            </div>
+                        </div>
+                        <div class="flex space-x-2">
+                            <button onclick="downloadAdditionalDocument('reference_page', 'pdf')" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors">
+                                <i class="fas fa-file-pdf mr-2"></i>PDF
+                            </button>
+                            <button onclick="downloadAdditionalDocument('reference_page', 'docx')" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
+                                <i class="fas fa-file-word mr-2"></i>DOCX
+                            </button>
+                        </div>
+                    </div>
+                    <div class="bg-gray-50 rounded-xl p-6 max-h-96 overflow-y-auto">
+                        <pre id="referencePage" class="whitespace-pre-wrap text-sm text-gray-800 font-mono"></pre>
+                    </div>
+                </div>
+
+                <!-- Thank You Note -->
+                <div id="thankYouNoteCard" class="bg-white/80 backdrop-blur-md rounded-2xl shadow-xl border border-gray-200 p-6 mb-6 hidden">
+                    <div class="flex items-center justify-between mb-6">
+                        <div class="flex items-center">
+                            <div class="w-12 h-12 bg-pink-100 rounded-xl flex items-center justify-center mr-4">
+                                <i class="fas fa-heart text-pink-600 text-xl"></i>
+                            </div>
+                            <div>
+                                <h4 class="text-lg font-semibold text-gray-900">Thank You Note</h4>
+                                <p class="text-gray-600">Post-interview follow-up</p>
+                            </div>
+                        </div>
+                        <div class="flex space-x-2">
+                            <button onclick="downloadAdditionalDocument('thank_you_note', 'pdf')" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors">
+                                <i class="fas fa-file-pdf mr-2"></i>PDF
+                            </button>
+                            <button onclick="downloadAdditionalDocument('thank_you_note', 'docx')" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
+                                <i class="fas fa-file-word mr-2"></i>DOCX
+                            </button>
+                        </div>
+                    </div>
+                    <div class="bg-gray-50 rounded-xl p-6 max-h-96 overflow-y-auto">
+                        <pre id="thankYouNote" class="whitespace-pre-wrap text-sm text-gray-800 font-mono"></pre>
+                    </div>
+                </div>
+
+                <!-- Motivation Letter -->
+                <div id="motivationLetterCard" class="bg-white/80 backdrop-blur-md rounded-2xl shadow-xl border border-gray-200 p-6 mb-6 hidden">
+                    <div class="flex items-center justify-between mb-6">
+                        <div class="flex items-center">
+                            <div class="w-12 h-12 bg-indigo-100 rounded-xl flex items-center justify-center mr-4">
+                                <i class="fas fa-lightbulb text-indigo-600 text-xl"></i>
+                            </div>
+                            <div>
+                                <h4 class="text-lg font-semibold text-gray-900">Motivation Letter</h4>
+                                <p class="text-gray-600">Detailed interest explanation</p>
+                            </div>
+                        </div>
+                        <div class="flex space-x-2">
+                            <button onclick="downloadAdditionalDocument('motivation_letter', 'pdf')" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors">
+                                <i class="fas fa-file-pdf mr-2"></i>PDF
+                            </button>
+                            <button onclick="downloadAdditionalDocument('motivation_letter', 'docx')" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
+                                <i class="fas fa-file-word mr-2"></i>DOCX
+                            </button>
+                        </div>
+                    </div>
+                    <div class="bg-gray-50 rounded-xl p-6 max-h-96 overflow-y-auto">
+                        <pre id="motivationLetter" class="whitespace-pre-wrap text-sm text-gray-800 font-mono"></pre>
+                    </div>
+                </div>
+
+                <!-- LinkedIn Bio -->
+                <div id="linkedinBioCard" class="bg-white/80 backdrop-blur-md rounded-2xl shadow-xl border border-gray-200 p-6 mb-6 hidden">
+                    <div class="flex items-center justify-between mb-6">
+                        <div class="flex items-center">
+                            <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mr-4">
+                                <i class="fab fa-linkedin text-blue-600 text-xl"></i>
+                            </div>
+                            <div>
+                                <h4 class="text-lg font-semibold text-gray-900">LinkedIn Bio</h4>
+                                <p class="text-gray-600">Professional profile</p>
+                            </div>
+                        </div>
+                        <div class="flex space-x-2">
+                            <button onclick="downloadAdditionalDocument('linkedin_bio', 'pdf')" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors">
+                                <i class="fas fa-file-pdf mr-2"></i>PDF
+                            </button>
+                            <button onclick="downloadAdditionalDocument('linkedin_bio', 'docx')" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
+                                <i class="fas fa-file-word mr-2"></i>DOCX
+                            </button>
+                        </div>
+                    </div>
+                    <div class="bg-gray-50 rounded-xl p-6 max-h-96 overflow-y-auto">
+                        <pre id="linkedinBio" class="whitespace-pre-wrap text-sm text-gray-800 font-mono"></pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Error Section -->
+        <div id="errorSection" class="hidden bg-red-50 border border-red-200 rounded-xl p-6 mb-8">
+            <div class="flex items-center">
+                <i class="fas fa-exclamation-triangle text-red-500 mr-3"></i>
+                <div>
+                    <h3 class="text-lg font-semibold text-red-800">Error</h3>
+                    <p id="errorMessage" class="text-red-600"></p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white/80 backdrop-blur-md border-t border-gray-200 mt-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <div class="text-center">
+                <p class="text-gray-600">
+                    Built with ❤️ as part of the #100DaysOfAI-Agents challenge
+                </p>
+                <p class="text-sm text-gray-500 mt-2">
+                    Transform your job search with AI-powered applications
+                </p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="/static/js/app.js"></script>
+</body>
+</html>

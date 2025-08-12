@@ -49,7 +49,7 @@ Build 100 useful, functional, and diverse AI agents in 100 days. Each agent will
 | 09  | PDFQAAgent             | Answer questions from PDFs                                      |
 | 10  | TextToSpeechAgent  | Convert GPT text responses                                     |
 | 11  | SpeechToTextAgent      | Convert speech to text                     |
-| 12  | not ideo      | Convert speech to text                                          |
+| 12  | JobApplicationAgent      | generates tailored job applications                                          |
 | 13  | CodeReviewerBot        | Review code and give suggestions                                |
 | 14  | JarvisFileManager      | Open/delete files with voice                                  |
 | 15  | BrowserOpenerAgent     | Open URLs by command                                            |
