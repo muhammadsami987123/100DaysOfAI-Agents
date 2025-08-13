@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>CodeReviewerBot — AI-Powered Code Review</title>
+
+  <!-- Tailwind & Icons -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+
+  <!-- CodeMirror core + common modes only (no fold addons to avoid errors) -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/theme/monokai.min.css" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/javascript/javascript.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/python/python.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/clike/clike.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/php/php.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/go/go.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/rust/rust.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/swift/swift.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/clojure/clojure.min.js"></script>
+
+  <style>
+    /* --- Visual polish & accessibility --- */
+    :root{
+      --glass-bg: rgba(18, 23, 38, 0.6);
+      --glass-border: rgba(255, 255, 255, 0.12);
+      --glass-highlight: rgba(255, 255, 255, 0.06);
+    }
+    .gradient-bg{
+      background: radial-gradient(1200px 600px at 10% -10%, #3b82f630 0%, transparent 60%),
+                  radial-gradient(1200px 600px at 110% 110%, #a855f730 0%, transparent 60%),
+                  linear-gradient(135deg, #0b1220 0%, #0f172a 60%, #111827 100%);
+      min-height: 100vh;
+    }
+    .glass{
+      background: var(--glass-bg);
+      backdrop-filter: blur(10px);
+      border: 1px solid var(--glass-border);
+      box-shadow:
+        0 10px 30px rgba(0,0,0,0.35),
+        inset 0 1px 0 var(--glass-highlight);
+    }
+    .tilt-3d{ transform: perspective(1000px) rotateX(0deg) rotateY(0deg); transition: transform .25s ease; }
+    .tilt-3d:hover{ transform: perspective(1000px) rotateX(2deg) rotateY(-2deg) translateY(-2px); }
+
+    .CodeMirror{
+      height: 400px; border-radius: 12px;
+      font-family: 'Fira Code', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      outline: none;
+    }
+
+    /* Severity ribbons with strong contrast */
+    .sev-critical{ background: #2b1111; border-left: 4px solid #ef4444; }
+    .sev-high{ background: #2c210b; border-left: 4px solid #f59e0b; }
+    .sev-medium{ background: #0b2240; border-left: 4px solid #3b82f6; }
+    .sev-low{ background: #0c2a1a; border-left: 4px solid #16a34a; }
+
+    .loading-spinner{
+      border: 3px solid rgba(255,255,255,.18);
+      border-top: 3px solid #60a5fa;
+      border-radius: 50%;
+      width: 30px; height: 30px;
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin{ to{ transform: rotate(360deg) } }
+
+    /* Tabs */
+    .tab-active{ background: rgba(59,130,246,0.15); border-bottom: 2px solid #60a5fa; color: #fff !important; }
+  </style>
+</head>
+
+<body class="gradient-bg text-slate-100 selection:bg-blue-600/70 selection:text-white">
+  <div class="container mx-auto px-4 py-8 max-w-6xl">
+    <!-- Header -->
+    <header class="text-center mb-8">
+      <h1 class="text-4xl md:text-5xl font-extrabold tracking-tight">
+        <span class="bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-indigo-400 to-fuchsia-400 drop-shadow">
+          <i class="fas fa-code mr-2"></i> CodeReviewerBot
+        </span>
+      </h1>
+      <p class="mt-3 text-slate-300">AI-Powered Code Review Agent — Day 13 of #100DaysOfAI-Agents</p>
+      <p class="text-slate-400 text-sm">Get senior‑level feedback on readability, security, performance, and best practices.</p>
+    </header>
+
+    <!-- Language -->
+    <section class="glass rounded-2xl p-5 mb-6 tilt-3d">
+      <div class="flex flex-wrap items-center gap-3 justify-center">
+        <label for="uiLanguage" class="text-slate-200 font-medium">UI Language</label>
+        <select id="uiLanguage" class="bg-slate-900/60 text-white border border-white/20 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400">
+          <option value="english">English</option>
+          <option value="hindi">हिंदी (Hindi)</option>
+          <option value="urdu">اردو (Urdu)</option>
+        </select>
+      </div>
+    </section>
+
+    <!-- Input Methods -->
+    <section class="grid md:grid-cols-3 gap-6 mb-8">
+      <button class="glass rounded-2xl p-6 text-left hover:ring-2 hover:ring-blue-400/60 transition tilt-3d" onclick="selectInputMethod('text', this)" aria-controls="textInputForm">
+        <div class="flex items-center gap-4">
+          <i class="fas fa-keyboard text-3xl text-blue-300"></i>
+          <div>
+            <h3 class="text-xl font-semibold">Paste Code</h3>
+            <p class="text-slate-300 text-sm">Directly paste your code for review</p>
+          </div>
+        </div>
+      </button>
+
+      <button class="glass rounded-2xl p-6 text-left hover:ring-2 hover:ring-blue-400/60 transition tilt-3d" onclick="selectInputMethod('file', this)" aria-controls="fileInputForm">
+        <div class="flex items-center gap-4">
+          <i class="fas fa-file-upload text-3xl text-green-300"></i>
+          <div>
+            <h3 class="text-xl font-semibold">Upload File</h3>
+            <p class="text-slate-300 text-sm">.py, .js, .java, .ts, .cpp, …</p>
+          </div>
+        </div>
+      </button>
+
+      <button class="glass rounded-2xl p-6 text-left hover:ring-2 hover:ring-blue-400/60 transition tilt-3d" onclick="selectInputMethod('github', this)" aria-controls="githubInputForm">
+        <div class="flex items-center gap-4">
+          <i class="fab fa-github text-3xl text-purple-300"></i>
+          <div>
+            <h3 class="text-xl font-semibold">GitHub URL</h3>
+            <p class="text-slate-300 text-sm">Public repo or direct file</p>
+          </div>
+        </div>
+      </button>
+    </section>
+
+    <!-- Forms -->
+    <section class="glass rounded-2xl p-6 mb-8">
+      <!-- Text Form -->
+      <div id="textInputForm" class="hidden">
+        <h3 class="text-xl font-semibold mb-4"><i class="fas fa-keyboard text-blue-300 mr-2"></i>Paste Your Code</h3>
+        <div class="mb-4">
+          <label class="block font-medium mb-2">Language (Auto-detected)</label>
+          <select id="languageSelect" class="w-full bg-slate-900/60 text-white border border-white/20 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400">
+            <option value="">Auto-detect</option>
+            <option value="python">Python</option>
+            <option value="javascript">JavaScript</option>
+            <option value="java">Java</option>
+            <option value="cpp">C++</option>
+            <option value="csharp">C#</option>
+            <option value="php">PHP</option>
+            <option value="go">Go</option>
+            <option value="rust">Rust</option>
+            <option value="swift">Swift</option>
+            <option value="kotlin">Kotlin</option>
+          </select>
+        </div>
+        <textarea id="codeInput" placeholder="Paste your code here…" class="w-full h-64 bg-slate-900/60 text-white border border-white/20 rounded-lg p-4 font-mono text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"></textarea>
+      </div>
+
+      <!-- File Form -->
+      <div id="fileInputForm" class="hidden">
+        <h3 class="text-xl font-semibold mb-4"><i class="fas fa-file-upload text-green-300 mr-2"></i>Upload Code File</h3>
+        <div id="fileDrop" class="border-2 border-dashed border-white/30 rounded-xl p-8 text-center hover:border-blue-400/80 transition">
+          <input type="file" id="fileInput" accept=".py,.js,.jsx,.ts,.tsx,.java,.cpp,.cc,.cxx,.h,.hpp,.cs,.php,.go,.rs,.swift,.kt,.kts" class="hidden">
+          <label for="fileInput" class="cursor-pointer block">
+            <i class="fas fa-cloud-upload-alt text-4xl text-green-300 mb-3"></i>
+            <p class="text-lg">Click to upload or drag & drop</p>
+            <p class="text-slate-300 text-sm mt-1">Popular languages supported</p>
+          </label>
+        </div>
+        <div id="fileInfoBox" class="mt-4 hidden">
+          <div class="bg-slate-900/60 rounded-lg p-4 border border-white/10">
+            <p><strong>File:</strong> <span id="fileName"></span></p>
+            <p class="text-slate-300 text-sm"><strong>Language:</strong> <span id="fileLanguage"></span></p>
+          </div>
+        </div>
+      </div>
+
+      <!-- GitHub Form -->
+      <div id="githubInputForm" class="hidden">
+        <h3 class="text-xl font-semibold mb-4"><i class="fab fa-github text-purple-300 mr-2"></i>GitHub Repository or File</h3>
+        <label class="block font-medium mb-2">GitHub URL</label>
+        <input type="url" id="githubUrl" placeholder="https://github.com/user/repo or …/blob/main/file.py" class="w-full bg-slate-900/60 text-white border border-white/20 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400">
+        <p class="text-slate-300 text-sm mt-2">
+          <i class="fas fa-info-circle"></i> Supports repo URLs and direct file URLs.
+        </p>
+        <div id="githubInfoBox" class="mt-4 hidden">
+          <div class="bg-slate-900/60 rounded-lg p-4 border border-white/10">
+            <p><strong>Repository:</strong> <span id="repoInfo"></span></p>
+            <p class="text-slate-300 text-sm"><strong>File:</strong> <span id="githubFileInfo"></span></p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Review Button -->
+      <div class="mt-6 text-center">
+        <button id="reviewBtn" class="relative inline-flex items-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 active:scale-[0.98] text-white font-semibold py-3 px-8 rounded-xl transition shadow-lg shadow-blue-900/30">
+          <i class="fas fa-magnifying-glass"></i> Review Code
+        </button>
+      </div>
+    </section>
+
+    <!-- Loading -->
+    <section id="loadingState" class="hidden">
+      <div class="glass rounded-2xl p-8 text-center">
+        <div class="loading-spinner mx-auto mb-4"></div>
+        <p class="text-lg">Analyzing your code…</p>
+        <p class="text-slate-300 text-sm mt-1">Usually just a few seconds</p>
+      </div>
+    </section>
+
+    <!-- Error -->
+    <section id="errorContainer" class="hidden">
+      <div class="glass rounded-2xl p-6 border-l-4 border-red-500">
+        <div class="flex items-center">
+          <i class="fas fa-exclamation-triangle text-red-400 text-2xl mr-3"></i>
+          <div>
+            <h3 class="font-semibold text-lg">Error</h3>
+            <p id="errorMessage" class="text-red-200 mt-1"></p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Results -->
+    <section id="resultsContainer" class="hidden">
+      <!-- Issue summary -->
+      <div class="grid md:grid-cols-5 gap-4 mb-6">
+        <div class="glass rounded-xl p-4 text-center"><div class="text-2xl font-bold" id="totalIssues">0</div><div class="text-slate-300 text-sm">Total Issues</div></div>
+        <div class="glass rounded-xl p-4 text-center"><div class="text-2xl font-bold text-red-400" id="criticalIssues">0</div><div class="text-slate-300 text-sm">Critical</div></div>
+        <div class="glass rounded-xl p-4 text-center"><div class="text-2xl font-bold text-yellow-400" id="highIssues">0</div><div class="text-slate-300 text-sm">High</div></div>
+        <div class="glass rounded-xl p-4 text-center"><div class="text-2xl font-bold text-blue-400" id="mediumIssues">0</div><div class="text-slate-300 text-sm">Medium</div></div>
+        <div class="glass rounded-xl p-4 text-center"><div class="text-2xl font-bold text-green-400" id="lowIssues">0</div><div class="text-slate-300 text-sm">Low</div></div>
+      </div>
+
+      <!-- Score summary -->
+      <div class="grid md:grid-cols-5 gap-4 mb-6">
+        <div class="glass rounded-xl p-4 text-center"><div class="text-2xl font-bold" id="readabilityScore">-</div><div class="text-slate-300 text-sm">Readability</div></div>
+        <div class="glass rounded-xl p-4 text-center"><div class="text-2xl font-bold" id="qualityScore">-</div><div class="text-slate-300 text-sm">Code Quality</div></div>
+        <div class="glass rounded-xl p-4 text-center"><div class="text-2xl font-bold" id="performanceScore">-</div><div class="text-slate-300 text-sm">Performance</div></div>
+        <div class="glass rounded-xl p-4 text-center"><div class="text-2xl font-bold" id="bestPracticesScore">-</div><div class="text-slate-300 text-sm">Best Practices</div></div>
+        <div class="glass rounded-xl p-4 text-center"><div class="text-2xl font-bold" id="securityScore">-</div><div class="text-slate-300 text-sm">Security</div></div>
+      </div>
+
+      <!-- Tabs -->
+      <div class="glass rounded-2xl p-6">
+        <div class="flex border-b border-white/10 mb-6 gap-2 flex-wrap">
+          <button class="tab-btn tab-active px-5 py-3 rounded-t-lg text-slate-300" onclick="showTab('issues', this)"><i class="fas fa-triangle-exclamation mr-2"></i>Issues</button>
+          <button class="tab-btn px-5 py-3 rounded-t-lg text-slate-300" onclick="showTab('suggestions', this)"><i class="fas fa-lightbulb mr-2"></i>Suggestions</button>
+          <button class="tab-btn px-5 py-3 rounded-t-lg text-slate-300" onclick="showTab('refactored', this)"><i class="fas fa-code mr-2"></i>Refactored Code</button>
+          <button class="tab-btn px-5 py-3 rounded-t-lg text-slate-300" onclick="showTab('summary', this)"><i class="fas fa-chart-bar mr-2"></i>Summary</button>
+        </div>
+
+        <!-- Issues -->
+        <div id="issuesTab" class="tab-content">
+          <div id="issuesList" class="space-y-4"></div>
+        </div>
+
+        <!-- Suggestions (improved: structured, always visible) -->
+        <div id="suggestionsTab" class="tab-content hidden">
+          <div id="suggestionsList" class="space-y-4"></div>
+        </div>
+
+        <!-- Refactored Code (visible by default, no hover dependency) -->
+        <div id="refactoredTab" class="tab-content hidden">
+          <div class="flex items-center justify-between mb-3">
+            <h4 class="text-lg font-semibold">Refactored Output</h4>
+            <button onclick="downloadRefactoredCode()" class="inline-flex items-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-white font-semibold py-2 px-4 rounded-lg transition">
+              <i class="fas fa-download"></i> Download
+            </button>
+          </div>
+          <div id="refactoredCodeContainer" class="overflow-hidden rounded-xl border border-white/10"></div>
+        </div>
+
+        <!-- Summary (now binds to real payload) -->
+        <div id="summaryTab" class="tab-content hidden">
+          <div id="summaryContent" class="prose prose-invert max-w-none"></div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    // ----------------- App -----------------
+    class CodeReviewerApp{
+      constructor(){
+        this.currentInputMethod = null;
+        this.currentResults = null;
+        this.codeEditor = null;
+        this.refactoredCodeEditor = null;
+        this.init();
+      }
+
+      init(){
+        this.setupListeners();
+        this.setupCodeEditor();
+        this.setupFileUpload();
+        this.setupGitHubValidation();
+      }
+
+      setupListeners(){
+        document.getElementById('uiLanguage').addEventListener('change', e => this.updateUILanguage(e.target.value));
+        document.getElementById('reviewBtn').addEventListener('click', () => this.reviewCode());
+      }
+
+      setupCodeEditor(){
+        const textarea = document.getElementById('codeInput');
+        if(!textarea) return;
+        this.codeEditor = CodeMirror.fromTextArea(textarea, {
+          mode: 'javascript',
+          theme: 'monokai',
+          lineNumbers: true,
+          tabSize: 2,
+          indentUnit: 2,
+          lineWrapping: true
+        });
+        this.codeEditor.on('change', () => this.autoDetectLanguage());
+      }
+
+      setupFileUpload(){
+        const fileInput = document.getElementById('fileInput');
+        const dropZone = document.getElementById('fileDrop');
+
+        if(fileInput){
+          fileInput.addEventListener('change', (e)=> this.handleFileSelect(e.target.files[0]));
+        }
+        if(dropZone){
+          ['dragover','dragenter'].forEach(evt => dropZone.addEventListener(evt, (e)=>{
+            e.preventDefault(); dropZone.classList.add('border-blue-400');
+          }));
+          ['dragleave','drop'].forEach(evt => dropZone.addEventListener(evt, (e)=>{
+            e.preventDefault(); dropZone.classList.remove('border-blue-400');
+          }));
+          dropZone.addEventListener('drop', (e)=>{
+            const files = e.dataTransfer.files;
+            if(files.length) this.handleFileSelect(files[0]);
+          });
+        }
+      }
+
+      setupGitHubValidation(){
+        const githubUrlInput = document.getElementById('githubUrl');
+        if(!githubUrlInput) return;
+        let t;
+        githubUrlInput.addEventListener('input', (e)=>{
+          clearTimeout(t);
+          t = setTimeout(()=> this.validateGitHubUrl(e.target.value), 700);
+        });
+      }
+
+      selectInputMethod(method, btnEl){
+        this.currentInputMethod = method;
+
+        // Hide all
+        ['text','file','github'].forEach(m=>{
+          const el = document.getElementById(m + 'InputForm');
+          if(el) el.classList.add('hidden');
+        });
+
+        // Show chosen
+        const chosen = document.getElementById(method + 'InputForm');
+        if(chosen) chosen.classList.remove('hidden');
+
+        // Button focus ring management
+        document.querySelectorAll('.tilt-3d').forEach(el => el.classList.remove('ring-2','ring-blue-400'));
+        if(btnEl) btnEl.classList.add('ring-2','ring-blue-400');
+      }
+
+      async handleFileSelect(file){
+        if(!file) return;
+        const box = document.getElementById('fileInfoBox');
+        const nameSpan = document.getElementById('fileName');
+        const langSpan = document.getElementById('fileLanguage');
+
+        const exts = ['.py','.js','.jsx','.ts','.tsx','.java','.cpp','.cc','.cxx','.h','.hpp','.cs','.php','.go','.rs','.swift','.kt','.kts'];
+        const ext = '.' + (file.name.split('.').pop() || '').toLowerCase();
+        if(!exts.includes(ext)) return this.showError('Unsupported file type. Please upload a code file.');
+
+        nameSpan.textContent = file.name;
+        langSpan.textContent = this.getLanguageName(ext);
+        box.classList.remove('hidden');
+
+        const reader = new FileReader();
+        reader.onload = (e)=>{
+          const content = e.target.result || '';
+          if(this.codeEditor){
+            this.codeEditor.setValue(content);
+            this.autoDetectLanguage();
+          }
+          // auto switch to text input UI so the editor is visible
+          document.getElementById('textInputForm').classList.remove('hidden');
+          document.getElementById('fileInputForm').classList.add('hidden');
+          this.currentInputMethod = 'text';
+        };
+        reader.readAsText(file);
+      }
+
+      async validateGitHubUrl(url){
+        const box = document.getElementById('githubInfoBox');
+        if(!url || !url.includes('github.com')){ box.classList.add('hidden'); return; }
+
+        try{
+          const fd = new FormData();
+          fd.append('github_url', url);
+          const res = await fetch('/api/validate-github', { method:'POST', body: fd });
+          const json = await res.json();
+
+          const repoInfo = document.getElementById('repoInfo');
+          const fileInfo = document.getElementById('githubFileInfo'); // fixed duplicate id
+
+          if(json.valid){
+            const info = json.github_info;
+            repoInfo.textContent = `${info.owner}/${info.repo}`;
+            fileInfo.textContent = info.type === 'file' ? info.path : 'Repository (first code file will be fetched)';
+            box.classList.remove('hidden');
+          }else{
+            box.classList.add('hidden');
+          }
+        }catch(e){
+          console.error(e);
+          box.classList.add('hidden');
+        }
+      }
+
+      autoDetectLanguage(){
+        if(!this.codeEditor) return;
+        const s = this.codeEditor.getValue();
+
+        let lang = '';
+        if(/(^|\s)def\s|\bfrom\s|\bimport\s/.test(s)) lang='python';
+        else if(/\bfunction\b|(^|\s)(const|let|var)\s/.test(s)) lang='javascript';
+        else if(/\bpublic\s+class\b|\bprivate\s+|\bpublic\s+/.test(s)) lang='java';
+        else if(/#include|\bint\s+main\s*\(/.test(s)) lang='cpp';
+        else if(/\bnamespace\b|\busing\s/.test(s)) lang='csharp';
+        else if(/<\?php|\bfunction\s/.test(s)) lang='php';
+        else if(/\bpackage\s|\bfunc\s/.test(s)) lang='go';
+        else if(/\bfn\s|\blet\s|\bmut\b/.test(s)) lang='rust';
+        else if(/\bimport\s.*\bclass\b/.test(s)) lang='swift';
+        else if(/\bfun\s|\bval\s|\bvar\s/.test(s)) lang='kotlin';
+
+        if(lang){
+          document.getElementById('languageSelect').value = lang;
+          this.updateEditorMode(lang);
+        }
+      }
+
+      updateEditorMode(language){
+        if(!this.codeEditor) return;
+        const mm = {
+          python:'python', javascript:'javascript',
+          java:'text/x-java-source', cpp:'text/x-c++src',
+          csharp:'text/x-csharp', php:'php',
+          go:'text/x-go', rust:'text/x-rustsrc',
+          swift:'text/x-swift', kotlin:'text/x-kotlin'
+        };
+        this.codeEditor.setOption('mode', mm[language] || 'javascript');
+      }
+
+      getLanguageName(ext){
+        const map = {'.py':'Python','.js':'JavaScript','.jsx':'JavaScript (React)','.ts':'TypeScript','.tsx':'TypeScript (React)',
+          '.java':'Java','.cpp':'C++','.cc':'C++','.cxx':'C++','.h':'C/C++ Header','.hpp':'C++ Header',
+          '.cs':'C#','.php':'PHP','.go':'Go','.rs':'Rust','.swift':'Swift','.kt':'Kotlin','.kts':'Kotlin Script'};
+        return map[ext] || 'Unknown';
+      }
+
+      async reviewCode(){
+        if(!this.currentInputMethod) return this.showError('Please select an input method first.');
+
+        this.showLoading(true); this.hideError(); this.hideResults();
+        try{
+          const fd = new FormData();
+          fd.append('ui_language', document.getElementById('uiLanguage').value);
+
+          if(this.currentInputMethod === 'text'){
+            const code = this.codeEditor ? this.codeEditor.getValue() : '';
+            const language = document.getElementById('languageSelect').value;
+            if(!code.trim()) throw new Error('Please enter some code to review.');
+            fd.append('code', code);
+            if(language) fd.append('language', language);
+          }else if(this.currentInputMethod === 'file'){
+            const file = document.getElementById('fileInput').files[0];
+            if(!file) throw new Error('Please select a file to upload.');
+            fd.append('file', file);
+          }else if(this.currentInputMethod === 'github'){
+            const url = document.getElementById('githubUrl').value;
+            if(!url.trim()) throw new Error('Please enter a GitHub URL.');
+            fd.append('github_url', url);
+          }
+
+          const res = await fetch('/api/review', { method:'POST', body: fd });
+          const json = await res.json();
+          if(!json.success) throw new Error(json.error || 'Code review failed.');
+
+          this.currentResults = json.data;
+          this.displayResults(json.data);
+
+        }catch(e){
+          this.showError(e.message || 'Something went wrong.');
+        }finally{
+          this.showLoading(false);
+        }
+      }
+
+      displayResults(data){
+        this.updateSummaryCards(data);
+        this.updateScoreCards(data);
+        this.renderIssues(data.issues || []);
+        this.renderSuggestions(data.suggestions || []);
+        this.renderRefactored(data.refactored_code, data.language);
+        this.renderSummary(data.summary, data.statistics);
+        document.getElementById('resultsContainer').classList.remove('hidden');
+        document.getElementById('resultsContainer').scrollIntoView({behavior:'smooth', block:'start'});
+      }
+
+      updateSummaryCards(data){
+        const s = data.statistics || { total_issues:0, critical_issues:0 };
+        document.getElementById('totalIssues').textContent = s.total_issues ?? 0;
+        document.getElementById('criticalIssues').textContent = s.critical_issues ?? 0;
+
+        const counts = { high:0, medium:0, low:0 };
+        (data.issues || []).forEach(i=>{ if(counts[i.severity] !== undefined) counts[i.severity]++; });
+        document.getElementById('highIssues').textContent = counts.high;
+        document.getElementById('mediumIssues').textContent = counts.medium;
+        document.getElementById('lowIssues').textContent = counts.low;
+      }
+
+      updateScoreCards(data){
+        const sc = data.scores || {};
+        document.getElementById('readabilityScore').textContent = sc.readability ?? '-';
+        document.getElementById('qualityScore').textContent = sc.code_quality ?? '-';
+        document.getElementById('performanceScore').textContent = sc.performance ?? '-';
+        document.getElementById('bestPracticesScore').textContent = sc.best_practices ?? '-';
+        document.getElementById('securityScore').textContent = sc.security ?? '-';
+      }
+
+      getSeverityIcon(sev){
+        const map = {
+          critical:'<i class="fas fa-circle-exclamation text-red-400"></i>',
+          high:'<i class="fas fa-exclamation-circle text-yellow-400"></i>',
+          medium:'<i class="fas fa-info-circle text-blue-400"></i>',
+          low:'<i class="fas fa-info text-green-400"></i>'
+        };
+        return map[sev] || map.medium;
+      }
+      getCategoryIcon(cat){
+        const map = {
+          syntax:'<i class="fas fa-bug text-red-400"></i>',
+          best_practices:'<i class="fas fa-book text-blue-400"></i>',
+          performance:'<i class="fas fa-gauge-high text-yellow-400"></i>',
+          security:'<i class="fas fa-shield-halved text-red-400"></i>',
+          readability:'<i class="fas fa-eye text-green-400"></i>'
+        };
+        return map[cat] || '<i class="fas fa-book text-blue-400"></i>';
+      }
+
+      renderIssues(issues){
+        const wrap = document.getElementById('issuesList');
+        wrap.innerHTML = '';
+        if(!issues.length){
+          wrap.innerHTML = `<div class="text-center py-8">
+            <i class="fas fa-check-circle text-emerald-400 text-4xl mb-3"></i>
+            <p class="text-lg">No issues found! Your code looks solid.</p></div>`;
+          return;
+        }
+
+        issues.forEach((it)=>{
+          const badge = (it.severity || 'medium').toLowerCase();
+          const sevClass = badge==='critical'?'sev-critical':badge==='high'?'sev-high':badge==='medium'?'sev-medium':'sev-low';
+
+          const card = document.createElement('div');
+          card.className = `rounded-xl p-4 glass ${sevClass}`;
+          card.innerHTML = `
+            <div class="flex flex-wrap items-center gap-3 mb-2">
+              ${this.getSeverityIcon(badge)}
+              <span class="text-xs font-semibold tracking-wide px-2 py-1 rounded bg-white/10">${badge.toUpperCase()}</span>
+              ${this.getCategoryIcon(it.category)}
+              <span class="text-sm text-slate-300">${(it.category || '').replace('_',' ').toUpperCase()}</span>
+              ${it.line_number ? `<span class="text-sm text-slate-400">Line ${it.line_number}</span>`:''}
+            </div>
+            <p class="mb-3">${this.escapeHtml(it.message || 'Issue')}</p>
+            ${it.code_snippet ? `<pre class="bg-slate-900/70 border border-white/10 rounded-lg p-3 overflow-auto text-sm mb-3"><code>${this.escapeHtml(it.code_snippet)}</code></pre>`:''}
+            <div class="bg-blue-900/30 rounded-lg p-3 border border-blue-400/20">
+              <p class="text-slate-200 text-sm"><strong>Suggestion:</strong> ${this.escapeHtml(it.suggestion || 'Consider refactoring.')}</p>
+            </div>
+          `;
+          wrap.appendChild(card);
+        });
+      }
+
+      // NEW: professional, structured suggestion items
+      renderSuggestions(suggestions){
+        const wrap = document.getElementById('suggestionsList');
+        wrap.innerHTML = '';
+        if(!suggestions.length){
+          wrap.innerHTML = `<div class="text-center py-8">
+            <i class="fas fa-lightbulb text-yellow-400 text-4xl mb-3"></i>
+            <p class="text-lg">No general suggestions at this time.</p></div>`;
+          return;
+        }
+
+        suggestions.forEach((sug, idx)=>{
+          // Allow string or object {title, detail, snippet}
+          const title = (typeof sug === 'string') ? `Suggestion ${idx+1}` : (sug.title || `Suggestion ${idx+1}`);
+          const detail = (typeof sug === 'string') ? sug : (sug.detail || '');
+          const snippet = (typeof sug === 'object' && sug.snippet) ? sug.snippet : '';
+
+          const el = document.createElement('div');
+          el.className = 'glass rounded-xl p-4';
+          el.innerHTML = `
+            <div class="flex gap-3 items-start">
+              <i class="fas fa-lightbulb text-yellow-400 text-xl mt-1"></i>
+              <div class="flex-1">
+                <h4 class="font-semibold mb-1">${this.escapeHtml(title)}</h4>
+                <p class="text-slate-200 mb-3">${this.escapeHtml(detail)}</p>
+                ${snippet ? `<pre class="bg-slate-900/70 border border-white/10 rounded-lg p-3 overflow-auto text-sm"><code>${this.escapeHtml(snippet)}</code></pre>`:''}
+              </div>
+            </div>
+          `;
+          wrap.appendChild(el);
+        });
+      }
+
+      renderRefactored(code, language){
+        const container = document.getElementById('refactoredCodeContainer');
+        container.innerHTML = '';
+        if(!code){
+          container.innerHTML = `<div class="text-center py-8">
+            <i class="fas fa-code text-blue-400 text-4xl mb-3"></i>
+            <p class="text-lg">No refactored code available.</p></div>`;
+          return;
+        }
+        const ta = document.createElement('textarea');
+        ta.value = code;
+        container.appendChild(ta);
+
+        const mode = this.getMode(language);
+        this.refactoredCodeEditor = CodeMirror.fromTextArea(ta, {
+          mode, theme:'monokai', lineNumbers:true, readOnly:true, lineWrapping:true
+        });
+      }
+
+      renderSummary(summary, statistics){
+        const cont = document.getElementById('summaryContent');
+        const stats = statistics?.code_summary || {};
+        const commentRatio = (typeof stats.comment_ratio === 'number') ? (stats.comment_ratio*100).toFixed(1)+'%' : '-';
+
+        // Show REAL summary payload (no placeholder)
+        cont.innerHTML = `
+          <div class="space-y-6">
+            <div class="glass rounded-xl p-6">
+              <h3 class="text-xl font-semibold mb-4"><i class="fas fa-chart-bar text-blue-300 mr-2"></i>Code Analysis Summary</h3>
+              <div class="grid md:grid-cols-2 gap-4">
+                <div>
+                  <p><strong>Total Lines:</strong> ${stats.total_lines ?? '-'}</p>
+                  <p><strong>Code Lines:</strong> ${stats.code_lines ?? '-'}</p>
+                  <p><strong>Comment Lines:</strong> ${stats.comment_lines ?? '-'}</p>
+                  <p><strong>Comment Ratio:</strong> ${commentRatio}</p>
+                </div>
+                <div>
+                  <p><strong>Functions:</strong> ${stats.functions ?? '-'}</p>
+                  <p><strong>Classes:</strong> ${stats.classes ?? '-'}</p>
+                  <p><strong>Imports:</strong> ${stats.imports ?? '-'}</p>
+                  <p><strong>Complexity:</strong> ${stats.complexity ?? '-'}</p>
+                </div>
+              </div>
+            </div>
+            <div class="glass rounded-xl p-6">
+              <h3 class="text-xl font-semibold mb-3"><i class="fas fa-file-alt text-emerald-300 mr-2"></i>Overall Assessment</h3>
+              <div class="leading-relaxed">${(summary || 'No summary provided by the engine.').replace(/\n/g,'<br>')}</div>
+            </div>
+          </div>
+        `;
+      }
+
+      getMode(language){
+        const map = {
+          python:'python', javascript:'javascript', java:'text/x-java-source',
+          cpp:'text/x-c++src', csharp:'text/x-csharp', php:'php',
+          go:'text/x-go', rust:'text/x-rustsrc', swift:'text/x-swift', kotlin:'text/x-kotlin'
+        };
+        return map[language] || 'javascript';
+      }
+
+      downloadRefactoredCode(){
+        if(!this.refactoredCodeEditor) return this.showError('No refactored code available to download.');
+        const code = this.refactoredCodeEditor.getValue();
+        const lang = this.currentResults?.language || 'txt';
+        const ext = ({python:'py',javascript:'js',java:'java',cpp:'cpp',csharp:'cs',php:'php',go:'go',rust:'rs',swift:'swift',kotlin:'kt'})[lang] || 'txt';
+        const blob = new Blob([code], {type:'text/plain'});
+        const url = URL.createObjectURL(blob);
+        const a = Object.assign(document.createElement('a'), { href:url, download:`refactored_code.${ext}` });
+        document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+      }
+
+      // UI helpers
+      showTab(tabName, btnEl){
+        document.querySelectorAll('.tab-content').forEach(n => n.classList.add('hidden'));
+        document.getElementById(tabName+'Tab').classList.remove('hidden');
+
+        document.querySelectorAll('.tab-btn').forEach(b=> b.classList.remove('tab-active'));
+        if(btnEl) btnEl.classList.add('tab-active');
+      }
+      showLoading(v){ document.getElementById('loadingState').classList.toggle('hidden', !v); }
+      showError(msg){
+        document.getElementById('errorMessage').textContent = msg;
+        document.getElementById('errorContainer').classList.remove('hidden');
+        document.getElementById('errorContainer').scrollIntoView({behavior:'smooth'});
+      }
+      hideError(){ document.getElementById('errorContainer').classList.add('hidden'); }
+      hideResults(){ document.getElementById('resultsContainer').classList.add('hidden'); }
+      updateUILanguage(lang){ /* ready for future i18n */ }
+
+      escapeHtml(t){ const d = document.createElement('div'); d.textContent = String(t ?? ''); return d.innerHTML; }
+    }
+
+    // --------- bootstrap
+    const app = new CodeReviewerApp();
+
+    // global handlers (HTML inline)
+    function selectInputMethod(method, btn){ app.selectInputMethod(method, btn); }
+    function reviewCode(){ app.reviewCode(); }
+    function showTab(tabName, btn){ app.showTab(tabName, btn); }
+    function downloadRefactoredCode(){ app.downloadRefactoredCode(); }
+  </script>
+</body>
+</html>
