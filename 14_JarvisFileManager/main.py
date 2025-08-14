@@ -111,6 +111,22 @@ class CommandParser:
         self.named_tokens = {"named", "نام کی", "नाम का"}
 
     @staticmethod
+    def _normalize_spoken_punctuation(text: str) -> str:
+        s = text
+        # Normalize common spoken punctuation to symbols
+        s = re.sub(r"\b(dot|point)\b", ".", s, flags=re.IGNORECASE)
+        s = re.sub(r"\b(slash)\b", "/", s, flags=re.IGNORECASE)
+        s = re.sub(r"\b(back\\s*slash)\b", "\\\\", s, flags=re.IGNORECASE)
+        s = re.sub(r"\b(underscore)\b", "_", s, flags=re.IGNORECASE)
+        s = re.sub(r"\b(dash|hyphen)\b", "-", s, flags=re.IGNORECASE)
+        # Collapse spaces around inserted punctuation
+        s = re.sub(r"\s*\.(\s*)", ".", s)
+        s = re.sub(r"\s*/(\s*)", "/", s)
+        s = re.sub(r"\s*-(\s*)", "-", s)
+        s = re.sub(r"\s*_(\s*)", "_", s)
+        return s
+
+    @staticmethod
     def _build_dir_aliases():
         return {
             # Desktop
@@ -169,6 +185,13 @@ class CommandParser:
             "new": "create",
             "make a": "create",
             "make new": "create",
+            "made": "create",
+            "you made": "create",
+            "you make": "create",
+            "please make": "create",
+            "please create": "create",
+            "build": "create",
+            "generate": "create",
             "بناؤ": "create",
             "بناو": "create",
             "بنا دو": "create",
@@ -273,29 +296,98 @@ class CommandParser:
         return None
 
     def _extract_name(self, lowered: str) -> Optional[str]:
-        # 1) Urdu/Hindi patterns: "<name> نام کی فائل", "<name> नाम का folder"
+        # 0) Normalize spoken punctuation before name detection
+        lowered = self._normalize_spoken_punctuation(lowered)
+        # 0.5) Direct patterns: "file|folder named|called <name>"
+        m = re.search(r"\b(file|folder|directory|dir)\s+(named|called)\s+([\w .\-]+)\b", lowered)
+        if m:
+            return self._clean_candidate_name(m.group(3).strip())
+        # 0.55) English: "(file|folder) name is <name>" or simply "name is <name>"
+        m = re.search(r"\b(file|folder|directory|dir)\s+name\s+is\s+([\w .\-]+)\b", lowered)
+        if m:
+            return self._clean_candidate_name(m.group(2).strip())
+        m = re.search(r"\bname\s+is\s+([\w .\-]+)\b", lowered)
+        if m:
+            return self._clean_candidate_name(m.group(1).strip())
+        # 0.6) Urdu/Hindi: "جس کا نام X ہو" / "जिसका नाम X हो"
+        m = re.search(r"جس کا نام\s+([\w .\-]+)\s+ہو", lowered)
+        if m:
+            return self._clean_candidate_name(m.group(1).strip())
+        m = re.search(r"जिसका नाम\s+([\w .\-]+)\s+हो", lowered)
+        if m:
+            return self._clean_candidate_name(m.group(1).strip())
+        # 0.65) Urdu/Hindi: "نام ہے X" / "नाम है X" and "نام X ہے" / "नाम X है|हो"
+        m = re.search(r"نام\s+ہے\s+([\w .\-]+)", lowered)
+        if m:
+            return self._clean_candidate_name(m.group(1).strip())
+        m = re.search(r"نام\s+([\w .\-]+)\s+(ہے|ہو)", lowered)
+        if m:
+            return self._clean_candidate_name(m.group(1).strip())
+        m = re.search(r"नाम\s+है\s+([\w .\-]+)", lowered)
+        if m:
+            return self._clean_candidate_name(m.group(1).strip())
+        m = re.search(r"नाम\s+([\w .\-]+)\s+(है|हो)", lowered)
+        if m:
+            return self._clean_candidate_name(m.group(1).strip())
+        # 1) Patterns with noun before the type: "<name> folder", "<name> file"
+        m = re.search(r"\b([\w .\-]+?)\s+(folder|फ़ोल्डर|فولڈر|file|फ़ाइल|فائل)\b", lowered)
+        if m:
+            candidate = m.group(1).strip()
+            if candidate:
+                return self._clean_candidate_name(candidate)
+        # 2) Urdu/Hindi patterns: "<name> نام کی فائل", "<name> नाम का folder"
         m = re.search(r"([\w .\-]+)\s+(نام کی|नाम का)\s+(فائل|फ़ाइल|folder|फ़ोल्डर|فولڈر)", lowered)
         if m:
             candidate = m.group(1).strip()
-            return candidate
-        # 2) English patterns: "file <name>", "folder <name>"
+            return self._clean_candidate_name(candidate)
+        # 3) English patterns: "file <name>", "folder <name>"
         m = re.search(r"\b(file|folder|directory|dir)\s+([\w .\-]+)\b", lowered)
         if m:
-            return m.group(2).strip()
-        # 3) Generic filename with extension
+            return self._clean_candidate_name(m.group(2).strip())
+        # 4) Generic filename with extension
         m = re.search(r"\b([\w .\-]+\.[a-z0-9]{1,8})\b", lowered)
         if m:
-            return m.group(1).strip()
-        # 4) After word 'named'
+            return self._clean_candidate_name(m.group(1).strip())
+        # 5) After word 'named'
         m = re.search(r"\bnamed\s+([\w .\-]+)\b", lowered)
         if m:
-            return m.group(1).strip()
+            return self._clean_candidate_name(m.group(1).strip())
+        # 6) Simple pattern "make a file <name>" or "create file <name>"
+        m = re.search(r"\b(make|create|made|generate|build)\b\s+(a\s+)?\b(file|folder|directory|dir)\b\s+([\w .\-]+)\b", lowered)
+        if m:
+            return self._clean_candidate_name(m.group(4).strip())
         return None
+
+    @staticmethod
+    def _clean_candidate_name(name: str) -> str:
+        cleaned = name.strip().strip('"\'')
+        # Remove common fillers at boundaries
+        fillers = {
+            "a", "an", "the", "please", "kindly", "me", "for", "for", "for me",
+            "my", "your", "you", "named", "called", "name", "is",
+            # action verbs at boundaries we don't want as names
+            "make", "create", "made", "build", "generate",
+            # types at edges
+            "file", "folder", "directory", "dir"
+        }
+        tokens = [t for t in re.split(r"\s+", cleaned) if t]
+        # Trim leading fillers
+        while tokens and tokens[0] in fillers:
+            tokens.pop(0)
+        # Trim trailing fillers
+        while tokens and tokens[-1] in fillers:
+            tokens.pop()
+        cleaned = " ".join(tokens).strip()
+        return cleaned
 
     def parse(self, text: str) -> ParsedCommand:
         if not text:
             return ParsedCommand()
-        lowered = text.strip().lower()
+        normalized = self._normalize_spoken_punctuation(text)
+        lowered = normalized.strip().lower()
+        # Heuristic: if a probable filename with extension exists anywhere, capture it
+        ext_match = re.search(r"\b([\w]+(?:[ _\-][\w]+)*\.[a-z0-9]{1,8})\b", normalized, flags=re.IGNORECASE)
+        probable_name = ext_match.group(1).strip() if ext_match else None
 
         # Find action
         action = None
@@ -314,6 +406,8 @@ class CommandParser:
 
         # Extract name
         name = self._extract_name(lowered)
+        if not name and probable_name:
+            name = probable_name
 
         # Infer type from name if missing
         if not target_type and name:
@@ -428,11 +522,12 @@ class JarvisFileManager:
     def create(self, cmd: ParsedCommand) -> None:
         if not cmd.target_type:
             cmd.target_type = "file" if (cmd.name and "." in cmd.name) else "folder"
-        # If name is missing, generate a sensible default name inside the chosen base directory
+        # If user didn't specify a name at all, generate a default inside the base directory
         if not cmd.name:
             base_dir = self._resolve_base_dir(cmd.base_dir_key)
             default_name = self._generate_default_name(cmd.target_type, base_dir)
             cmd.name = default_name
+        # Ensure we preserve exact spoken name including extensions
         path, _ = self._resolve_target_path(cmd)
 
         try:
@@ -456,6 +551,14 @@ class JarvisFileManager:
                     if not path.parent.exists():
                         self._fail("Error: Directory not found")
                         return
+                    # If user gave no explicit name phrases but type is folder and
+                    # the extracted name is actually the word 'make' or other action, fallback to New Folder
+                    folder_name = path.name.strip()
+                    confusing_names = {"make", "create", "made", "build", "generate"}
+                    if folder_name.lower() in confusing_names:
+                        base_dir = path.parent
+                        fallback_name = self._generate_default_name("folder", base_dir)
+                        path = (base_dir / fallback_name).resolve()
                     path.mkdir(parents=True, exist_ok=False)
                 self._record_created(path, "folder")
                 self._succeed(f"Folder created at {path}")
@@ -540,7 +643,9 @@ def run_cli():
                 manager._fail("Could not understand the command.")
                 return
             console.print(f"[bold blue]🗣 Command:[/bold blue] {text}")
-            lang = parser_engine.detect_language(text) or "auto"
+            # Try robust language detection; if short text, keep previous or hint
+            detected_lang = parser_engine.detect_language(text)
+            lang = detected_lang or "auto"
             console.print(f"[dim]Detected language: {lang}[/dim]")
             cmd = parser_engine.parse(text)
         if not cmd.action:
@@ -548,8 +653,18 @@ def run_cli():
             if re.search(r"\b(show|list|display)\b.*\b(created|made|بنائی|بنائے|बनाई|बनाए)\b", text.lower()):
                 manager.show_created()
                 return
-            manager._fail("Sorry, I couldn't detect the action (create/open/delete/show).")
-            return
+            # Try forgiving detection if user says e.g., "you made a file ..."
+            if re.search(r"\b(you\s+made|you\s+make|please\s+make|please\s+create|build|generate)\b", text.lower()):
+                cmd.action = "create"
+            elif re.search(r"\b(open|launch)\b", text.lower()):
+                cmd.action = "open"
+            elif re.search(r"\b(delete|remove|erase|del|हटाओ|मिटाओ|ڈلیٹ|حذف)\b", text.lower()):
+                cmd.action = "delete"
+            elif re.search(r"\b(show|list|display)\b", text.lower()):
+                cmd.action = "show"
+            else:
+                manager._fail("Sorry, I couldn't detect the action (create/open/delete/show).")
+                return
         if cmd.action == "create":
             manager.create(cmd)
         elif cmd.action == "open":
