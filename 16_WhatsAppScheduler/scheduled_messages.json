@@ -1,0 +1,63 @@
+{
+  "messages": {
+    "1": {
+      "phone": "+923102816575",
+      "message": "hello i am agent . i am only testing agent",
+      "scheduled_time": "2025-08-16T20:28:09.395564",
+      "status": "failed",
+      "error": "sendwhatmsg() got an unexpected keyword argument 'print_wait_time'"
+    },
+    "2": {
+      "phone": "+923102816575",
+      "message": "i am testing agent",
+      "scheduled_time": "2025-08-16T20:41:00",
+      "status": "failed",
+      "error": "Call Time must be Greater than Wait Time as WhatsApp Web takes some Time to Load!"
+    },
+    "3": {
+      "phone": "+923102816575",
+      "message": "i am testing agant",
+      "scheduled_time": "2025-08-16T20:44:22.969267",
+      "status": "sending"
+    },
+    "4": {
+      "phone": "+923477286878",
+      "message": "i am testing agant",
+      "scheduled_time": "2025-08-16T20:47:09.817807",
+      "status": "sending"
+    },
+    "5": {
+      "phone": "+923477286878",
+      "message": "hi",
+      "scheduled_time": "2025-08-16T20:52:01.814531",
+      "status": "sent"
+    },
+    "6": {
+      "phone": "+923477286878",
+      "message": "hi",
+      "scheduled_time": "2025-08-16T20:54:00",
+      "status": "sent"
+    },
+    "7": {
+      "phone": "+923477286878",
+      "message": "hi",
+      "scheduled_time": "2025-08-16T21:02:20.389576",
+      "status": "failed",
+      "error": "Message verification failed"
+    },
+    "8": {
+      "phone": "+923102816575",
+      "message": "Hi I am testing agant , I am your duffer friend personal WhatsApp schedule agent",
+      "scheduled_time": "2025-08-17T21:06:00",
+      "status": "scheduled"
+    },
+    "9": {
+      "phone": "+923102816575",
+      "message": "Hi I am testing agant , I am your duffer friend personal WhatsApp schedule agent",
+      "scheduled_time": "2025-08-16T21:09:00",
+      "status": "failed",
+      "error": "Message verification failed"
+    }
+  },
+  "counter": 10
+}
