@@ -54,8 +54,8 @@ Build 100 useful, functional, and diverse AI agents in 100 days. Each agent will
 | 14  | JarvisFileManager      | Open/delete files with voice                                  |
 | 15  | BrowserOpenerAgent     | Open URLs by command                                            |
 | 16  | WhatsAppScheduler      | Auto-schedule WhatsApp messages                                 |
-| 17  | GmailOrganizer         | Label and archive emails with GPT                               |
-| 18  | FileSorterAgent        | Organize files by type/date                                     |
+| 17  | RepoSummarizerAgent         | AI assistant helping users understand GitHub repositories                               |
+| 18  | DevHelper         | Terminal-based AI Assistant for Developers                         |
 | 19  | AutoReplyBot           | Email/chat auto-responder                                       |
 | 20  | PythonDocAgent         | Explain Python code or docs                                     |
 | 21  | CalendarAssistant      | Query and manage events via voice                               |
