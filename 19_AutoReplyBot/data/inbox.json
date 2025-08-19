@@ -1,0 +1,22 @@
+[
+  {
+    "id": "e1",
+    "from": "john@example.com",
+    "to": "me@example.com",
+    "subject": "Meeting Tomorrow",
+    "body": "Can we move our meeting to 2 PM? Also, can you share the latest deck?",
+    "timestamp": "2025-01-01T10:00:00Z",
+    "thread_id": "t-123"
+  },
+  {
+    "id": "e2",
+    "from": "alerts@service.com",
+    "to": "me@example.com",
+    "subject": "System Notification",
+    "body": "This is an automated notice.",
+    "timestamp": "2025-01-01T10:05:00Z",
+    "thread_id": "t-124"
+  }
+]
+
+

@@ -1,0 +1,20 @@
+[
+  {
+    "id": "c1",
+    "from": "alice",
+    "to": "me",
+    "text": "hey, can you review my PR today? #urgent",
+    "timestamp": "2025-01-01T11:00:00Z",
+    "thread_id": "t-abc"
+  },
+  {
+    "id": "c2",
+    "from": "no-reply@tool.com",
+    "to": "me",
+    "text": "automated daily summary",
+    "timestamp": "2025-01-01T11:10:00Z",
+    "thread_id": "t-xyz"
+  }
+]
+
+

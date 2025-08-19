@@ -1,0 +1,72 @@
+[
+  {
+    "thread_id": "t-123",
+    "in_reply_to": "e1",
+    "channel": "email",
+    "reply": "Subject: Re: Meeting Tomorrow\n\nHi John,\n\nI can move our meeting to 2 PM. I’ll also send you the latest deck shortly.\n\nBest,  \n[Your Name]",
+    "timestamp": 1755602901.053153
+  },
+  {
+    "thread_id": "t-124",
+    "in_reply_to": "e2",
+    "channel": "email",
+    "reply": "Subject: Re: System Notification\n\nHello,\n\nThank you for your message! If you have any specific questions or need assistance regarding the system notification, please let me know how I can help.\n\nBest regards,  \n[Your Name]",
+    "timestamp": 1755602905.4971244
+  },
+  {
+    "thread_id": "198c27bddd45c728",
+    "in_reply_to": "198c27c0a8bd9ffe",
+    "channel": "email",
+    "reply": "Subject: Re: Making the most of Cursor\n\nHi Muhammad,\n\nThank you for your email! I'm glad to hear that your free plan for Cursor is active. \n\nIf you have any questions or need assistance while exploring the features, feel free to reach out. Enjoy your experience with Cursor!\n\nBest,  \nAutoReplyBot",
+    "timestamp": 1755610662.2095547
+  },
+  {
+    "thread_id": "198c27bddd45c728",
+    "in_reply_to": "198c27bddd45c728",
+    "channel": "email",
+    "reply": "Subject: Re: Making the most of Cursor\n\nHi Muhammad,\n\nThanks for your message! It’s great to see that your free plan for Cursor is active. \n\nFeel free to explore the features mentioned in the email, and if you have any questions or need further assistance, just let me know!\n\nBest,  \nAutoReplyBot",
+    "timestamp": 1755610673.8005073
+  },
+  {
+    "thread_id": "198b8b289b9f22ae",
+    "in_reply_to": "198b8b289b9f22ae",
+    "channel": "email",
+    "reply": "Subject: Re: Making the most of Cursor\n\nHi Muhammad,\n\nThank you for your email! I'm glad to hear your free plan for Cursor is active. \n\nTo get started, try typing and using the autocomplete suggestions, or explore inline editing with Cmd/Ctrl+K. For more tips, check out our [documentation](https://track.pstmrk.it/3s/docs.cursor.com%2Fwelcome/I76j/72u-AQ/AQ/41340845-f749-4545-bd54-89a5234a05dc/5/ELphTtsYd8).\n\nIf you have any questions or need assistance, feel free to reach out.\n\nBest,  \nThe Cursor Devs",
+    "timestamp": 1755610689.130288
+  },
+  {
+    "thread_id": "198c28d8179262d6",
+    "in_reply_to": "198c28d8179262d6",
+    "channel": "email",
+    "reply": "Subject: Re: Hello\n\nHi there,\n\nThank you for reaching out! How can I assist you today?\n\nBest regards,  \nAutoReplyBot",
+    "timestamp": 1755610773.1194649
+  },
+  {
+    "thread_id": "198c291bad79a4e1",
+    "in_reply_to": "198c291bad79a4e1",
+    "channel": "email",
+    "reply": "Subject: Re: \n\nHi sm tv,\n\nI’m doing well, thank you! How about you? If there's anything specific you’d like to discuss, feel free to let me know.\n\nBest,  \n[Your Name]",
+    "timestamp": 1755611044.5601315
+  },
+  {
+    "thread_id": "198c291bad79a4e1",
+    "in_reply_to": "198c291bad79a4e1",
+    "channel": "email",
+    "reply": "Subject: Re: (no subject)\n\nHi sm tv,\n\nI’m doing well, thank you! How about you? \n\nIf you have any specific questions or topics you’d like to discuss, feel free to share!\n\nBest regards,  \n[Your Name]",
+    "timestamp": 1755612038.668143
+  },
+  {
+    "thread_id": "198c2ab788a51290",
+    "in_reply_to": "198c2ab788a51290",
+    "channel": "email",
+    "reply": "Subject: Re: (no subject)\n\nHi Sami,\n\nI’m doing well, thank you! How about you? If you have any specific questions or topics to discuss, feel free to share.\n\nBest regards,  \n[Your Name]",
+    "timestamp": 1755612735.6524758
+  },
+  {
+    "thread_id": "198c2ab788a51290",
+    "in_reply_to": "198c2ab788a51290",
+    "channel": "email",
+    "reply": "Hi Sami,                                                                                                                                                           ││                                                                                                                                                                    ││ I'm doing well, thank you! How about you? If there's anything specific you'd like to discuss, feel free to let me know.                                            ││                                                                                                                                                                    ││ Best regards,",
+    "timestamp": 1755618139.6703403
+  }
+]
