@@ -1,0 +1,38 @@
+OPENAI_API_KEY=sk-
+OPENAI_MODEL=gpt-4o-mini
+TEMPERATURE=0.5
+MAX_TOKENS=800
+STREAMING=true
+# gamil 
+GMAIL_ENABLED=true   
+GMAIL_QUERY=is:unread -category:promotions -category:social
+GMAIL_MAX_RESULTS=20
+GMAIL_CREDENTIALS_FILE=./data/credentials.json
+GMAIL_TOKEN_FILE=./data/token.json
+GMAIL_USER=me
+
+# Behavior
+DEFAULT_TONE=friendly
+DEFAULT_LANGUAGE=auto
+
+# Memory
+MAX_TURNS_PER_THREAD=100
+
+# Sources
+SOURCE_TYPE=json
+DATA_DIR=./data
+INBOX_JSON_PATH=./data/inbox.json
+CHAT_JSON_PATH=./data/chat_log.json
+OUTBOX_JSON_PATH=./data/outbox.json
+
+# Auto mode
+AUTO_MODE_DELAY_SECONDS=2.0
+
+# Filters
+KEYWORDS=urgent, asap, follow up, inquiry
+BLACKLIST_CONTACTS=no-reply@, donotreply@
+
+# Optional add-ons
+SCHEDULE_ENABLED=false
+VOICE_ENABLED=false
+

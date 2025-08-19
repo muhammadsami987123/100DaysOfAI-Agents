@@ -68,5 +68,26 @@
     "channel": "email",
     "reply": "Hi Sami,                                                                                                                                                           ││                                                                                                                                                                    ││ I'm doing well, thank you! How about you? If there's anything specific you'd like to discuss, feel free to let me know.                                            ││                                                                                                                                                                    ││ Best regards,",
     "timestamp": 1755618139.6703403
+  },
+  {
+    "thread_id": "198c2ab788a51290",
+    "in_reply_to": "198c2ab788a51290",
+    "channel": "email",
+    "reply": "Subject: Re: Hello!\n\nHi Sami,\n\nI'm doing well, thank you! How about you? \n\nLooking forward to hearing from you.\n\nBest,  \n[Your Name]",
+    "timestamp": 1755618559.5162566
+  },
+  {
+    "thread_id": "198c2ab788a51290",
+    "in_reply_to": "198c2ab788a51290",
+    "channel": "email",
+    "reply": "Subject: Re: (no subject)\n\nHi Sami,\n\nI'm doing well, thank you! How about you? If there's anything specific you'd like to discuss, feel free to let me know.\n\nBest,  \n[Your Name]",
+    "timestamp": 1755619033.6074495
+  },
+  {
+    "thread_id": "198c30e086c16fee",
+    "in_reply_to": "198c30e086c16fee",
+    "channel": "email",
+    "reply": "Subject: Re: (no subject)\n\nHi Sami,\n\nI'm doing well, thank you! How about you? If there's anything specific you'd like to discuss, feel free to let me know.\n\nBest,  \n[Your Name]",
+    "timestamp": 1755619220.3925695
   }
 ]

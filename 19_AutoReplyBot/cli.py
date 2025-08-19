@@ -16,6 +16,7 @@ from config import (
     DEFAULT_LANGUAGE,
     STREAMING,
     AUTO_MODE_DELAY_SECONDS,
+    GMAIL_ENABLED,
 )
 from agent import AutoReplyBot
 from sources import load_inbox_messages, load_chat_messages, append_outbox, Message, send_reply
@@ -70,11 +71,16 @@ def manual_flow(bot: AutoReplyBot, message: Message, tone: str, lang: str, conso
     edited = Prompt.ask("Edit reply? (leave blank to keep)", default="")
     final_text = edited if edited.strip() else reply_text
     if args_send:
-        sent_id = send_reply(message.sender, f"Re: {message.subject}", final_text, thread_id=message.thread_id)
-        if sent_id:
-            console.print(f"[green]Sent via Gmail:[/green] {sent_id}")
+        if not GMAIL_ENABLED:
+            console.print("[yellow]Gmail sending is disabled (GMAIL_ENABLED=false). Not sent.[/yellow]")
         else:
-            console.print("[yellow]Saved to outbox (not sent).[/yellow]")
+            sent_id = send_reply(message.sender, f"Re: {message.subject}", final_text, thread_id=message.thread_id)
+            if sent_id:
+                console.print(f"[green]Sent via Gmail:[/green] {sent_id}")
+            else:
+                console.print("[yellow]Failed to send via Gmail. Saved to outbox (not sent).[/yellow]")
+    else:
+        console.print("[yellow]Send disabled. Use --send to actually send via Gmail.[/yellow]")
     show_status(console, "Reply saved ✔")
     append_outbox({
         "thread_id": message.thread_id,
@@ -102,11 +108,16 @@ def auto_flow(bot: AutoReplyBot, message: Message, tone: str, lang: str, console
     else:
         reply_text = bot.generate_reply(message, tone=tone, language=lang)
     if args_send:
-        sent_id = send_reply(message.sender, f"Re: {message.subject}", reply_text, thread_id=message.thread_id)
-        if sent_id:
-            console.print(f"[green]Sent via Gmail:[/green] {sent_id}")
+        if not GMAIL_ENABLED:
+            console.print("[yellow]Gmail sending is disabled (GMAIL_ENABLED=false). Not sent.[/yellow]")
         else:
-            console.print("[yellow]Saved to outbox (not sent).[/yellow]")
+            sent_id = send_reply(message.sender, f"Re: {message.subject}", reply_text, thread_id=message.thread_id)
+            if sent_id:
+                console.print(f"[green]Sent via Gmail:[/green] {sent_id}")
+            else:
+                console.print("[yellow]Failed to send via Gmail. Saved to outbox (not sent).[/yellow]")
+    else:
+        console.print("[yellow]Send disabled. Use --send to actually send via Gmail.[/yellow]")
     show_status(console, "Reply saved ✔")
     append_outbox({
         "thread_id": message.thread_id,
@@ -208,11 +219,16 @@ def interactive_manual_session(bot: AutoReplyBot, messages: List[Message], tone:
             continue
 
         if args_send:
-            sent_id = send_reply(message.sender, f"Re: {message.subject}", final_text, thread_id=message.thread_id)
-            if sent_id:
-                console.print(f"[green]Sent via Gmail:[/green] {sent_id}")
+            if not GMAIL_ENABLED:
+                console.print("[yellow]Gmail sending is disabled (GMAIL_ENABLED=false). Not sent.[/yellow]")
             else:
-                console.print("[yellow]Saved to outbox (not sent).[/yellow]")
+                sent_id = send_reply(message.sender, f"Re: {message.subject}", final_text, thread_id=message.thread_id)
+                if sent_id:
+                    console.print(f"[green]Sent via Gmail:[/green] {sent_id}")
+                else:
+                    console.print("[yellow]Failed to send via Gmail. Saved to outbox (not sent).[/yellow]")
+        else:
+            console.print("[yellow]Send disabled. Use --send to actually send via Gmail.[/yellow]")
         append_outbox({
             "thread_id": message.thread_id,
             "in_reply_to": message.id,
@@ -267,7 +283,7 @@ def main() -> int:
         console.print("[yellow]No messages found in sources. Add JSON to data folder.[/yellow]")
         return 0
 
-    console.print(Panel.fit(f"AutoReplyBot — Mode: {args.mode} | Tone: {args.tone} | Language: {args.lang} | Streaming: {False if args.no_stream else STREAMING}", title="AutoReplyBot"))
+    console.print(Panel.fit(f"AutoReplyBot — Mode: {args.mode} | Tone: {args.tone} | Language: {args.lang} | Streaming: {False if args.no_stream else STREAMING} | Gmail: {'ON' if GMAIL_ENABLED else 'OFF'}", title="AutoReplyBot"))
 
     if args.mode == "manual":
         interactive_manual_session(bot, messages, args.tone, args.lang, console, False if args.no_stream else STREAMING, args.send)
