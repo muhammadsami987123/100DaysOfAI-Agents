@@ -1,5 +1,6 @@
 // Global variables to store current post data
 let currentPost = null;
+let originalPostText = null; // Store original post text for editing
 
 // DOM elements
 const postForm = document.getElementById('postForm');
@@ -49,6 +50,9 @@ postForm.addEventListener('submit', async function(e) {
                 topic: data.topic,
                 tone: data.tone
             };
+            
+            // Store original post text for editing
+            originalPostText = data.post_text;
             
             // Display the generated post
             displayPost(data);
@@ -220,7 +224,23 @@ function resetForm() {
     resultsSection.classList.add('hidden');
     charCountDisplay.classList.add('hidden');
     statusMessage.classList.add('hidden');
+    
+    // Hide edit section
+    const editSection = document.getElementById('editSection');
+    if (editSection) {
+        editSection.classList.add('hidden');
+    }
+    
+    // Reset edit-related variables
     currentPost = null;
+    originalPostText = null;
+    
+    // Show action buttons again
+    const actionButtons = document.querySelector('.flex.flex-wrap.gap-4');
+    if (actionButtons) {
+        actionButtons.style.opacity = '1';
+        actionButtons.style.pointerEvents = 'auto';
+    }
     
     // Scroll to top
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -297,6 +317,122 @@ function getCharacterLimit(platform) {
     return limits[platform] || 280;
 }
 
+// Edit post functionality
+function editPost() {
+    if (!currentPost) {
+        showStatus('No post to edit.', 'error');
+        return;
+    }
+    
+    // Store original text if not already stored
+    if (!originalPostText) {
+        originalPostText = currentPost.post_text;
+    }
+    
+    // Show edit section
+    const editSection = document.getElementById('editSection');
+    const editablePost = document.getElementById('editablePost');
+    const editCharCount = document.getElementById('editCharCount');
+    
+    // Populate textarea with current post text
+    editablePost.value = currentPost.post_text;
+    
+    // Update character count
+    updateEditCharCount();
+    
+    // Show edit section with animation
+    editSection.classList.remove('hidden');
+    editSection.classList.add('edit-section');
+    
+    // Focus on textarea
+    editablePost.focus();
+    
+    // Hide action buttons temporarily
+    document.querySelector('.flex.flex-wrap.gap-4').style.opacity = '0.5';
+    document.querySelector('.flex.flex-wrap.gap-4').style.pointerEvents = 'none';
+    
+    // Show status
+    showStatus('Edit mode activated. Make your changes and click "Save Changes" when done.', 'info');
+}
+
+// Save edit changes
+function saveEdit() {
+    const editablePost = document.getElementById('editablePost');
+    const editSection = document.getElementById('editSection');
+    const newText = editablePost.value.trim();
+    
+    if (!newText) {
+        showStatus('Post content cannot be empty.', 'error');
+        return;
+    }
+    
+    // Update current post data
+    currentPost.post_text = newText;
+    
+    // Update the displayed post
+    displayPost({
+        post_text: newText,
+        platform: currentPost.platform,
+        topic: currentPost.topic,
+        tone: currentPost.tone,
+        char_count: newText.length,
+        char_limit: getCharacterLimit(currentPost.platform)
+    });
+    
+    // Hide edit section
+    editSection.classList.add('hidden');
+    
+    // Show action buttons again
+    document.querySelector('.flex.flex-wrap.gap-4').style.opacity = '1';
+    document.querySelector('.flex.flex-wrap.gap-4').style.pointerEvents = 'auto';
+    
+    // Show success message
+    showStatus('Post updated successfully!', 'success');
+}
+
+// Cancel edit
+function cancelEdit() {
+    const editSection = document.getElementById('editSection');
+    const editablePost = document.getElementById('editablePost');
+    
+    // Restore original text
+    if (originalPostText) {
+        currentPost.post_text = originalPostText;
+        editablePost.value = originalPostText;
+    }
+    
+    // Hide edit section
+    editSection.classList.add('hidden');
+    
+    // Show action buttons again
+    document.querySelector('.flex.flex-wrap.gap-4').style.opacity = '1';
+    document.querySelector('.flex.flex-wrap.gap-4').style.pointerEvents = 'auto';
+    
+    // Show status
+    showStatus('Edit cancelled. Original post restored.', 'warning');
+}
+
+// Update character count in edit mode
+function updateEditCharCount() {
+    const editablePost = document.getElementById('editablePost');
+    const editCharCount = document.getElementById('editCharCount');
+    const charLimit = getCharacterLimit(currentPost.platform);
+    
+    if (editablePost && editCharCount) {
+        const currentCount = editablePost.value.length;
+        editCharCount.textContent = `${currentCount}/${charLimit}`;
+        
+        // Update color based on character count
+        if (currentCount <= charLimit) {
+            editCharCount.className = 'text-sm text-green-600 font-medium';
+        } else if (currentCount <= charLimit + 50) {
+            editCharCount.className = 'text-sm text-yellow-600 font-medium';
+        } else {
+            editCharCount.className = 'text-sm text-red-600 font-medium';
+        }
+    }
+}
+
 // Initialize tooltips and other UI enhancements
 document.addEventListener('DOMContentLoaded', function() {
     // Add hover effects to form elements
@@ -310,4 +446,10 @@ document.addEventListener('DOMContentLoaded', function() {
             this.parentElement.classList.remove('ring-2', 'ring-purple-200');
         });
     });
+    
+    // Add real-time character counting for edit mode
+    const editablePost = document.getElementById('editablePost');
+    if (editablePost) {
+        editablePost.addEventListener('input', updateEditCharCount);
+    }
 });

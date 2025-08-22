@@ -113,9 +113,43 @@
                 <div id="postContent" class="mb-6">
                     <!-- Post content will be inserted here -->
                 </div>
+                
+                <!-- Edit Mode Section -->
+                <div id="editSection" class="mb-6 hidden">
+                    <label for="editablePost" class="block text-sm font-medium text-gray-700 mb-2">
+                        <i class="fas fa-edit mr-2 text-blue-600"></i>Edit Your Post
+                    </label>
+                    <textarea 
+                        id="editablePost" 
+                        class="w-full p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+                        rows="6"
+                        placeholder="Edit your post content here..."
+                    ></textarea>
+                    <div class="mt-2 flex justify-between items-center">
+                        <div class="text-sm text-gray-600">
+                            <span id="editCharCount">0</span> characters
+                        </div>
+                        <div class="flex gap-2">
+                            <button id="saveEditBtn" onclick="saveEdit()" 
+                                    class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition duration-200">
+                                <i class="fas fa-check mr-1"></i>Save Changes
+                            </button>
+                            <button id="cancelEditBtn" onclick="cancelEdit()" 
+                                    class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition duration-200">
+                                <i class="fas fa-times mr-1"></i>Cancel
+                            </button>
+                        </div>
+                    </div>
+                </div>
 
                 <!-- Action Buttons -->
                 <div class="flex flex-wrap gap-4">
+                    <button id="editBtn" onclick="editPost()" 
+                            class="bg-yellow-600 hover:bg-yellow-700 text-white font-bold py-3 px-6 rounded-lg transition duration-200 flex items-center">
+                        <i class="fas fa-edit mr-2"></i>
+                        Edit Post
+                    </button>
+                    
                     <button id="copyBtn" onclick="copyToClipboard()" 
                             class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg transition duration-200 flex items-center">
                         <i class="fas fa-copy mr-2"></i>

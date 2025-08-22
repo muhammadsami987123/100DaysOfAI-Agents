@@ -573,6 +573,45 @@ textarea:focus {
     100% { left: 100%; }
 }
 
+/* Edit section styling */
+.edit-section {
+    transition: all 0.3s ease;
+}
+
+.edit-section.hidden {
+    display: none;
+    opacity: 0;
+    transform: translateY(-10px);
+}
+
+.edit-section:not(.hidden) {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+#editablePost {
+    font-family: inherit;
+    line-height: 1.6;
+    transition: all 0.3s ease;
+}
+
+#editablePost:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+    outline: none;
+}
+
+/* Edit button specific styling */
+#editBtn {
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+}
+
+#editBtn:hover {
+    background: linear-gradient(135deg, #d97706 0%, #b45309 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(245, 158, 11, 0.3);
+}
+
 /* Responsive improvements */
 @media (max-width: 640px) {
     .card {
@@ -597,5 +636,21 @@ textarea:focus {
     .flex.flex-wrap.gap-4 button {
         flex: 1;
         min-width: 120px;
+    }
+    
+    /* Stack edit buttons vertically on mobile */
+    #editSection .flex.gap-2 {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    #editSection .flex.gap-2 button {
+        width: 100%;
+    }
+    
+    /* Make edit textarea more mobile-friendly */
+    #editablePost {
+        font-size: 16px; /* Prevents zoom on iOS */
+        min-height: 120px;
     }
 }

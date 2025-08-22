@@ -1,6 +1,8 @@
 @echo off
 setlocal
-echo SocialPostCreatorAgent - Choose Interface:
+echo SocialPostCreatorAgent - AI Social Media Post Generator
+echo Features: Generate, Edit, Copy, Save Posts
+echo Choose Interface:
 echo.
 echo 1. CLI Interface (Interactive)
 echo 2. Web UI (Browser)
