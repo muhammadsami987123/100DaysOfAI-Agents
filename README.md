@@ -58,8 +58,8 @@ Build 100 useful, functional, and diverse AI agents in 100 days. Each agent will
 | 18  | DevHelper         | Terminal-based AI Assistant for Developers                         |
 | 19  | AutoReplyBot           | Email/chat auto-responder                                       |
 | 20  | PythonDocAgent         | Explain Python code or docs                                     |
-| 21  | CalendarAssistant      | Query and manage events via voice                               |
-| 22  | ContactFinderAgent     | Search contacts and auto-call or email                          |
+| 21  | TextFixer_Assistant      | desktop assistant that corrects selected text instantly and seamlessly across any app                               |
+| 22  | SocialPostCreatorAgent      | AI Social Media Post Generator   |
 | 23  | JarvisClipboard        | Read and modify clipboard content                               |
 | 24  | MoodMusicAgent         | Play music based on your emotion                                |
 | 25  | CalculatorAI           | Solve math problems via GPT                                     |

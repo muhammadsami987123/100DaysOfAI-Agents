@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SocialPostCreatorAgent - AI Social Media Post Generator</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
+    <style>
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .card-shadow {
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+        .platform-icon {
+            width: 24px;
+            height: 24px;
+            display: inline-block;
+            margin-right: 8px;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- Header -->
+    <header class="gradient-bg text-white py-6">
+        <div class="container mx-auto px-4 text-center">
+            <h1 class="text-4xl font-bold mb-2">
+                <i class="fas fa-comments mr-3"></i>
+                SocialPostCreatorAgent
+            </h1>
+            <p class="text-xl opacity-90">AI-Powered Social Media Post Generator</p>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 py-8">
+        <div class="max-w-4xl mx-auto">
+            <!-- Form Section -->
+            <div class="card p-6 mb-8">
+                <h2 class="text-2xl font-bold text-gray-800 mb-6">
+                    <i class="fas fa-magic mr-2 text-purple-600"></i>
+                    Generate Your Post
+                </h2>
+                
+                <form id="postForm" class="space-y-6">
+                    <!-- Platform Selection -->
+                    <div class="form-group">
+                        <label for="platform" class="form-label">
+                            <i class="fas fa-globe mr-2 text-purple-600"></i>Choose Platform
+                        </label>
+                        <select id="platform" name="platform" required class="form-select">
+                            {% for platform in platforms %}
+                            <option value="{{ platform }}" {% if platform == 'Twitter' %}selected{% endif %}>
+                                {{ platform }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <!-- Topic Input -->
+                    <div class="form-group">
+                        <label for="topic" class="form-label">
+                            <i class="fas fa-lightbulb mr-2 text-purple-600"></i>Topic
+                        </label>
+                        <input type="text" id="topic" name="topic" required 
+                               placeholder="e.g., AI in Education, Climate Change, Tech Innovation..."
+                               class="form-input">
+                    </div>
+
+                    <!-- Tone Selection -->
+                    <div class="form-group">
+                        <label for="tone" class="form-label">
+                            <i class="fas fa-palette mr-2 text-purple-600"></i>Select Tone
+                        </label>
+                        <select id="tone" name="tone" required class="form-select">
+                            {% for tone in tones %}
+                            <option value="{{ tone }}" {% if tone == 'professional' %}selected{% endif %}>
+                                {{ tone|title }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <!-- Save to File Option -->
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="save_to_file" name="save_to_file" class="form-checkbox">
+                        <label for="save_to_file" class="form-checkbox-label">
+                            <i class="fas fa-save mr-2 text-purple-600"></i>Save post to local folder
+                        </label>
+                    </div>
+
+                    <!-- Generate Button -->
+                    <button type="submit" id="generateBtn" 
+                            class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-6 rounded-lg transition duration-200 flex items-center justify-center">
+                        <i class="fas fa-magic mr-2"></i>
+                        <span id="generateBtnText">Generate Post</span>
+                        <div id="loadingSpinner" class="hidden ml-2">
+                            <i class="fas fa-spinner fa-spin"></i>
+                        </div>
+                    </button>
+                </form>
+            </div>
+
+            <!-- Results Section -->
+            <div id="resultsSection" class="hidden card platform-card p-6">
+                <h3 class="text-2xl font-bold text-gray-800 mb-6">
+                    <i class="fas fa-check-circle mr-2 text-green-600"></i>
+                    Generated Post
+                </h3>
+                
+                <div id="postContent" class="mb-6">
+                    <!-- Post content will be inserted here -->
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="flex flex-wrap gap-4">
+                    <button id="copyBtn" onclick="copyToClipboard()" 
+                            class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg transition duration-200 flex items-center">
+                        <i class="fas fa-copy mr-2"></i>
+                        Copy to Clipboard
+                    </button>
+                    
+                    <button id="saveBtn" onclick="savePost()" 
+                            class="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg transition duration-200 flex items-center">
+                        <i class="fas fa-save mr-2"></i>
+                        Save to File
+                    </button>
+                    
+                    <button onclick="resetForm()" 
+                            class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-3 px-6 rounded-lg transition duration-200 flex items-center">
+                        <i class="fas fa-redo mr-2"></i>
+                        Generate Another
+                    </button>
+                </div>
+
+                <!-- Status Messages -->
+                <div id="statusMessage" class="status-message hidden"></div>
+            </div>
+
+            <!-- Character Count Display -->
+            <div id="charCountDisplay" class="hidden mt-4 text-center">
+                <div id="charCountIndicator" class="char-count-indicator">
+                    <i class="fas fa-info-circle mr-2"></i>
+                    <span id="charCountText"></span>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white py-6 mt-12">
+        <div class="container mx-auto px-4 text-center">
+            <p class="text-gray-400">
+                <i class="fas fa-robot mr-2"></i>
+                Powered by OpenAI • Built with Flask • 
+                <a href="#" class="text-purple-400 hover:text-purple-300">View on GitHub</a>
+            </p>
+        </div>
+    </footer>
+
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>

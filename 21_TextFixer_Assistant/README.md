@@ -24,7 +24,7 @@ A lightweight, always-running desktop assistant that corrects grammar, spelling,
 - `pynput` for global hotkeys
 - `pyperclip` for clipboard operations
 - `language-tool-python` (public API) or `openai` for AI corrections
-- `.env` for configuration
+- `.env` for configuratilo
 
 ---
 
