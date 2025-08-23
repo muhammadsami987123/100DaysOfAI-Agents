@@ -60,7 +60,7 @@ Build 100 useful, functional, and diverse AI agents in 100 days. Each agent will
 | 20  | PythonDocAgent         | Explain Python code or docs                                     |
 | 21  | TextFixer_Assistant      | desktop assistant that corrects selected text instantly and seamlessly across any app                               |
 | 22  | SocialPostCreatorAgent      | AI Social Media Post Generator   |
-| 23  | JarvisClipboard        | Read and modify clipboard content                               |
+| 23  | AICommandExplainerAgent        |  Smart Terminal Command Interpreter                               |
 | 24  | MoodMusicAgent         | Play music based on your emotion                                |
 | 25  | CalculatorAI           | Solve math problems via GPT                                     |
 | 26  | FocusTimerAgent        | Pomodoro timer with TTS reminders                               |
