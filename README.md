@@ -64,8 +64,8 @@ Build 100 useful, functional, and diverse AI agents in 100 days. Each agent will
 | 24  | MoodMusicAgent         | Play music based on your emotion                                |
 | 25  | CalculatorAI           | Solve math problems via GPT                                     |
 | 26  | FocusTimerAgent        | Pomodoro timer with TTS reminders                               |
-| 27  | TweetWriterBot         | Write tweets from notes                                         |
-| 28  | LinkedInPostAgent      | Generate professional post drafts                               |
+| 27  | LinkedInPostAgent         | Generate professional post                                         |
+| 28  | ----      | Generate professional post drafts                               |
 | 29  | ResumeFeedbackBot      | Review resumes and suggest changes                              |
 | 30  | PortfolioGenerator     | Create personal portfolios from input                           |
 | 31  | MemoryNotesBot         | Save and recall information (mock memory agent)                 |

@@ -1,0 +1,2 @@
+# LinkedInPostAgent package init
+
