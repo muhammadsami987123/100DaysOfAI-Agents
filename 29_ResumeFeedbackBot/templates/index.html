@@ -1,0 +1,899 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ResumeFeedbackBot - AI-Powered Resume & Portfolio Review</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    animation: {
+                        'fade-in': 'fadeIn 0.5s ease-in-out',
+                        'slide-up': 'slideUp 0.5s ease-out',
+                        'slide-down': 'slideDown 0.3s ease-out',
+                        'bounce-in': 'bounceIn 0.6s ease-out',
+                        'pulse-slow': 'pulse 3s infinite',
+                        'float': 'float 3s ease-in-out infinite',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        @keyframes slideUp {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        @keyframes slideDown {
+            from { transform: translateY(-20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        @keyframes bounceIn {
+            0% { transform: scale(0.3); opacity: 0; }
+            50% { transform: scale(1.05); }
+            70% { transform: scale(0.9); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .chatbot-shadow {
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+        }
+        .message-bubble {
+            animation: slideUp 0.3s ease-out;
+        }
+        .typing-indicator {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #e5e7eb;
+            border-radius: 50%;
+            border-top-color: #3b82f6;
+            animation: spin 1s ease-in-out infinite;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        /* Mobile-specific styles */
+        @media (max-width: 640px) {
+            .chatbot-shadow {
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            }
+            
+            .message-bubble {
+                max-width: 90% !important;
+            }
+            
+            /* Prevent zoom on input focus */
+            input[type="text"], 
+            input[type="url"], 
+            input[type="email"], 
+            select, 
+            textarea {
+                font-size: 16px !important;
+            }
+        }
+        
+        /* Tablet styles */
+        @media (min-width: 641px) and (max-width: 1024px) {
+            .message-bubble {
+                max-width: 80% !important;
+            }
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
+    <!-- Header -->
+    <header class="bg-white/90 backdrop-blur-md border-b border-gray-200 sticky top-0 z-40">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center py-3 sm:py-4">
+                <div class="flex items-center space-x-2 sm:space-x-3">
+                    <div class="w-10 h-10 sm:w-12 sm:h-12 gradient-bg rounded-xl flex items-center justify-center shadow-lg">
+                        <i class="fas fa-file-alt text-white text-lg sm:text-xl"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-lg sm:text-xl lg:text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                            ResumeFeedbackBot
+                        </h1>
+                        <p class="text-xs sm:text-sm text-gray-600 hidden sm:block">AI-Powered Resume & Portfolio Review</p>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-2 sm:space-x-4">
+                    <button id="chatToggle" class="bg-gradient-to-r from-blue-500 to-purple-600 text-white px-3 py-2 sm:px-4 sm:py-2 rounded-lg hover:from-blue-600 hover:to-purple-700 transition-all duration-200 flex items-center space-x-1 sm:space-x-2 text-sm sm:text-base">
+                        <i class="fas fa-comments"></i>
+                        <span class="hidden sm:inline">AI Assistant</span>
+                    </button>
+                    <a href="https://github.com/muhammadsami987123/29_ResumeFeedbackBot" class="text-gray-600 hover:text-gray-900 transition-colors">
+                        <i class="fab fa-github text-lg sm:text-xl"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Hero Section -->
+        <div class="text-center mb-8 sm:mb-12 animate-fade-in">
+            <div class="inline-flex items-center justify-center w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full mb-4 sm:mb-6 shadow-lg">
+                <i class="fas fa-star text-white text-xl sm:text-2xl"></i>
+            </div>
+            <h2 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-4 sm:mb-6 px-4">
+                Get Expert Feedback on Your
+                <span class="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                    Resume & Portfolio
+                </span>
+            </h2>
+            <p class="text-lg sm:text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed px-4">
+                Upload your resume or paste your portfolio URL to receive AI-powered analysis, 
+                actionable feedback, and personalized suggestions for improvement.
+            </p>
+        </div>
+
+        <!-- Tabs -->
+        <div class="flex justify-center mb-6 sm:mb-8 px-4">
+            <div class="bg-white/80 backdrop-blur-md rounded-2xl p-1 sm:p-2 shadow-lg w-full max-w-md">
+                <div class="flex space-x-1 sm:space-x-2">
+                    <button id="resumeTab" class="tab-btn px-4 py-3 sm:px-6 sm:py-4 rounded-xl font-medium transition-all duration-300 text-sm sm:text-base lg:text-lg flex-1" onclick="switchTab('resume')">
+                        <i class="fas fa-file-alt mr-2 sm:mr-3"></i><span class="hidden sm:inline">Resume</span><span class="sm:hidden">Resume</span>
+                    </button>
+                    <button id="portfolioTab" class="tab-btn px-4 py-3 sm:px-6 sm:py-4 rounded-xl font-medium transition-all duration-300 text-sm sm:text-base lg:text-lg flex-1" onclick="switchTab('portfolio')">
+                        <i class="fas fa-globe mr-2 sm:mr-3"></i><span class="hidden sm:inline">Portfolio</span><span class="sm:hidden">Portfolio</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <style>
+            .tab-btn {
+                background: transparent;
+                color: #4B5563;
+                border: none;
+                outline: none;
+                cursor: pointer;
+                transition: all 0.3s ease;
+            }
+            .tab-btn.active {
+                background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+                color: #fff !important;
+                box-shadow: 0 4px 12px 0 rgba(102,126,234,0.3);
+                transform: translateY(-2px);
+            }
+            .tab-btn:not(.active):hover {
+                background: #f3f4f6;
+                color: #5b21b6;
+                transform: translateY(-1px);
+            }
+        </style>
+
+        <!-- Resume Review Section -->
+        <div id="resumeSection" class="animate-slide-up">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8 mb-6 sm:mb-8">
+                <!-- Resume Upload Section -->
+                <div class="bg-white/90 backdrop-blur-md rounded-2xl sm:rounded-3xl shadow-xl border border-gray-200 p-6 sm:p-8 hover:shadow-2xl transition-all duration-300">
+                    <div class="flex items-center mb-6 sm:mb-8">
+                        <div class="w-12 h-12 sm:w-16 sm:h-16 bg-gradient-to-r from-blue-400 to-blue-600 rounded-xl sm:rounded-2xl flex items-center justify-center mr-4 sm:mr-6 shadow-lg">
+                            <i class="fas fa-file-upload text-white text-xl sm:text-2xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-xl sm:text-2xl font-bold text-gray-900">Upload Your Resume</h3>
+                            <p class="text-sm sm:text-base text-gray-600">PDF or DOCX format, max 16MB</p>
+                        </div>
+                    </div>
+
+                    <form id="resumeForm" enctype="multipart/form-data">
+                        <div class="space-y-4 sm:space-y-6">
+                            <div class="border-2 border-dashed border-gray-300 rounded-xl sm:rounded-2xl p-6 sm:p-10 text-center hover:border-blue-400 hover:bg-blue-50 transition-all duration-300 cursor-pointer" id="uploadZone">
+                                <div class="space-y-3 sm:space-y-4">
+                                    <i class="fas fa-cloud-upload-alt text-3xl sm:text-5xl text-gray-400 animate-float"></i>
+                                    <div>
+                                        <p class="text-lg sm:text-xl font-semibold text-gray-900">Drop your resume here</p>
+                                        <p class="text-sm sm:text-base text-gray-500">or click to browse</p>
+                                    </div>
+                                    <p class="text-xs sm:text-sm text-gray-400">Supports PDF and DOCX files</p>
+                                </div>
+                                <input type="file" id="resumeFile" name="file" accept=".pdf,.docx,.doc" class="hidden" required>
+                            </div>
+                            
+                            <div id="fileInfo" class="hidden">
+                                <div class="bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-xl sm:rounded-2xl p-4 sm:p-6">
+                                    <div class="flex items-center">
+                                        <i class="fas fa-check-circle text-green-500 mr-3 sm:mr-4 text-xl sm:text-2xl"></i>
+                                        <div>
+                                            <p class="font-semibold text-green-800 text-base sm:text-lg" id="fileName"></p>
+                                            <p class="text-xs sm:text-sm text-green-600" id="fileSize"></p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Job Role and Industry -->
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700 mb-2 sm:mb-3">Target Job Role (Optional)</label>
+                                    <input type="text" name="target_role" placeholder="e.g., Software Engineer" class="w-full px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 text-sm sm:text-base">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700 mb-2 sm:mb-3">Industry (Optional)</label>
+                                    <select name="industry" class="w-full px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 text-sm sm:text-base">
+                                        <option value="">Select Industry</option>
+                                        <option value="Technology">Technology</option>
+                                        <option value="Healthcare">Healthcare</option>
+                                        <option value="Finance">Finance</option>
+                                        <option value="Education">Education</option>
+                                        <option value="Marketing">Marketing</option>
+                                        <option value="Sales">Sales</option>
+                                        <option value="Engineering">Engineering</option>
+                                        <option value="Design">Design</option>
+                                        <option value="Consulting">Consulting</option>
+                                        <option value="Non-profit">Non-profit</option>
+                                        <option value="Government">Government</option>
+                                        <option value="Other">Other</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <button type="submit" class="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3 sm:py-4 px-6 sm:px-8 rounded-lg sm:rounded-xl font-semibold text-base sm:text-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-300 flex items-center justify-center shadow-lg hover:shadow-xl transform hover:-translate-y-1">
+                                <i class="fas fa-search mr-2 sm:mr-3"></i>
+                                Analyze Resume
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Resume Analysis Results -->
+                <div id="resumeResults" class="bg-white/90 backdrop-blur-md rounded-2xl sm:rounded-3xl shadow-xl border border-gray-200 p-6 sm:p-8 hidden">
+                    <div class="flex items-center mb-6 sm:mb-8">
+                        <div class="w-12 h-12 sm:w-16 sm:h-16 bg-gradient-to-r from-green-400 to-green-600 rounded-xl sm:rounded-2xl flex items-center justify-center mr-4 sm:mr-6 shadow-lg">
+                            <i class="fas fa-chart-line text-white text-xl sm:text-2xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-xl sm:text-2xl font-bold text-gray-900">Analysis Results</h3>
+                            <p class="text-sm sm:text-base text-gray-600">Detailed feedback and suggestions</p>
+                        </div>
+                    </div>
+
+                    <div id="resumeAnalysisContent" class="space-y-6">
+                        <!-- Content will be populated by JavaScript -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Portfolio Review Section -->
+        <div id="portfolioSection" class="animate-slide-up hidden">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8 mb-6 sm:mb-8">
+                <!-- Portfolio URL Input -->
+                <div class="bg-white/90 backdrop-blur-md rounded-2xl sm:rounded-3xl shadow-xl border border-gray-200 p-6 sm:p-8 hover:shadow-2xl transition-all duration-300">
+                    <div class="flex items-center mb-6 sm:mb-8">
+                        <div class="w-12 h-12 sm:w-16 sm:h-16 bg-gradient-to-r from-purple-400 to-purple-600 rounded-xl sm:rounded-2xl flex items-center justify-center mr-4 sm:mr-6 shadow-lg">
+                            <i class="fas fa-globe text-white text-xl sm:text-2xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-xl sm:text-2xl font-bold text-gray-900">Portfolio URL</h3>
+                            <p class="text-sm sm:text-base text-gray-600">Paste your portfolio or personal website URL</p>
+                        </div>
+                    </div>
+
+                    <form id="portfolioForm">
+                        <div class="space-y-4 sm:space-y-6">
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-2 sm:mb-3">Website URL</label>
+                                <input type="url" id="portfolioUrl" name="portfolio_url" placeholder="https://your-portfolio.com" class="w-full px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 text-sm sm:text-base" required>
+                            </div>
+
+                            <button type="submit" class="w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white py-3 sm:py-4 px-6 sm:px-8 rounded-lg sm:rounded-xl font-semibold text-base sm:text-lg hover:from-purple-700 hover:to-pink-700 transition-all duration-300 flex items-center justify-center shadow-lg hover:shadow-xl transform hover:-translate-y-1">
+                                <i class="fas fa-search mr-2 sm:mr-3"></i>
+                                Analyze Portfolio
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Portfolio Analysis Results -->
+                <div id="portfolioResults" class="bg-white/90 backdrop-blur-md rounded-2xl sm:rounded-3xl shadow-xl border border-gray-200 p-6 sm:p-8 hidden">
+                    <div class="flex items-center mb-6 sm:mb-8">
+                        <div class="w-12 h-12 sm:w-16 sm:h-16 bg-gradient-to-r from-purple-400 to-purple-600 rounded-xl sm:rounded-2xl flex items-center justify-center mr-4 sm:mr-6 shadow-lg">
+                            <i class="fas fa-chart-line text-white text-xl sm:text-2xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-xl sm:text-2xl font-bold text-gray-900">Portfolio Analysis</h3>
+                            <p class="text-sm sm:text-base text-gray-600">Design and content feedback</p>
+                        </div>
+                    </div>
+
+                    <div id="portfolioAnalysisContent" class="space-y-6">
+                        <!-- Content will be populated by JavaScript -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Loading Overlay -->
+        <div id="loadingOverlay" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+            <div class="bg-white rounded-2xl sm:rounded-3xl p-6 sm:p-10 text-center shadow-2xl mx-4">
+                <div class="animate-spin rounded-full h-12 w-12 sm:h-16 sm:w-16 border-b-4 border-blue-600 mx-auto mb-4 sm:mb-6"></div>
+                <p class="text-lg sm:text-xl font-semibold text-gray-900 mb-2">Analyzing...</p>
+                <p class="text-sm sm:text-base text-gray-600">This may take a few moments</p>
+            </div>
+        </div>
+    </main>
+
+    <!-- Floating Chatbot -->
+    <div id="chatbot" class="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50 hidden">
+        <div class="bg-white rounded-2xl sm:rounded-3xl shadow-2xl chatbot-shadow w-[calc(100vw-2rem)] sm:w-96 h-[calc(100vh-8rem)] sm:h-[500px] max-w-sm flex flex-col">
+            <!-- Chatbot Header -->
+            <div class="bg-gradient-to-r from-blue-500 to-purple-600 text-white p-4 rounded-t-3xl flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
+                        <i class="fas fa-brain text-white"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-semibold">AI Career Assistant</h3>
+                        <p class="text-xs opacity-90">Online</p>
+                    </div>
+                </div>
+                <button id="closeChat" class="text-white hover:text-gray-200 transition-colors">
+                    <i class="fas fa-times text-lg"></i>
+                </button>
+            </div>
+
+            <!-- Chat Messages -->
+            <div id="chatMessages" class="flex-1 p-4 overflow-y-auto space-y-3 bg-gray-50">
+                <div class="message-bubble bg-white rounded-2xl p-4 shadow-sm max-w-[85%]">
+                    <div class="flex items-start space-x-2">
+                        <div class="w-8 h-8 bg-gradient-to-r from-blue-400 to-purple-500 rounded-full flex items-center justify-center flex-shrink-0">
+                            <i class="fas fa-robot text-white text-sm"></i>
+                        </div>
+                        <div class="flex-1">
+                            <p class="text-sm text-gray-800">
+                                Hello! 👋 I'm your AI career assistant. How can I help you today?
+                            </p>
+                            <p class="text-xs text-gray-500 mt-1">Just now</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Chat Input -->
+            <div class="p-4 bg-white border-t border-gray-200 rounded-b-3xl">
+                <div class="flex space-x-2">
+                    <input type="text" id="chatInput" placeholder="Type your message..." class="flex-1 px-4 py-3 border border-gray-300 rounded-2xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200">
+                    <button onclick="sendChatMessage()" class="bg-gradient-to-r from-blue-500 to-purple-600 text-white px-4 py-3 rounded-2xl hover:from-blue-600 hover:to-purple-700 transition-all duration-200 flex items-center justify-center">
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chat Toggle Button -->
+    <div id="chatToggleBtn" class="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-40">
+        <button class="w-14 h-14 sm:w-16 sm:h-16 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center animate-bounce-slow">
+            <i class="fas fa-comments text-lg sm:text-xl"></i>
+        </button>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-white/90 backdrop-blur-md border-t border-gray-200 mt-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <div class="text-center text-gray-600">
+                <p>&copy; 2025 ResumeFeedbackBot. Built with ❤️ for career development.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Global variables
+        let currentAnalysis = null;
+        let chatContext = {};
+        let isTyping = false;
+
+        // Tab switching
+        function switchTab(tab) {
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active', 'bg-gradient-to-r', 'from-blue-600', 'to-purple-600', 'text-white');
+                btn.classList.add('text-gray-600');
+            });
+            
+            if (tab === 'resume') {
+                document.getElementById('resumeTab').classList.add('active', 'bg-gradient-to-r', 'from-blue-600', 'to-purple-600', 'text-white');
+                document.getElementById('resumeSection').classList.remove('hidden');
+                document.getElementById('portfolioSection').classList.add('hidden');
+            } else {
+                document.getElementById('portfolioTab').classList.add('active', 'bg-gradient-to-r', 'from-purple-600', 'to-pink-600', 'text-white');
+                document.getElementById('portfolioSection').classList.remove('hidden');
+                document.getElementById('resumeSection').classList.add('hidden');
+            }
+        }
+
+        // Chatbot toggle
+        document.getElementById('chatToggle').addEventListener('click', toggleChat);
+        document.getElementById('chatToggleBtn').addEventListener('click', toggleChat);
+        document.getElementById('closeChat').addEventListener('click', toggleChat);
+
+        function toggleChat() {
+            const chatbot = document.getElementById('chatbot');
+            const toggleBtn = document.getElementById('chatToggleBtn');
+            
+            if (chatbot.classList.contains('hidden')) {
+                chatbot.classList.remove('hidden');
+                toggleBtn.classList.add('hidden');
+                chatbot.classList.add('animate-bounce-in');
+            } else {
+                chatbot.classList.add('hidden');
+                toggleBtn.classList.remove('hidden');
+            }
+        }
+
+        // File upload handling
+        const uploadZone = document.getElementById('uploadZone');
+        const resumeFile = document.getElementById('resumeFile');
+        const fileInfo = document.getElementById('fileInfo');
+        const fileName = document.getElementById('fileName');
+        const fileSize = document.getElementById('fileSize');
+
+        uploadZone.addEventListener('click', () => resumeFile.click());
+        uploadZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadZone.classList.add('border-blue-400', 'bg-blue-50');
+        });
+        uploadZone.addEventListener('dragleave', () => {
+            uploadZone.classList.remove('border-blue-400', 'bg-blue-50');
+        });
+        uploadZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadZone.classList.remove('border-blue-400', 'bg-blue-50');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                resumeFile.files = files;
+                updateFileInfo(files[0]);
+            }
+        });
+
+        resumeFile.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                updateFileInfo(e.target.files[0]);
+            }
+        });
+
+        function updateFileInfo(file) {
+            fileName.textContent = file.name;
+            fileSize.textContent = `${(file.size / 1024 / 1024).toFixed(2)} MB`;
+            fileInfo.classList.remove('hidden');
+        }
+
+        // Resume form submission
+        document.getElementById('resumeForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const formData = new FormData(e.target);
+            const file = formData.get('file');
+            
+            if (!file || file.size === 0) {
+                alert('Please select a file');
+                return;
+            }
+
+            showLoading();
+            
+            try {
+                const response = await fetch('/api/analyze-resume', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    currentAnalysis = result;
+                    chatContext = { type: 'resume', analysis: result };
+                    displayResumeResults(result);
+                    addChatMessage('assistant', 'Great! I\'ve analyzed your resume. You can ask me any questions about the feedback or get suggestions for improvement!');
+                } else {
+                    throw new Error(result.error || 'Analysis failed');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error analyzing resume: ' + error.message);
+            } finally {
+                hideLoading();
+            }
+        });
+
+        // Portfolio form submission
+        document.getElementById('portfolioForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const portfolioUrl = document.getElementById('portfolioUrl').value.trim();
+            
+            if (!portfolioUrl) {
+                alert('Please enter a portfolio URL');
+                return;
+            }
+
+            showLoading();
+            
+            try {
+                const response = await fetch('/api/analyze-portfolio', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ portfolio_url: portfolioUrl })
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    currentAnalysis = result;
+                    chatContext = { type: 'portfolio', analysis: result };
+                    displayPortfolioResults(result);
+                    addChatMessage('assistant', 'Excellent! I\'ve analyzed your portfolio. Feel free to ask me any questions about the feedback or get personalized recommendations!');
+                } else {
+                    throw new Error(result.error || 'Analysis failed');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error analyzing portfolio: ' + error.message);
+            } finally {
+                hideLoading();
+            }
+        });
+
+        // Display resume results
+        function displayResumeResults(analysis) {
+            const resultsDiv = document.getElementById('resumeResults');
+            const contentDiv = document.getElementById('resumeAnalysisContent');
+            
+            contentDiv.innerHTML = `
+                <div class="space-y-8">
+                    <!-- Overall Score -->
+                    <div class="text-center">
+                        <div class="inline-flex items-center justify-center w-24 h-24 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full mb-6 shadow-lg">
+                            <span class="text-3xl font-bold text-white">${analysis.overall_score?.toFixed(1) || 'N/A'}</span>
+                        </div>
+                        <h4 class="text-xl font-bold text-gray-900">Overall Score</h4>
+                        <p class="text-gray-600">out of 10</p>
+                    </div>
+
+                    <!-- Scores Grid -->
+                    <div class="grid grid-cols-2 gap-4">
+                        ${Object.entries(analysis.scores || {}).map(([key, score]) => `
+                            <div class="bg-gradient-to-r from-gray-50 to-gray-100 rounded-2xl p-4">
+                                <div class="flex justify-between items-center mb-3">
+                                    <span class="text-sm font-semibold text-gray-700 capitalize">${key.replace('_', ' ')}</span>
+                                    <span class="text-xl font-bold text-blue-600">${score}</span>
+                                </div>
+                                <div class="w-full bg-gray-200 rounded-full h-3">
+                                    <div class="bg-gradient-to-r from-blue-500 to-purple-600 h-3 rounded-full transition-all duration-1000" style="width: ${score * 10}%"></div>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+
+                    <!-- Strengths -->
+                    <div class="bg-gradient-to-r from-green-50 to-emerald-50 rounded-2xl p-6">
+                        <h5 class="text-lg font-bold text-gray-900 mb-4 flex items-center">
+                            <i class="fas fa-check-circle text-green-500 mr-3 text-xl"></i>
+                            Strengths
+                        </h5>
+                        <ul class="space-y-3">
+                            ${(analysis.strengths || []).map(strength => `
+                                <li class="flex items-start">
+                                    <i class="fas fa-arrow-right text-green-500 mt-1 mr-3 text-sm"></i>
+                                    <span class="text-gray-700">${strength}</span>
+                                </li>
+                            `).join('')}
+                        </ul>
+                    </div>
+
+                    <!-- Weaknesses -->
+                    <div class="bg-gradient-to-r from-yellow-50 to-orange-50 rounded-2xl p-6">
+                        <h5 class="text-lg font-bold text-gray-900 mb-4 flex items-center">
+                            <i class="fas fa-exclamation-triangle text-yellow-500 mr-3 text-xl"></i>
+                            Areas for Improvement
+                        </h5>
+                        <ul class="space-y-3">
+                            ${(analysis.weaknesses || []).map(weakness => `
+                                <li class="flex items-start">
+                                    <i class="fas fa-arrow-right text-yellow-500 mt-1 mr-3 text-sm"></i>
+                                    <span class="text-gray-700">${weakness}</span>
+                                </li>
+                            `).join('')}
+                        </ul>
+                    </div>
+
+                    <!-- Suggestions -->
+                    <div class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl p-6">
+                        <h5 class="text-lg font-bold text-gray-900 mb-4 flex items-center">
+                            <i class="fas fa-lightbulb text-blue-500 mr-3 text-xl"></i>
+                            Suggestions
+                        </h5>
+                        <ul class="space-y-3">
+                            ${(analysis.suggestions || []).map(suggestion => `
+                                <li class="flex items-start">
+                                    <i class="fas fa-arrow-right text-blue-500 mt-1 mr-3 text-sm"></i>
+                                    <span class="text-gray-700">${suggestion}</span>
+                                </li>
+                            `).join('')}
+                        </ul>
+                    </div>
+
+                    <!-- Improved Version -->
+                    ${analysis.improvements ? `
+                        <div class="bg-gradient-to-r from-purple-50 to-pink-50 rounded-2xl p-6">
+                            <h5 class="text-lg font-bold text-gray-900 mb-4 flex items-center">
+                                <i class="fas fa-magic text-purple-500 mr-3 text-xl"></i>
+                                Improved Version
+                            </h5>
+                            <div class="bg-white rounded-xl p-4">
+                                <pre class="whitespace-pre-wrap text-sm text-gray-700">${analysis.improvements.improved_resume || 'No improvements available'}</pre>
+                            </div>
+                        </div>
+                    ` : ''}
+                </div>
+            `;
+            
+            resultsDiv.classList.remove('hidden');
+            resultsDiv.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Display portfolio results
+        function displayPortfolioResults(analysis) {
+            const resultsDiv = document.getElementById('portfolioResults');
+            const contentDiv = document.getElementById('portfolioAnalysisContent');
+            
+            contentDiv.innerHTML = `
+                <div class="space-y-8">
+                    <!-- Overall Score -->
+                    <div class="text-center">
+                        <div class="inline-flex items-center justify-center w-24 h-24 bg-gradient-to-r from-purple-500 to-pink-600 rounded-full mb-6 shadow-lg">
+                            <span class="text-3xl font-bold text-white">${analysis.overall_score?.toFixed(1) || 'N/A'}</span>
+                        </div>
+                        <h4 class="text-xl font-bold text-gray-900">Overall Score</h4>
+                        <p class="text-gray-600">out of 10</p>
+                    </div>
+
+                    <!-- Scores Grid -->
+                    <div class="grid grid-cols-2 gap-4">
+                        ${Object.entries(analysis.scores || {}).map(([key, score]) => `
+                            <div class="bg-gradient-to-r from-gray-50 to-gray-100 rounded-2xl p-4">
+                                <div class="flex justify-between items-center mb-3">
+                                    <span class="text-sm font-semibold text-gray-700 capitalize">${key.replace('_', ' ')}</span>
+                                    <span class="text-xl font-bold text-purple-600">${score}</span>
+                                </div>
+                                <div class="w-full bg-gray-200 rounded-full h-3">
+                                    <div class="bg-gradient-to-r from-purple-500 to-pink-600 h-3 rounded-full transition-all duration-1000" style="width: ${score * 10}%"></div>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+
+                    <!-- Strengths -->
+                    <div class="bg-gradient-to-r from-green-50 to-emerald-50 rounded-2xl p-6">
+                        <h5 class="text-lg font-bold text-gray-900 mb-4 flex items-center">
+                            <i class="fas fa-check-circle text-green-500 mr-3 text-xl"></i>
+                            Strengths
+                        </h5>
+                        <ul class="space-y-3">
+                            ${(analysis.strengths || []).map(strength => `
+                                <li class="flex items-start">
+                                    <i class="fas fa-arrow-right text-green-500 mt-1 mr-3 text-sm"></i>
+                                    <span class="text-gray-700">${strength}</span>
+                                </li>
+                            `).join('')}
+                        </ul>
+                    </div>
+
+                    <!-- Weaknesses -->
+                    <div class="bg-gradient-to-r from-yellow-50 to-orange-50 rounded-2xl p-6">
+                        <h5 class="text-lg font-bold text-gray-900 mb-4 flex items-center">
+                            <i class="fas fa-exclamation-triangle text-yellow-500 mr-3 text-xl"></i>
+                            Areas for Improvement
+                        </h5>
+                        <ul class="space-y-3">
+                            ${(analysis.weaknesses || []).map(weakness => `
+                                <li class="flex items-start">
+                                    <i class="fas fa-arrow-right text-yellow-500 mt-1 mr-3 text-sm"></i>
+                                    <span class="text-gray-700">${weakness}</span>
+                                </li>
+                            `).join('')}
+                        </ul>
+                    </div>
+
+                    <!-- Suggestions -->
+                    <div class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl p-6">
+                        <h5 class="text-lg font-bold text-gray-900 mb-4 flex items-center">
+                            <i class="fas fa-lightbulb text-blue-500 mr-3 text-xl"></i>
+                            Suggestions
+                        </h5>
+                        <ul class="space-y-3">
+                            ${(analysis.suggestions || []).map(suggestion => `
+                                <li class="flex items-start">
+                                    <i class="fas fa-arrow-right text-blue-500 mt-1 mr-3 text-sm"></i>
+                                    <span class="text-gray-700">${suggestion}</span>
+                                </li>
+                            `).join('')}
+                        </ul>
+                    </div>
+
+                    <!-- Technical Recommendations -->
+                    ${analysis.technical_recommendations ? `
+                        <div class="bg-gradient-to-r from-gray-50 to-slate-50 rounded-2xl p-6">
+                            <h5 class="text-lg font-bold text-gray-900 mb-4 flex items-center">
+                                <i class="fas fa-cogs text-gray-500 mr-3 text-xl"></i>
+                                Technical Recommendations
+                            </h5>
+                            <ul class="space-y-3">
+                                ${analysis.technical_recommendations.map(rec => `
+                                    <li class="flex items-start">
+                                        <i class="fas fa-arrow-right text-gray-500 mt-1 mr-3 text-sm"></i>
+                                        <span class="text-gray-700">${rec}</span>
+                                    </li>
+                                `).join('')}
+                            </ul>
+                        </div>
+                    ` : ''}
+                </div>
+            `;
+            
+            resultsDiv.classList.remove('hidden');
+            resultsDiv.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Chat functionality
+        async function sendChatMessage() {
+            const input = document.getElementById('chatInput');
+            const message = input.value.trim();
+            
+            if (!message || isTyping) return;
+            
+            // Add user message to chat
+            addChatMessage('user', message);
+            input.value = '';
+            
+            // Show typing indicator
+            showTypingIndicator();
+            
+            try {
+                const response = await fetch('/api/chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        message: message,
+                        context: chatContext
+                    })
+                });
+                
+                const result = await response.json();
+                
+                // Hide typing indicator
+                hideTypingIndicator();
+                
+                if (response.ok) {
+                    addChatMessage('assistant', result.response);
+                } else {
+                    addChatMessage('assistant', 'Sorry, I encountered an error. Please try again.');
+                }
+            } catch (error) {
+                console.error('Chat error:', error);
+                hideTypingIndicator();
+                addChatMessage('assistant', 'Sorry, I encountered an error. Please try again.');
+            }
+        }
+
+        function addChatMessage(sender, message) {
+            const chatMessages = document.getElementById('chatMessages');
+            const messageDiv = document.createElement('div');
+            
+            const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            
+            if (sender === 'user') {
+                messageDiv.className = 'message-bubble bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-2xl p-4 shadow-sm max-w-[85%] ml-auto';
+                messageDiv.innerHTML = `
+                    <div class="flex items-start space-x-2">
+                        <div class="flex-1">
+                            <p class="text-sm">${message}</p>
+                            <p class="text-xs opacity-70 mt-1">${time}</p>
+                        </div>
+                        <div class="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center flex-shrink-0">
+                            <i class="fas fa-user text-white text-sm"></i>
+                        </div>
+                    </div>
+                `;
+            } else {
+                messageDiv.className = 'message-bubble bg-white rounded-2xl p-4 shadow-sm max-w-[85%]';
+                messageDiv.innerHTML = `
+                    <div class="flex items-start space-x-2">
+                        <div class="w-8 h-8 bg-gradient-to-r from-blue-400 to-purple-500 rounded-full flex items-center justify-center flex-shrink-0">
+                            <i class="fas fa-robot text-white text-sm"></i>
+                        </div>
+                        <div class="flex-1">
+                            <p class="text-sm text-gray-800">${message}</p>
+                            <p class="text-xs text-gray-500 mt-1">${time}</p>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        function showTypingIndicator() {
+            isTyping = true;
+            const chatMessages = document.getElementById('chatMessages');
+            const typingDiv = document.createElement('div');
+            typingDiv.id = 'typingIndicator';
+            typingDiv.className = 'message-bubble bg-white rounded-2xl p-4 shadow-sm max-w-[85%]';
+            typingDiv.innerHTML = `
+                <div class="flex items-start space-x-2">
+                    <div class="w-8 h-8 bg-gradient-to-r from-blue-400 to-purple-500 rounded-full flex items-center justify-center flex-shrink-0">
+                        <i class="fas fa-robot text-white text-sm"></i>
+                    </div>
+                    <div class="flex-1">
+                        <div class="flex space-x-1">
+                            <div class="typing-indicator"></div>
+                            <div class="typing-indicator" style="animation-delay: 0.1s"></div>
+                            <div class="typing-indicator" style="animation-delay: 0.2s"></div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            chatMessages.appendChild(typingDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        function hideTypingIndicator() {
+            isTyping = false;
+            const typingIndicator = document.getElementById('typingIndicator');
+            if (typingIndicator) {
+                typingIndicator.remove();
+            }
+        }
+
+        // Enter key for chat
+        document.getElementById('chatInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                sendChatMessage();
+            }
+        });
+
+        // Loading functions
+        function showLoading() {
+            document.getElementById('loadingOverlay').classList.remove('hidden');
+        }
+
+        function hideLoading() {
+            document.getElementById('loadingOverlay').classList.add('hidden');
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            // Set default tab
+            switchTab('resume');
+        });
+    </script>
+</body>
+</html>
