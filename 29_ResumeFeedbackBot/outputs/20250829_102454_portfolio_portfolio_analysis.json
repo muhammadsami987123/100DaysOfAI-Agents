@@ -1,0 +1,23 @@
+{
+  "overall_score": 0.0,
+  "scores": {
+    "design": 0,
+    "usability": 0,
+    "content": 0,
+    "performance": 0,
+    "mobile_responsiveness": 0,
+    "professionalism": 0
+  },
+  "strengths": [],
+  "weaknesses": [
+    "Analysis failed: Failed to extract website content: HTTPSConnectionPool(host='muhammad-sami.vercel.app', port=443): Read timed out. (read timeout=10)"
+  ],
+  "suggestions": [
+    "Please check the URL and try again"
+  ],
+  "technical_recommendations": [
+    "Verify website accessibility"
+  ],
+  "error": true,
+  "error_message": "Failed to extract website content: HTTPSConnectionPool(host='muhammad-sami.vercel.app', port=443): Read timed out. (read timeout=10)"
+}

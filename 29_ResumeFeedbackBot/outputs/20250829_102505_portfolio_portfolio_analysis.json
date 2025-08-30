@@ -1,0 +1,37 @@
+{
+  "overall_score": 8.0,
+  "scores": {
+    "design": 8,
+    "usability": 7,
+    "content": 9,
+    "performance": 8,
+    "mobile_responsiveness": 7,
+    "professionalism": 8
+  },
+  "strengths": [
+    "Clean and modern design",
+    "Clear project showcases",
+    "Strong content detailing expertise and experience"
+  ],
+  "weaknesses": [
+    "Slow loading times",
+    "Limited mobile optimization"
+  ],
+  "suggestions": [
+    "Optimize images for faster loading",
+    "Improve mobile navigation",
+    "Enhance readability by increasing text contrast"
+  ],
+  "technical_recommendations": [
+    "Compress images",
+    "Add lazy loading",
+    "Improve CSS for mobile",
+    "Implement responsive text size adjustments"
+  ],
+  "website_data": {
+    "url": "https://muhammad-sami.vercel.app/",
+    "content_length": 152606,
+    "pages_analyzed": 4,
+    "links_count": 41
+  }
+}

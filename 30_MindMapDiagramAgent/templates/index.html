@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>MindMapDiagramAgent - AI-Powered Mind Map Generator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10.6.1/dist/mermaid.min.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    animation: {
+                        'fade-in': 'fadeIn 0.5s ease-in-out',
+                        'slide-up': 'slideUp 0.5s ease-out',
+                        'slide-down': 'slideDown 0.3s ease-out',
+                        'bounce-in': 'bounceIn 0.6s ease-out',
+                        'pulse-slow': 'pulse 3s infinite',
+                        'float': 'float 3s ease-in-out infinite',
+                        'shimmer': 'shimmer 2s linear infinite',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        @keyframes slideUp {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        @keyframes slideDown {
+            from { transform: translateY(-20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        @keyframes bounceIn {
+            0% { transform: scale(0.3); opacity: 0; }
+            50% { transform: scale(1.05); }
+            70% { transform: scale(0.9); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+        @keyframes shimmer {
+            0% { background-position: -200px 0; }
+            100% { background-position: calc(200px + 100%) 0; }
+        }
+        
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .card-shadow {
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+        }
+        .diagram-container {
+            min-height: 500px;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            border-radius: 12px;
+            border: 2px dashed #cbd5e1;
+            transition: all 0.3s ease;
+        }
+        .diagram-container:hover {
+            border-color: #3b82f6;
+            background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+        }
+        .diagram-container.has-content {
+            border-style: solid;
+            border-color: #10b981;
+            background: white;
+        }
+        
+        /* Mobile-specific styles */
+        @media (max-width: 640px) {
+            .card-shadow {
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            }
+            
+            /* Prevent zoom on input focus */
+            input[type="text"], 
+            input[type="url"], 
+            input[type="email"], 
+            select, 
+            textarea {
+                font-size: 16px !important;
+            }
+        }
+        
+        /* Loading animation */
+        .loading-shimmer {
+            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+            background-size: 200px 100%;
+            animation: shimmer 2s linear infinite;
+        }
+        
+        /* Mermaid diagram styling */
+        .mermaid {
+            text-align: center;
+            margin: 20px 0;
+        }
+        
+        /* Custom scrollbar */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f5f9;
+            border-radius: 3px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 3px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- Header -->
+    <header class="gradient-bg text-white py-8 shadow-lg">
+        <div class="container mx-auto px-4 text-center">
+            <h1 class="text-4xl md:text-5xl font-bold mb-4 animate-bounce-in">
+                <i class="fas fa-brain mr-4 animate-float"></i>
+                MindMapDiagramAgent
+            </h1>
+            <p class="text-xl md:text-2xl opacity-90 mb-2">AI-Powered Mind Map Generator</p>
+            <p class="text-lg opacity-75">Transform your thoughts into beautiful visual diagrams</p>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 py-8">
+        <!-- Input Section -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+            <!-- Text Input Panel -->
+            <div class="bg-white rounded-2xl shadow-lg p-6 animate-fade-in">
+                <div class="flex items-center mb-6">
+                    <i class="fas fa-edit text-2xl text-blue-600 mr-3"></i>
+                    <h2 class="text-2xl font-bold text-gray-800">Input Your Ideas</h2>
+                </div>
+                
+                <!-- Diagram Type Selection -->
+                <div class="mb-6">
+                    <label class="block text-sm font-semibold text-gray-700 mb-3">
+                        <i class="fas fa-sitemap mr-2"></i>Diagram Type
+                    </label>
+                    <div class="grid grid-cols-2 gap-3" id="diagramTypeGrid">
+                        <!-- Will be populated by JavaScript -->
+                    </div>
+                    <p class="text-xs text-gray-500 mt-2">Choose the type of diagram that best represents your content structure.</p>
+                </div>
+                
+                <!-- Theme Selection -->
+                <div class="mb-6">
+                    <label class="block text-sm font-semibold text-gray-700 mb-3">
+                        <i class="fas fa-palette mr-2"></i>Theme
+                    </label>
+                    <div class="grid grid-cols-5 gap-2" id="themeGrid">
+                        <!-- Will be populated by JavaScript -->
+                    </div>
+                </div>
+                
+                <!-- Depth Control -->
+                <div class="mb-6">
+                    <label class="block text-sm font-semibold text-gray-700 mb-3">
+                        <i class="fas fa-layer-group mr-2"></i>Depth Levels
+                    </label>
+                    <div class="flex items-center space-x-4">
+                        <input type="range" id="depthSlider" min="2" max="5" value="3" 
+                               class="flex-1 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider">
+                        <span id="depthValue" class="text-lg font-semibold text-blue-600 min-w-[2rem]">3</span>
+                    </div>
+                    <div class="flex justify-between text-xs text-gray-500 mt-1">
+                        <span>Shallow</span>
+                        <span>Deep</span>
+                    </div>
+                </div>
+                
+                <!-- Text Input -->
+                <div class="mb-6">
+                    <label for="textInput" class="block text-sm font-semibold text-gray-700 mb-3">
+                        <i class="fas fa-keyboard mr-2"></i>Your Text
+                    </label>
+                    <textarea 
+                        id="textInput" 
+                        rows="8" 
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none custom-scrollbar"
+                        placeholder="Paste your notes, ideas, or concepts here...&#10;&#10;Example:&#10;Artificial Intelligence&#10;- Machine Learning&#10;  - Supervised Learning&#10;  - Unsupervised Learning&#10;- Natural Language Processing&#10;  - Text Analysis&#10;  - Language Generation&#10;- Computer Vision&#10;  - Image Recognition&#10;  - Object Detection"
+                    ></textarea>
+                    <div class="flex justify-between items-center mt-2">
+                        <span id="charCount" class="text-sm text-gray-500">0 characters</span>
+                        <button id="clearBtn" class="text-sm text-red-500 hover:text-red-700 transition-colors">
+                            <i class="fas fa-trash mr-1"></i>Clear
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Generate Button -->
+                <button id="generateBtn" class="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-4 px-6 rounded-lg font-semibold text-lg hover:from-blue-700 hover:to-purple-700 transform hover:scale-105 transition-all duration-200 shadow-lg">
+                    <i class="fas fa-magic mr-2"></i>
+                    Generate Mind Map
+                </button>
+                
+                <!-- Loading State -->
+                <div id="loadingState" class="hidden mt-4 p-4 bg-blue-50 rounded-lg">
+                    <div class="flex items-center">
+                        <div class="loading-shimmer w-6 h-6 rounded-full mr-3"></div>
+                        <span class="text-blue-700 font-medium">AI is processing your ideas...</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Diagram Display Panel -->
+            <div class="bg-white rounded-2xl shadow-lg p-6 animate-fade-in">
+                <div class="flex items-center justify-between mb-6">
+                    <div class="flex items-center">
+                        <i class="fas fa-project-diagram text-2xl text-green-600 mr-3"></i>
+                        <h2 class="text-2xl font-bold text-gray-800">Generated Diagram</h2>
+                    </div>
+                    <div class="flex space-x-2" id="diagramControls">
+                        <button id="zoomInBtn" class="p-2 text-gray-600 hover:text-blue-600 transition-colors" title="Zoom In">
+                            <i class="fas fa-search-plus"></i>
+                        </button>
+                        <button id="zoomOutBtn" class="p-2 text-gray-600 hover:text-blue-600 transition-colors" title="Zoom Out">
+                            <i class="fas fa-search-minus"></i>
+                        </button>
+                        <button id="resetZoomBtn" class="p-2 text-gray-600 hover:text-blue-600 transition-colors" title="Reset Zoom">
+                            <i class="fas fa-expand-arrows-alt"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Diagram Container -->
+                <div id="diagramContainer" class="diagram-container flex items-center justify-center">
+                    <div class="text-center text-gray-500">
+                        <i class="fas fa-brain text-6xl mb-4 opacity-50"></i>
+                        <p class="text-lg font-medium">Your mind map will appear here</p>
+                        <p class="text-sm opacity-75">Enter your text and click "Generate Mind Map"</p>
+                    </div>
+                </div>
+                
+                <!-- Export Options -->
+                <div id="exportSection" class="hidden mt-6 p-6 bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl border border-blue-200">
+                    <h3 class="text-xl font-bold text-gray-800 mb-4 flex items-center">
+                        <i class="fas fa-download mr-3 text-blue-600"></i>Export Your Diagram
+                    </h3>
+                    <p class="text-gray-600 mb-4">Download your diagram in various formats for sharing and further editing.</p>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <button class="export-btn group bg-white border-2 border-gray-200 rounded-xl p-4 hover:border-blue-500 hover:bg-blue-50 hover:shadow-lg transition-all duration-200 transform hover:scale-105" data-format="png">
+                            <div class="text-center">
+                                <i class="fas fa-image text-3xl text-blue-600 mb-3 group-hover:scale-110 transition-transform"></i>
+                                <div class="text-sm font-semibold text-gray-800">PNG Image</div>
+                                <div class="text-xs text-gray-500 mt-1">High-quality image</div>
+                            </div>
+                        </button>
+                        <button class="export-btn group bg-white border-2 border-gray-200 rounded-xl p-4 hover:border-green-500 hover:bg-green-50 hover:shadow-lg transition-all duration-200 transform hover:scale-105" data-format="svg">
+                            <div class="text-center">
+                                <i class="fas fa-vector-square text-3xl text-green-600 mb-3 group-hover:scale-110 transition-transform"></i>
+                                <div class="text-sm font-semibold text-gray-800">SVG Vector</div>
+                                <div class="text-xs text-gray-500 mt-1">Scalable graphics</div>
+                            </div>
+                        </button>
+                        <button class="export-btn group bg-white border-2 border-gray-200 rounded-xl p-4 hover:border-red-500 hover:bg-red-50 hover:shadow-lg transition-all duration-200 transform hover:scale-105" data-format="pdf">
+                            <div class="text-center">
+                                <i class="fas fa-file-pdf text-3xl text-red-600 mb-3 group-hover:scale-110 transition-transform"></i>
+                                <div class="text-sm font-semibold text-gray-800">PDF Document</div>
+                                <div class="text-xs text-gray-500 mt-1">Printable format</div>
+                            </div>
+                        </button>
+                        <button class="export-btn group bg-white border-2 border-gray-200 rounded-xl p-4 hover:border-purple-500 hover:bg-purple-50 hover:shadow-lg transition-all duration-200 transform hover:scale-105" data-format="json">
+                            <div class="text-center">
+                                <i class="fas fa-code text-3xl text-purple-600 mb-3 group-hover:scale-110 transition-transform"></i>
+                                <div class="text-sm font-semibold text-gray-800">JSON Data</div>
+                                <div class="text-xs text-gray-500 mt-1">Structured data</div>
+                            </div>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Session Management -->
+        <div class="bg-white rounded-2xl shadow-lg p-6 mb-8 animate-fade-in">
+            <div class="flex items-center justify-between mb-6">
+                <div class="flex items-center">
+                    <i class="fas fa-save text-2xl text-indigo-600 mr-3"></i>
+                    <h2 class="text-2xl font-bold text-gray-800">Session Management</h2>
+                </div>
+                <button id="saveSessionBtn" class="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors">
+                    <i class="fas fa-save mr-2"></i>Save Session
+                </button>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Save Session -->
+                <div>
+                    <label for="sessionName" class="block text-sm font-semibold text-gray-700 mb-2">
+                        Session Name
+                    </label>
+                    <input type="text" id="sessionName" placeholder="Enter session name..." 
+                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
+                </div>
+                
+                <!-- Load Session -->
+                <div>
+                    <label for="loadSessionSelect" class="block text-sm font-semibold text-gray-700 mb-2">
+                        Load Saved Session
+                    </label>
+                    <select id="loadSessionSelect" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
+                        <option value="">Select a saved session...</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Error Section -->
+        <div id="errorSection" class="hidden bg-red-50 border border-red-200 rounded-xl p-6 mb-8 animate-slide-down">
+            <div class="flex items-center">
+                <i class="fas fa-exclamation-triangle text-red-500 mr-3 text-xl"></i>
+                <div>
+                    <h3 class="text-lg font-semibold text-red-800">Error</h3>
+                    <p id="errorMessage" class="text-red-600"></p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Success Section -->
+        <div id="successSection" class="hidden bg-green-50 border border-green-200 rounded-xl p-6 mb-8 animate-slide-down">
+            <div class="flex items-center">
+                <i class="fas fa-check-circle text-green-500 mr-3 text-xl"></i>
+                <div>
+                    <h3 class="text-lg font-semibold text-green-800">Success!</h3>
+                    <p id="successMessage" class="text-green-600"></p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white/80 backdrop-blur-md border-t border-gray-200 mt-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <div class="text-center">
+                <p class="text-gray-600">
+                    Built with ❤️ as part of the #100DaysOfAI-Agents challenge
+                </p>
+                <p class="text-sm text-gray-500 mt-2">
+                    Transform your thoughts into beautiful visual diagrams with AI
+                </p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="/static/js/app.js"></script>
+</body>
+</html>

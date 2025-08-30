@@ -1,0 +1,50 @@
+{
+  "overall_score": 8.0,
+  "scores": {
+    "clarity": 8,
+    "relevance": 9,
+    "professionalism": 8,
+    "structure": 7,
+    "grammar": 9,
+    "achievements": 8,
+    "skills_alignment": 9,
+    "overall_impact": 8
+  },
+  "strengths": [
+    "Concise and informative professional summary",
+    "Diverse project experience with quantifiable achievements"
+  ],
+  "weaknesses": [
+    "Lacks specific metrics in some achievements",
+    "Skills section could benefit from prioritization based on target role"
+  ],
+  "suggestions": [
+    "Include specific results or metrics to quantify achievements further",
+    "Reorganize the skills section to highlight those most relevant to the target role",
+    "Consider adjusting the structure for improved readability"
+  ],
+  "section_analysis": {
+    "summary": {
+      "score": 8,
+      "feedback": "The summary provides a good overview but lacks specificity regarding the target role and key achievements.",
+      "suggestions": [
+        "Mention the specific target role in the summary",
+        "Include notable achievements or contributions"
+      ]
+    },
+    "experience": {
+      "score": 8,
+      "feedback": "The experience section is comprehensive and showcases a range of projects but could benefit from more quantitative metrics.",
+      "suggestions": [
+        "Add specific metrics to highlight impact",
+        "Use strong action verbs to describe responsibilities and achievements"
+      ]
+    }
+  },
+  "improved_summary": "Full Stack Web Developer and AI Engineer with expertise in building scalable, cloud-native applications and AI solutions. Seeking to leverage experience in AI-powered automation and web development to contribute to innovative IT solutions.",
+  "improved_experience": [
+    "Developed and deployed 90+ AI agents, enhancing productivity and automation capabilities for various clients.",
+    "Delivered over 50 web projects, improving client satisfaction and expanding service offerings.",
+    "Led a team in a hackathon to create a marketplace builder, achieving a 30% faster delivery time than projected."
+  ]
+}
