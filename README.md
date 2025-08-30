@@ -67,7 +67,7 @@ Build 100 useful, functional, and diverse AI agents in 100 days. Each agent will
 | 27  | LinkedInPostAgent         | Generate professional post                                         |
 | 28  | ----      | Generate professional post drafts                               |
 | 29  | ResumeFeedbackBot      | Review resumes and suggest changes                              |
-| 30  | PortfolioGenerator     | Create personal portfolios from input                           |
+| 30  | MindMapDiagramAgent      | Visualize Your Thoughts with AI                          |
 | 31  | MemoryNotesBot         | Save and recall information (mock memory agent)                 |
 | 32  | SystemMonitorAgent     | Report CPU, RAM, disk usage                                     |
 | 33  | AIQuizMaker            | Generate quizzes from topics                                    |
