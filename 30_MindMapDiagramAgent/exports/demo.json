@@ -1,0 +1,31 @@
+{
+  "title": "Sample Diagram",
+  "description": "A sample diagram for testing export",
+  "nodes": [
+    {
+      "id": "node1",
+      "label": "Main Topic",
+      "level": 1,
+      "parent": null,
+      "children": [
+        "node2",
+        "node3"
+      ]
+    },
+    {
+      "id": "node2",
+      "label": "Subtopic 1",
+      "level": 2,
+      "parent": "node1",
+      "children": []
+    },
+    {
+      "id": "node3",
+      "label": "Subtopic 2",
+      "level": 2,
+      "parent": "node1",
+      "children": []
+    }
+  ],
+  "relationships": []
+}

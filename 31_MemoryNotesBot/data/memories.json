@@ -1,0 +1,230 @@
+[
+  {
+    "id": "f0a8e7d6-528f-4354-8a51-22b6cb7f3c77",
+    "content": "My GitHub personal access token is ghp_1234567890abcdef",
+    "memory_type": "password",
+    "priority": "critical",
+    "tags": [
+      "github",
+      "token",
+      "development"
+    ],
+    "category": "development",
+    "created_at": "2025-09-01 19:45:36.737952",
+    "updated_at": "2025-09-01 19:45:36.737952",
+    "accessed_at": null,
+    "access_count": 0,
+    "expires_at": null,
+    "metadata": {}
+  },
+  {
+    "id": "2865f112-9042-487f-815c-81d24aef756d",
+    "content": "Remember to call Sarah about the project meeting tomorrow at 2 PM",
+    "memory_type": "reminder",
+    "priority": "high",
+    "tags": [
+      "meeting",
+      "sarah",
+      "project"
+    ],
+    "category": "work",
+    "created_at": "2025-09-01 19:45:36.737952",
+    "updated_at": "2025-09-01 19:45:36.737952",
+    "accessed_at": null,
+    "access_count": 0,
+    "expires_at": null,
+    "metadata": {}
+  },
+  {
+    "id": "67634082-d3b5-468a-9c1a-8babbd6e45ce",
+    "content": "Great idea: Create a mobile app for tracking daily habits",
+    "memory_type": "idea",
+    "priority": "medium",
+    "tags": [
+      "mobile",
+      "app",
+      "habits",
+      "productivity"
+    ],
+    "category": "ideas",
+    "created_at": "2025-09-01 19:45:36.749668",
+    "updated_at": "2025-09-01 19:45:36.749668",
+    "accessed_at": null,
+    "access_count": 0,
+    "expires_at": null,
+    "metadata": {}
+  },
+  {
+    "id": "35e9c8b3-a55b-4f39-9bb5-668e07d92523",
+    "content": "Bank support number: 1-800-123-4567, available 24/7",
+    "memory_type": "contact",
+    "priority": "medium",
+    "tags": [
+      "bank",
+      "support",
+      "contact"
+    ],
+    "category": "personal",
+    "created_at": "2025-09-01 19:45:36.757451",
+    "updated_at": "2025-09-01 19:45:36.757451",
+    "accessed_at": null,
+    "access_count": 0,
+    "expires_at": null,
+    "metadata": {}
+  },
+  {
+    "id": "0cf16148-5830-4287-be76-c8447a353e58",
+    "content": "Project deadline for website redesign is March 15th",
+    "memory_type": "task",
+    "priority": "high",
+    "tags": [
+      "deadline",
+      "website",
+      "redesign"
+    ],
+    "category": "work",
+    "created_at": "2025-09-01 19:45:36.761446",
+    "updated_at": "2025-09-01 19:45:36.761446",
+    "accessed_at": null,
+    "access_count": 0,
+    "expires_at": null,
+    "metadata": {}
+  },
+  {
+    "id": "01286c0a-5fda-42d3-a58c-377ac66f52ce",
+    "content": "Remember to buy groceries: milk, bread, eggs, and vegetables",
+    "memory_type": "reminder",
+    "priority": "medium",
+    "tags": [
+      "groceries",
+      "shopping",
+      "food"
+    ],
+    "category": "personal",
+    "created_at": "2025-09-01 19:45:36.771342",
+    "updated_at": "2025-09-01 19:45:36.771342",
+    "accessed_at": null,
+    "access_count": 0,
+    "expires_at": null,
+    "metadata": {}
+  },
+  {
+    "id": "eea1eba1-a78e-4a8f-9277-a49b7972b001",
+    "content": "Python virtual environment activation: source venv/bin/activate",
+    "memory_type": "long_term",
+    "priority": "medium",
+    "tags": [
+      "python",
+      "venv",
+      "development"
+    ],
+    "category": "development",
+    "created_at": "2025-09-01 19:45:36.771342",
+    "updated_at": "2025-09-01 19:45:36.771342",
+    "accessed_at": null,
+    "access_count": 0,
+    "expires_at": null,
+    "metadata": {}
+  },
+  {
+    "id": "e9a4b528-2828-4225-8bcf-b07fa7b26769",
+    "content": "Dentist appointment on Friday at 3 PM",
+    "memory_type": "reminder",
+    "priority": "high",
+    "tags": [
+      "dentist",
+      "appointment",
+      "health"
+    ],
+    "category": "health",
+    "created_at": "2025-09-01 19:45:36.790396",
+    "updated_at": "2025-09-01 19:45:36.790396",
+    "accessed_at": null,
+    "access_count": 0,
+    "expires_at": null,
+    "metadata": {}
+  },
+  {
+    "id": "9532f990-11cf-4eed-8f22-495210b2e396",
+    "content": "i ma smia",
+    "memory_type": "idea",
+    "priority": "medium",
+    "tags": [
+      "personal",
+      "identity"
+    ],
+    "category": "personal",
+    "created_at": "2025-09-01 19:56:03.653681",
+    "updated_at": "2025-09-01 19:56:03.653681",
+    "accessed_at": null,
+    "access_count": 0,
+    "expires_at": null,
+    "metadata": {}
+  },
+  {
+    "id": "68b13846-9858-4fe1-890e-341ee9ed7404",
+    "content": "i am sami",
+    "memory_type": "contact",
+    "priority": "low",
+    "tags": [
+      "personal",
+      "identity"
+    ],
+    "category": "personal",
+    "created_at": "2025-09-01 19:56:34.960676",
+    "updated_at": "2025-09-01 19:56:34.960676",
+    "accessed_at": null,
+    "access_count": 0,
+    "expires_at": null,
+    "metadata": {}
+  },
+  {
+    "id": "e3c2b02b-7233-4204-946f-71592856c3e7",
+    "content": "i am smai",
+    "memory_type": "idea",
+    "priority": "low",
+    "tags": [
+      "introduction",
+      "personal"
+    ],
+    "category": "personal",
+    "created_at": "2025-09-01 20:05:56.557935",
+    "updated_at": "2025-09-01 20:05:56.557935",
+    "accessed_at": null,
+    "access_count": 0,
+    "expires_at": "2025-09-01 21:05:56.557935",
+    "metadata": {}
+  },
+  {
+    "id": "03a656fd-1d29-44bb-8585-f7f56405770c",
+    "content": "my wifi password is sami_123487",
+    "memory_type": "password",
+    "priority": "high",
+    "tags": [
+      "wifi",
+      "password",
+      "network"
+    ],
+    "category": "security",
+    "created_at": "2025-09-01 20:09:38.107358",
+    "updated_at": "2025-09-01 20:09:38.107358",
+    "accessed_at": null,
+    "access_count": 0,
+    "expires_at": null,
+    "metadata": {}
+  },
+  {
+    "id": "f440e4d5-7669-4290-880e-2ce9e311c818",
+    "content": "hi ",
+    "memory_type": "idea",
+    "priority": "low",
+    "tags": [],
+    "category": "general",
+    "created_at": "2025-09-01 20:11:00.659553",
+    "updated_at": "2025-09-01 20:11:00.659553",
+    "accessed_at": null,
+    "access_count": 0,
+    "expires_at": null,
+    "metadata": {}
+  }
+]

@@ -753,7 +753,7 @@ Ensure the JSON is valid and follows the exact structure above.
     ) -> Dict[str, Any]:
         """Export as PNG file"""
         try:
-            # Create a matplotlib-based diagram
+            # Create a matplotlib-based diagraExport Your Diagramm
             img_data = self._generate_png_content(data)
             file_path = os.path.join(self.config.EXPORT_DIR, f"{filename}.png")
             

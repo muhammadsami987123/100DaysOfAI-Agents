@@ -1,0 +1,130 @@
+[
+  {
+    "id": "c8fd1a33-7855-4218-b42c-0a96f631ce29",
+    "memory_id": "f0a8e7d6-528f-4354-8a51-22b6cb7f3c77",
+    "operation": "created",
+    "timestamp": "2025-09-01 19:45:36.737952",
+    "details": null,
+    "user_input": "My GitHub personal access token is ghp_1234567890abcdef"
+  },
+  {
+    "id": "016063e6-071d-4795-ab50-6f06db92fdc0",
+    "memory_id": "2865f112-9042-487f-815c-81d24aef756d",
+    "operation": "created",
+    "timestamp": "2025-09-01 19:45:36.737952",
+    "details": null,
+    "user_input": "Remember to call Sarah about the project meeting tomorrow at 2 PM"
+  },
+  {
+    "id": "4804dc55-23a7-4678-adaf-6a392584d4d8",
+    "memory_id": "67634082-d3b5-468a-9c1a-8babbd6e45ce",
+    "operation": "created",
+    "timestamp": "2025-09-01 19:45:36.749668",
+    "details": null,
+    "user_input": "Great idea: Create a mobile app for tracking daily habits"
+  },
+  {
+    "id": "3503b073-d45e-4fc3-b38f-a5cda1e84db5",
+    "memory_id": "35e9c8b3-a55b-4f39-9bb5-668e07d92523",
+    "operation": "created",
+    "timestamp": "2025-09-01 19:45:36.757451",
+    "details": null,
+    "user_input": "Bank support number: 1-800-123-4567, available 24/7"
+  },
+  {
+    "id": "58b1a441-8df2-450b-9b98-d0a681fbab49",
+    "memory_id": "0cf16148-5830-4287-be76-c8447a353e58",
+    "operation": "created",
+    "timestamp": "2025-09-01 19:45:36.761446",
+    "details": null,
+    "user_input": "Project deadline for website redesign is March 15th"
+  },
+  {
+    "id": "f41cf393-943e-4565-ab48-6f25cebf94fe",
+    "memory_id": "01286c0a-5fda-42d3-a58c-377ac66f52ce",
+    "operation": "created",
+    "timestamp": "2025-09-01 19:45:36.771342",
+    "details": null,
+    "user_input": "Remember to buy groceries: milk, bread, eggs, and vegetables"
+  },
+  {
+    "id": "aa3d351e-6f96-4f7d-9d9b-32de3fcb27d7",
+    "memory_id": "eea1eba1-a78e-4a8f-9277-a49b7972b001",
+    "operation": "created",
+    "timestamp": "2025-09-01 19:45:36.771342",
+    "details": null,
+    "user_input": "Python virtual environment activation: source venv/bin/activate"
+  },
+  {
+    "id": "247ca95f-902b-427f-9345-e1b73c14ff63",
+    "memory_id": "e9a4b528-2828-4225-8bcf-b07fa7b26769",
+    "operation": "created",
+    "timestamp": "2025-09-01 19:45:36.790396",
+    "details": null,
+    "user_input": "Dentist appointment on Friday at 3 PM"
+  },
+  {
+    "id": "301d3ee1-7252-4282-802d-e4a7fa054275",
+    "memory_id": "cd54644c-5c0a-44b2-8cb1-d36a1d039e9a",
+    "operation": "created",
+    "timestamp": "2025-09-01 19:45:46.458906",
+    "details": null,
+    "user_input": "Test memory for installation verification"
+  },
+  {
+    "id": "9494f76a-3359-44ee-b9ac-b25e4cf915d7",
+    "memory_id": "cd54644c-5c0a-44b2-8cb1-d36a1d039e9a",
+    "operation": "accessed",
+    "timestamp": "2025-09-01 19:45:46.458906",
+    "details": null,
+    "user_input": null
+  },
+  {
+    "id": "57029748-9b3c-48d5-b7ac-8bc2a1c753b0",
+    "memory_id": "cd54644c-5c0a-44b2-8cb1-d36a1d039e9a",
+    "operation": "deleted",
+    "timestamp": "2025-09-01 19:45:46.472073",
+    "details": "Memory deleted",
+    "user_input": null
+  },
+  {
+    "id": "d161d8da-cab3-4d45-a675-19182a06cef6",
+    "memory_id": "9532f990-11cf-4eed-8f22-495210b2e396",
+    "operation": "created",
+    "timestamp": "2025-09-01 19:56:03.653681",
+    "details": null,
+    "user_input": "i ma smia"
+  },
+  {
+    "id": "9e7a3095-cbe7-4fcd-8ab1-6f5cb1de0293",
+    "memory_id": "68b13846-9858-4fe1-890e-341ee9ed7404",
+    "operation": "created",
+    "timestamp": "2025-09-01 19:56:34.960676",
+    "details": null,
+    "user_input": "i am sami"
+  },
+  {
+    "id": "ba8f8247-7430-4b40-befe-5b626cb47e88",
+    "memory_id": "e3c2b02b-7233-4204-946f-71592856c3e7",
+    "operation": "created",
+    "timestamp": "2025-09-01 20:05:56.557935",
+    "details": null,
+    "user_input": "i am smai"
+  },
+  {
+    "id": "1e93c010-4bab-4ea6-8f00-ebaa3f70d947",
+    "memory_id": "03a656fd-1d29-44bb-8585-f7f56405770c",
+    "operation": "created",
+    "timestamp": "2025-09-01 20:09:38.107358",
+    "details": null,
+    "user_input": "my wifi password is sami_123487"
+  },
+  {
+    "id": "56126f33-194c-413c-8225-47fbbdb56cd7",
+    "memory_id": "f440e4d5-7669-4290-880e-2ce9e311c818",
+    "operation": "created",
+    "timestamp": "2025-09-01 20:11:00.659553",
+    "details": null,
+    "user_input": "hi "
+  }
+]

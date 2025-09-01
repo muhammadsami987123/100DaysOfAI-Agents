@@ -1,0 +1,95 @@
+{
+  "title": "Learn",
+  "description": "Generated mindmap from text input",
+  "nodes": [
+    {
+      "id": "node_1",
+      "label": "Learn",
+      "level": 1,
+      "parent": null,
+      "children": [],
+      "type": "central"
+    },
+    {
+      "id": "node_2",
+      "label": "AutoGen",
+      "level": 2,
+      "parent": "node_1",
+      "children": [],
+      "type": "subtopic"
+    },
+    {
+      "id": "node_3",
+      "label": "Learn",
+      "level": 2,
+      "parent": "node_1",
+      "children": [],
+      "type": "subtopic"
+    },
+    {
+      "id": "node_4",
+      "label": "Tools",
+      "level": 2,
+      "parent": "node_1",
+      "children": [],
+      "type": "subtopic"
+    },
+    {
+      "id": "node_5",
+      "label": "Definition",
+      "level": 2,
+      "parent": "node_1",
+      "children": [],
+      "type": "subtopic"
+    },
+    {
+      "id": "node_6",
+      "label": "Build",
+      "level": 2,
+      "parent": "node_1",
+      "children": [],
+      "type": "subtopic"
+    },
+    {
+      "id": "node_7",
+      "label": "Types",
+      "level": 2,
+      "parent": "node_1",
+      "children": [],
+      "type": "subtopic"
+    },
+    {
+      "id": "node_8",
+      "label": "Purpose",
+      "level": 2,
+      "parent": "node_1",
+      "children": [],
+      "type": "subtopic"
+    },
+    {
+      "id": "node_9",
+      "label": "OpenAI",
+      "level": 2,
+      "parent": "node_1",
+      "children": [],
+      "type": "subtopic"
+    },
+    {
+      "id": "node_10",
+      "label": "Learning",
+      "level": 2,
+      "parent": "node_1",
+      "children": [],
+      "type": "subtopic"
+    },
+    {
+      "id": "node_11",
+      "label": "Research",
+      "level": 2,
+      "parent": "node_1",
+      "children": [],
+      "type": "subtopic"
+    }
+  ],
+  "relationships": []
+}

@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="800" height="600" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+        <style>
+            .node { fill: #3b82f6; stroke: #1d4ed8; stroke-width: 2; }
+            .node-text { fill: white; font-family: Arial, sans-serif; font-size: 12px; text-anchor: middle; }
+            .connection { stroke: #6b7280; stroke-width: 2; fill: none; }
+            .title { fill: #1f2937; font-family: Arial, sans-serif; font-size: 24px; font-weight: bold; text-anchor: middle; }
+        </style>
+    </defs>
+    
+    <rect width="800" height="600" fill="white"/>
+    <text x="400" y="40" class="title">Learn</text>
+
+    <circle cx="100" cy="100" r="30" class="node"/>
+    <text x="100" y="104" class="node-text">Learn</text>
+    <circle cx="300" cy="100" r="30" class="node"/>
+    <text x="300" y="104" class="node-text">Build</text>
+    <circle cx="500" cy="100" r="30" class="node"/>
+    <text x="500" y="104" class="node-text">Applicatio</text>
+    <circle cx="100" cy="200" r="30" class="node"/>
+    <text x="100" y="204" class="node-text">Definition</text>
+    <circle cx="300" cy="200" r="30" class="node"/>
+    <text x="300" y="204" class="node-text">Learning</text>
+    <circle cx="500" cy="200" r="30" class="node"/>
+    <text x="500" y="204" class="node-text">Learn</text>
+    <circle cx="100" cy="300" r="30" class="node"/>
+    <text x="100" y="304" class="node-text">APIs</text>
+    <circle cx="300" cy="300" r="30" class="node"/>
+    <text x="300" y="304" class="node-text">Rule-based</text>
+    <circle cx="500" cy="300" r="30" class="node"/>
+    <text x="500" y="304" class="node-text">Skills</text>
+    <circle cx="100" cy="400" r="30" class="node"/>
+    <text x="100" y="404" class="node-text">Chatbots</text>
+</svg>

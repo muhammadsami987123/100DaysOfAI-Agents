@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MemoryNotesBot - AI Memory Assistant</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .memory-card {
+            transition: all 0.3s ease;
+        }
+        .memory-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+        .priority-critical { @apply bg-red-100 border-red-300; }
+        .priority-high { @apply bg-orange-100 border-orange-300; }
+        .priority-medium { @apply bg-yellow-100 border-yellow-300; }
+        .priority-low { @apply bg-green-100 border-green-300; }
+        .type-short_term { @apply bg-blue-100 border-blue-300; }
+        .type-long_term { @apply bg-purple-100 border-purple-300; }
+        .type-reminder { @apply bg-pink-100 border-pink-300; }
+        .type-password { @apply bg-red-100 border-red-300; }
+        .type-idea { @apply bg-indigo-100 border-indigo-300; }
+        .type-task { @apply bg-emerald-100 border-emerald-300; }
+        .type-contact { @apply bg-teal-100 border-teal-300; }
+        .type-project { @apply bg-amber-100 border-amber-300; }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen" x-data="memoryBot()">
+    <!-- Navigation -->
+    <nav class="bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center">
+                    <i class="fas fa-brain text-2xl mr-3"></i>
+                    <h1 class="text-xl font-bold">MemoryNotesBot</h1>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <button @click="showStats = !showStats" class="hover:bg-blue-700 px-3 py-2 rounded-md">
+                        <i class="fas fa-chart-bar mr-2"></i>Stats
+                    </button>
+                    <button @click="showExport = !showExport" class="hover:bg-blue-700 px-3 py-2 rounded-md">
+                        <i class="fas fa-download mr-2"></i>Export
+                    </button>
+                    <button @click="testVoice()" class="hover:bg-blue-700 px-3 py-2 rounded-md">
+                        <i class="fas fa-microphone mr-2"></i>Voice Test
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Tabs -->
+        <div class="mb-8">
+            <div class="border-b border-gray-200">
+                <nav class="-mb-px flex space-x-8">
+                    <button @click="activeTab = 'save'" 
+                            :class="activeTab === 'save' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
+                            class="whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm">
+                        <i class="fas fa-save mr-2"></i>Save Memory
+                    </button>
+                    <button @click="activeTab = 'recall'" 
+                            :class="activeTab === 'recall' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
+                            class="whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm">
+                        <i class="fas fa-search mr-2"></i>Recall
+                    </button>
+                    <button @click="activeTab = 'forget'" 
+                            :class="activeTab === 'forget' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
+                            class="whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm">
+                        <i class="fas fa-trash mr-2"></i>Forget
+                    </button>
+                    <button @click="activeTab = 'history'" 
+                            :class="activeTab === 'history' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
+                            class="whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm">
+                        <i class="fas fa-history mr-2"></i>History
+                    </button>
+                </nav>
+            </div>
+        </div>
+
+        <!-- Save Memory Tab -->
+        <div x-show="activeTab === 'save'" class="space-y-6">
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <h2 class="text-2xl font-bold text-gray-900 mb-6">
+                    <i class="fas fa-save text-blue-600 mr-3"></i>Save New Memory
+                </h2>
+                
+                <form @submit.prevent="saveMemory()" class="space-y-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            What would you like me to remember?
+                        </label>
+                        <textarea x-model="newMemory.content" 
+                                  class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                                  rows="4" 
+                                  placeholder="Remember my GitHub token is ghp_123... or Save my bank support number: 0800-123..."></textarea>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Memory Type</label>
+                            <select x-model="newMemory.memory_type" 
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                                <option value="long_term">Long Term</option>
+                                <option value="short_term">Short Term</option>
+                                <option value="reminder">Reminder</option>
+                                <option value="password">Password</option>
+                                <option value="idea">Idea</option>
+                                <option value="task">Task</option>
+                                <option value="contact">Contact</option>
+                                <option value="project">Project</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Priority</label>
+                            <select x-model="newMemory.priority" 
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                                <option value="low">Low</option>
+                                <option value="medium">Medium</option>
+                                <option value="high">High</option>
+                                <option value="critical">Critical</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Category</label>
+                            <input type="text" x-model="newMemory.category" 
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                                   placeholder="work, personal, project...">
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Expires in (hours)</label>
+                            <input type="number" x-model="newMemory.expires_in_hours" 
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                                   placeholder="24 (leave empty for no expiry)">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Tags</label>
+                        <div class="flex flex-wrap gap-2 mb-2">
+                            <template x-for="tag in newMemory.tags" :key="tag">
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                    <span x-text="tag"></span>
+                                    <button @click="removeTag(tag)" class="ml-1 text-blue-600 hover:text-blue-800">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </span>
+                            </template>
+                        </div>
+                        <div class="flex gap-2">
+                            <input type="text" x-model="newTag" 
+                                   @keyup.enter="addTag()"
+                                   class="flex-1 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                                   placeholder="Add a tag...">
+                            <button type="button" @click="addTag()" 
+                                    class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
+                                Add
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center space-x-4">
+                        <button type="submit" 
+                                class="flex-1 bg-blue-600 text-white px-6 py-3 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+                            <i class="fas fa-save mr-2"></i>Save Memory
+                        </button>
+                        <button type="button" @click="enhanceWithAI()" 
+                                class="px-6 py-3 bg-purple-600 text-white rounded-md hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2">
+                            <i class="fas fa-magic mr-2"></i>AI Enhance
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Recall Tab -->
+        <div x-show="activeTab === 'recall'" class="space-y-6">
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <h2 class="text-2xl font-bold text-gray-900 mb-6">
+                    <i class="fas fa-search text-green-600 mr-3"></i>Recall Memories
+                </h2>
+                
+                <div class="mb-6">
+                    <div class="flex gap-4">
+                        <input type="text" x-model="searchQuery" 
+                               @keyup.enter="searchMemories()"
+                               class="flex-1 px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                               placeholder="What are you looking for?">
+                        <button @click="searchMemories()" 
+                                class="px-6 py-2 bg-green-600 text-white rounded-md hover:bg-green-700">
+                            <i class="fas fa-search mr-2"></i>Search
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Search Results -->
+                <div x-show="searchResults.length > 0" class="space-y-4">
+                    <h3 class="text-lg font-semibold text-gray-900">
+                        Found <span x-text="searchResults.length"></span> memories:
+                    </h3>
+                    
+                    <div class="grid gap-4">
+                        <template x-for="(memory, index) in searchResults" :key="memory.id">
+                            <div class="memory-card bg-white border rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow">
+                                <div class="flex justify-between items-start mb-2">
+                                    <div class="flex items-center space-x-2">
+                                        <span :class="'px-2 py-1 text-xs font-medium rounded-full ' + getPriorityClass(memory.priority)" 
+                                              x-text="memory.priority"></span>
+                                        <span :class="'px-2 py-1 text-xs font-medium rounded-full ' + getTypeClass(memory.memory_type)" 
+                                              x-text="memory.memory_type"></span>
+                                    </div>
+                                    <div class="flex space-x-2">
+                                        <button @click="editMemory(memory)" class="text-blue-600 hover:text-blue-800">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <button @click="deleteMemory(memory.id)" class="text-red-600 hover:text-red-800">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                
+                                <p class="text-gray-900 mb-3" x-text="memory.content"></p>
+                                
+                                <div class="flex items-center justify-between text-sm text-gray-500">
+                                    <div class="flex items-center space-x-4">
+                                        <span x-text="'Created: ' + formatDate(memory.created_at)"></span>
+                                        <span x-text="'Accessed: ' + (memory.accessed_at ? formatDate(memory.accessed_at) : 'Never')"></span>
+                                    </div>
+                                    <div class="flex items-center space-x-2">
+                                        <template x-for="tag in memory.tags" :key="tag">
+                                            <span class="px-2 py-1 bg-gray-100 text-gray-700 rounded text-xs" x-text="tag"></span>
+                                        </template>
+                                    </div>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+
+                <!-- No Results -->
+                <div x-show="searchQuery && searchResults.length === 0" class="text-center py-8">
+                    <i class="fas fa-search text-gray-400 text-4xl mb-4"></i>
+                    <p class="text-gray-500">No memories found matching your search.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Forget Tab -->
+        <div x-show="activeTab === 'forget'" class="space-y-6">
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <h2 class="text-2xl font-bold text-gray-900 mb-6">
+                    <i class="fas fa-trash text-red-600 mr-3"></i>Forget Memories
+                </h2>
+                
+                <div class="mb-6">
+                    <div class="flex gap-4">
+                        <input type="text" x-model="forgetQuery" 
+                               @keyup.enter="searchForForget()"
+                               class="flex-1 px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                               placeholder="Search for memories to delete...">
+                        <button @click="searchForForget()" 
+                                class="px-6 py-2 bg-red-600 text-white rounded-md hover:bg-red-700">
+                            <i class="fas fa-search mr-2"></i>Search
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Forget Results -->
+                <div x-show="forgetResults.length > 0" class="space-y-4">
+                    <h3 class="text-lg font-semibold text-gray-900">
+                        Found <span x-text="forgetResults.length"></span> memories to potentially delete:
+                    </h3>
+                    
+                    <div class="grid gap-4">
+                        <template x-for="(memory, index) in forgetResults" :key="memory.id">
+                            <div class="memory-card bg-white border rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow">
+                                <div class="flex justify-between items-start mb-2">
+                                    <div class="flex items-center space-x-2">
+                                        <span :class="'px-2 py-1 text-xs font-medium rounded-full ' + getPriorityClass(memory.priority)" 
+                                              x-text="memory.priority"></span>
+                                        <span :class="'px-2 py-1 text-xs font-medium rounded-full ' + getTypeClass(memory.memory_type)" 
+                                              x-text="memory.memory_type"></span>
+                                    </div>
+                                    <button @click="deleteMemory(memory.id)" 
+                                            class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700">
+                                        <i class="fas fa-trash mr-2"></i>Delete
+                                    </button>
+                                </div>
+                                
+                                <p class="text-gray-900 mb-3" x-text="memory.content"></p>
+                                
+                                <div class="flex items-center justify-between text-sm text-gray-500">
+                                    <span x-text="'Created: ' + formatDate(memory.created_at)"></span>
+                                    <div class="flex items-center space-x-2">
+                                        <template x-for="tag in memory.tags" :key="tag">
+                                            <span class="px-2 py-1 bg-gray-100 text-gray-700 rounded text-xs" x-text="tag"></span>
+                                        </template>
+                                    </div>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- History Tab -->
+        <div x-show="activeTab === 'history'" class="space-y-6">
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <h2 class="text-2xl font-bold text-gray-900 mb-6">
+                    <i class="fas fa-history text-purple-600 mr-3"></i>Memory History
+                </h2>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                    <button @click="loadRecentMemories()" 
+                            class="p-4 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100">
+                        <i class="fas fa-clock text-blue-600 text-2xl mb-2"></i>
+                        <h3 class="font-semibold text-blue-900">Recent Memories</h3>
+                        <p class="text-blue-600 text-sm">Latest additions</p>
+                    </button>
+                    
+                    <button @click="loadFrequentMemories()" 
+                            class="p-4 bg-green-50 border border-green-200 rounded-lg hover:bg-green-100">
+                        <i class="fas fa-star text-green-600 text-2xl mb-2"></i>
+                        <h3 class="font-semibold text-green-900">Frequent Access</h3>
+                        <p class="text-green-600 text-sm">Most used memories</p>
+                    </button>
+                    
+                    <button @click="loadMemoriesByTag()" 
+                            class="p-4 bg-purple-50 border border-purple-200 rounded-lg hover:bg-purple-100">
+                        <i class="fas fa-tags text-purple-600 text-2xl mb-2"></i>
+                        <h3 class="font-semibold text-purple-900">By Tag</h3>
+                        <p class="text-purple-600 text-sm">Grouped by tags</p>
+                    </button>
+                </div>
+
+                <!-- History Results -->
+                <div x-show="historyResults.length > 0" class="space-y-4">
+                    <h3 class="text-lg font-semibold text-gray-900">
+                        <span x-text="historyTitle"></span> (<span x-text="historyResults.length"></span> memories):
+                    </h3>
+                    
+                    <div class="grid gap-4">
+                        <template x-for="(memory, index) in historyResults" :key="memory.id">
+                            <div class="memory-card bg-white border rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow">
+                                <div class="flex justify-between items-start mb-2">
+                                    <div class="flex items-center space-x-2">
+                                        <span :class="'px-2 py-1 text-xs font-medium rounded-full ' + getPriorityClass(memory.priority)" 
+                                              x-text="memory.priority"></span>
+                                        <span :class="'px-2 py-1 text-xs font-medium rounded-full ' + getTypeClass(memory.memory_type)" 
+                                              x-text="memory.memory_type"></span>
+                                    </div>
+                                    <div class="flex space-x-2">
+                                        <button @click="editMemory(memory)" class="text-blue-600 hover:text-blue-800">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <button @click="deleteMemory(memory.id)" class="text-red-600 hover:text-red-800">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                
+                                <p class="text-gray-900 mb-3" x-text="memory.content"></p>
+                                
+                                <div class="flex items-center justify-between text-sm text-gray-500">
+                                    <div class="flex items-center space-x-4">
+                                        <span x-text="'Created: ' + formatDate(memory.created_at)"></span>
+                                        <span x-text="'Accessed: ' + (memory.accessed_at ? formatDate(memory.accessed_at) : 'Never')"></span>
+                                        <span x-text="'Access Count: ' + memory.access_count"></span>
+                                    </div>
+                                    <div class="flex items-center space-x-2">
+                                        <template x-for="tag in memory.tags" :key="tag">
+                                            <span class="px-2 py-1 bg-gray-100 text-gray-700 rounded text-xs" x-text="tag"></span>
+                                        </template>
+                                    </div>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistics Modal -->
+    <div x-show="showStats" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+        <div class="relative top-20 mx-auto p-5 border w-11/12 md:w-3/4 lg:w-1/2 shadow-lg rounded-md bg-white">
+            <div class="mt-3">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-medium text-gray-900">Memory Statistics</h3>
+                    <button @click="showStats = false" class="text-gray-400 hover:text-gray-600">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+                
+                <div x-show="statistics" class="space-y-4">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="bg-blue-50 p-4 rounded-lg">
+                            <h4 class="font-semibold text-blue-900">Total Memories</h4>
+                            <p class="text-2xl font-bold text-blue-600" x-text="statistics.total_memories"></p>
+                        </div>
+                        <div class="bg-green-50 p-4 rounded-lg">
+                            <h4 class="font-semibold text-green-900">Storage Size</h4>
+                            <p class="text-2xl font-bold text-green-600" x-text="statistics.storage_size_mb + ' MB'"></p>
+                        </div>
+                        <div class="bg-purple-50 p-4 rounded-lg">
+                            <h4 class="font-semibold text-purple-900">Long-term</h4>
+                            <p class="text-2xl font-bold text-purple-600" x-text="statistics.long_term_count"></p>
+                        </div>
+                        <div class="bg-orange-50 p-4 rounded-lg">
+                            <h4 class="font-semibold text-orange-900">Short-term</h4>
+                            <p class="text-2xl font-bold text-orange-600" x-text="statistics.short_term_count"></p>
+                        </div>
+                    </div>
+                    
+                    <div x-show="statistics.most_used_tags.length > 0">
+                        <h4 class="font-semibold text-gray-900 mb-2">Most Used Tags</h4>
+                        <div class="flex flex-wrap gap-2">
+                            <template x-for="[tag, count] in statistics.most_used_tags" :key="tag">
+                                <span class="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm">
+                                    <span x-text="tag"></span>
+                                    <span class="ml-1 text-gray-500">(<span x-text="count"></span>)</span>
+                                </span>
+                            </template>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mt-6 flex justify-end">
+                    <button @click="showStats = false" 
+                            class="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400">
+                        Close
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Export Modal -->
+    <div x-show="showExport" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+        <div class="relative top-20 mx-auto p-5 border w-11/12 md:w-3/4 lg:w-1/2 shadow-lg rounded-md bg-white">
+            <div class="mt-3">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-medium text-gray-900">Export Memories</h3>
+                    <button @click="showExport = false" class="text-gray-400 hover:text-gray-600">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+                
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Export Format</label>
+                        <select x-model="exportFormat" 
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                            <option value="json">JSON</option>
+                            <option value="markdown">Markdown</option>
+                            <option value="csv">CSV</option>
+                        </select>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Filter by Tags (optional)</label>
+                        <input type="text" x-model="exportTags" 
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                               placeholder="work, personal, project...">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Filter by Category (optional)</label>
+                        <input type="text" x-model="exportCategory" 
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                               placeholder="work, personal...">
+                    </div>
+                </div>
+                
+                <div class="mt-6 flex justify-end space-x-3">
+                    <button @click="showExport = false" 
+                            class="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400">
+                        Cancel
+                    </button>
+                    <button @click="exportMemories()" 
+                            class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
+                        <i class="fas fa-download mr-2"></i>Export
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Memory Modal -->
+    <div x-show="showEditModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+        <div class="relative top-20 mx-auto p-5 border w-11/12 md:w-3/4 lg:w-1/2 shadow-lg rounded-md bg-white">
+            <div class="mt-3">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-medium text-gray-900">Edit Memory</h3>
+                    <button @click="showEditModal = false" class="text-gray-400 hover:text-gray-600">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+                
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Content</label>
+                        <textarea x-model="editingMemory.content" 
+                                  class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                                  rows="4"></textarea>
+                    </div>
+                    
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Memory Type</label>
+                            <select x-model="editingMemory.memory_type" 
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                                <option value="long_term">Long Term</option>
+                                <option value="short_term">Short Term</option>
+                                <option value="reminder">Reminder</option>
+                                <option value="password">Password</option>
+                                <option value="idea">Idea</option>
+                                <option value="task">Task</option>
+                                <option value="contact">Contact</option>
+                                <option value="project">Project</option>
+                            </select>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Priority</label>
+                            <select x-model="editingMemory.priority" 
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                                <option value="low">Low</option>
+                                <option value="medium">Medium</option>
+                                <option value="high">High</option>
+                                <option value="critical">Critical</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Tags</label>
+                        <div class="flex flex-wrap gap-2 mb-2">
+                            <template x-for="tag in editingMemory.tags" :key="tag">
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                    <span x-text="tag"></span>
+                                    <button @click="removeEditTag(tag)" class="ml-1 text-blue-600 hover:text-blue-800">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </span>
+                            </template>
+                        </div>
+                        <div class="flex gap-2">
+                            <input type="text" x-model="editTag" 
+                                   @keyup.enter="addEditTag()"
+                                   class="flex-1 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                                   placeholder="Add a tag...">
+                            <button type="button" @click="addEditTag()" 
+                                    class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
+                                Add
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mt-6 flex justify-end space-x-3">
+                    <button @click="showEditModal = false" 
+                            class="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400">
+                        Cancel
+                    </button>
+                    <button @click="updateMemory()" 
+                            class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
+                        <i class="fas fa-save mr-2"></i>Update
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notifications -->
+    <div x-show="notification.show" 
+         x-transition:enter="transition ease-out duration-300"
+         x-transition:enter-start="opacity-0 transform scale-95"
+         x-transition:enter-end="opacity-100 transform scale-100"
+         x-transition:leave="transition ease-in duration-200"
+         x-transition:leave-start="opacity-100 transform scale-100"
+         x-transition:leave-end="opacity-0 transform scale-95"
+         class="fixed top-4 right-4 z-50">
+        <div :class="'px-6 py-4 rounded-lg shadow-lg ' + (notification.type === 'success' ? 'bg-green-500 text-white' : 'bg-red-500 text-white')">
+            <div class="flex items-center">
+                <i :class="notification.type === 'success' ? 'fas fa-check-circle' : 'fas fa-exclamation-circle'" class="mr-2"></i>
+                <span x-text="notification.message"></span>
+            </div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='app.js') }}"></script>
+</body>
+</html>
