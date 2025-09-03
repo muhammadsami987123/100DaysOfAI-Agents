@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎯 AI Quiz Maker - Generate Engaging Quizzes with AI</title>
+    <meta name="description" content="Create engaging quizzes from topics, articles, or text files using OpenAI's GPT models. Features both CLI and Web UI.">
+    
+    <!-- Favicon -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎯</text></svg>">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#eff6ff',
+                            500: '#3b82f6',
+                            600: '#2563eb',
+                            700: '#1d4ed8',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gradient-to-br from-blue-50 via-white to-purple-50 min-h-screen">
+    <!-- Header -->
+    <header class="bg-white/80 backdrop-blur-md border-b border-gray-200/50 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-20">
+                <div class="flex items-center space-x-4">
+                    <div class="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center shadow-lg">
+                        <i class="fas fa-brain text-white text-2xl"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                            🎯 AI Quiz Maker
+                        </h1>
+                        <p class="text-gray-600 text-sm">Generate engaging quizzes with AI</p>
+                    </div>
+                </div>
+                <nav class="flex space-x-3">
+                    <button class="nav-btn bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-xl font-medium transition-all duration-200 transform hover:scale-105 active:scale-95 shadow-md" onclick="showSection('generator')">
+                        <i class="fas fa-magic mr-2"></i> Generator
+                    </button>
+                    <button class="nav-btn bg-gray-100 hover:bg-gray-200 text-gray-700 px-6 py-3 rounded-xl font-medium transition-all duration-200 transform hover:scale-105 active:scale-95" onclick="showSection('history')">
+                        <i class="fas fa-history mr-2"></i> History
+                    </button>
+                    <button class="nav-btn bg-gray-100 hover:bg-gray-200 text-gray-700 px-6 py-3 rounded-xl font-medium transition-all duration-200 transform hover:scale-105 active:scale-95" onclick="showSection('stats')">
+                        <i class="fas fa-chart-bar mr-2"></i> Stats
+                    </button>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Generator Section -->
+        <section id="generator" class="section active">
+            <div class="text-center mb-12">
+                <h2 class="text-4xl font-bold text-gray-800 mb-4">
+                    <i class="fas fa-magic text-blue-500 mr-3"></i> Quiz Generator
+                </h2>
+                <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+                    Create engaging quizzes from topics, text files, or pasted content using advanced AI
+                </p>
+            </div>
+
+            <!-- Input Methods -->
+            <div class="bg-white rounded-3xl shadow-xl p-8 mb-8">
+                <div class="flex justify-center mb-8">
+                    <div class="bg-gray-100 rounded-2xl p-2 flex space-x-2">
+                        <button class="tab-btn bg-white text-blue-600 px-8 py-3 rounded-xl font-medium transition-all duration-200 shadow-md" onclick="switchTab('topic')">
+                            <i class="fas fa-lightbulb mr-2"></i> Topic
+                        </button>
+                        <button class="tab-btn bg-transparent text-gray-600 hover:text-gray-800 px-8 py-3 rounded-xl font-medium transition-all duration-200" onclick="switchTab('url')">
+                            <i class="fas fa-link mr-2"></i> URL
+                        </button>
+                        <button class="tab-btn bg-transparent text-gray-600 hover:text-gray-800 px-8 py-3 rounded-xl font-medium transition-all duration-200" onclick="switchTab('file')">
+                            <i class="fas fa-file-upload mr-2"></i> File Upload
+                        </button>
+                        <button class="tab-btn bg-transparent text-gray-600 hover:text-gray-800 px-8 py-3 rounded-xl font-medium transition-all duration-200" onclick="switchTab('text')">
+                            <i class="fas fa-edit mr-2"></i> Text Input
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Topic Tab -->
+                <div id="topic-tab" class="tab-content active">
+                    <div class="max-w-2xl mx-auto">
+                        <label for="topic-input" class="block text-lg font-semibold text-gray-700 mb-3">
+                            Enter a topic or subject:
+                        </label>
+                        <input type="text" id="topic-input" 
+                               class="w-full px-6 py-4 text-lg border-2 border-gray-200 rounded-2xl focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition-all duration-200"
+                               placeholder="e.g., Python Programming, Machine Learning, World History..." 
+                               maxlength="200">
+                    </div>
+                </div>
+
+                <!-- URL Tab -->
+                <div id="url-tab" class="tab-content hidden">
+                    <div class="max-w-2xl mx-auto">
+                        <label for="url-input" class="block text-lg font-semibold text-gray-700 mb-3">
+                            Enter a documentation or article URL:
+                        </label>
+                        <div class="space-y-4">
+                            <input type="url" id="url-input" 
+                                   class="w-full px-6 py-4 text-lg border-2 border-gray-200 rounded-2xl focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition-all duration-200"
+                                   placeholder="https://docs.python.org/3/tutorial/..." 
+                                   pattern="https?://.+">
+                            
+                            <!-- URL Examples -->
+                            <div class="bg-blue-50 border border-blue-200 rounded-xl p-4">
+                                <h5 class="font-semibold text-blue-800 mb-2">💡 Examples of supported URLs:</h5>
+                                <ul class="text-sm text-blue-700 space-y-1">
+                                    <li>• Documentation: <code class="bg-blue-100 px-1 rounded">docs.python.org</code>, <code class="bg-blue-100 px-1 rounded">developer.mozilla.org</code></li>
+                                    <li>• Articles: <code class="bg-blue-100 px-1 rounded">medium.com</code>, <code class="bg-blue-100 px-1 rounded">dev.to</code></li>
+                                    <li>• Wikis: <code class="bg-blue-100 px-1 rounded">wikipedia.org</code>, <code class="bg-blue-100 px-1 rounded">stackoverflow.com</code></li>
+                                    <li>• Any public webpage with readable content</li>
+                                </ul>
+                            </div>
+                            
+                            <div class="text-center">
+                                <button id="fetch-url-btn" onclick="fetchUrlContent()"
+                                        class="bg-green-500 hover:bg-green-600 text-white px-8 py-3 rounded-xl font-medium transition-all duration-200 transform hover:scale-105">
+                                    <i class="fas fa-download mr-2"></i> Fetch Content
+                                </button>
+                            </div>
+                            <div id="url-status" class="url-status hidden text-center">
+                                <div class="inline-flex items-center space-x-3 bg-blue-50 text-blue-700 px-6 py-3 rounded-xl">
+                                    <div class="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600"></div>
+                                    <span>Fetching content from URL...</span>
+                                </div>
+                            </div>
+                            <div id="url-preview" class="url-preview hidden mt-4 p-4 bg-gray-50 rounded-xl border border-gray-200">
+                                <h4 class="font-semibold text-gray-800 mb-2">Content Preview:</h4>
+                                <div id="url-content-preview" class="text-sm text-gray-600 max-h-32 overflow-y-auto"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- File Upload Tab -->
+                <div id="file-tab" class="tab-content hidden">
+                    <div class="max-w-2xl mx-auto">
+                        <label for="file-input" class="block text-lg font-semibold text-gray-700 mb-3">
+                            Upload a text file:
+                        </label>
+                        <div class="border-2 border-dashed border-gray-300 rounded-2xl p-12 text-center hover:border-blue-400 transition-colors duration-200">
+                            <input type="file" id="file-input" accept=".txt,.md,.doc,.docx" class="hidden">
+                            <label for="file-input" class="cursor-pointer">
+                                <i class="fas fa-cloud-upload-alt text-6xl text-gray-400 mb-4"></i>
+                                <p class="text-xl text-gray-600 mb-2">Choose a file or drag and drop</p>
+                                <p class="text-gray-500">Supports .txt, .md, .doc, .docx files</p>
+                            </label>
+                        </div>
+                        <div id="file-info" class="file-info hidden mt-4 p-4 bg-blue-50 rounded-xl"></div>
+                    </div>
+                </div>
+
+                <!-- Text Input Tab -->
+                <div id="text-tab" class="tab-content hidden">
+                    <div class="max-w-2xl mx-auto">
+                        <label for="text-input" class="block text-lg font-semibold text-gray-700 mb-3">
+                            Paste your content:
+                        </label>
+                        <textarea id="text-input" 
+                                  class="w-full px-6 py-4 text-lg border-2 border-gray-200 rounded-2xl focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition-all duration-200 resize-none"
+                                  placeholder="Paste your article, notes, or any text content here..." 
+                                  rows="6" maxlength="10000"></textarea>
+                        <div class="flex justify-between items-center mt-3">
+                            <div class="char-count text-sm text-gray-500">
+                                <span id="char-count">0</span> / 10,000 characters
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quiz Configuration -->
+                <div class="max-w-2xl mx-auto mt-8">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div>
+                            <label for="questions-input" class="block text-sm font-semibold text-gray-700 mb-2">
+                                Number of Questions
+                            </label>
+                            <input type="number" id="questions-input" value="5" min="1" max="50"
+                                   class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all duration-200">
+                        </div>
+                        <div>
+                            <label for="difficulty-input" class="block text-sm font-semibold text-gray-700 mb-2">
+                                Difficulty
+                            </label>
+                            <select id="difficulty-input" 
+                                    class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all duration-200">
+                                <option value="easy">Easy</option>
+                                <option value="medium" selected>Medium</option>
+                                <option value="hard">Hard</option>
+                            </select>
+                        </div>
+                        <div class="flex items-center">
+                            <label class="flex items-center space-x-3 cursor-pointer">
+                                <input type="checkbox" id="include-answers" checked
+                                       class="w-5 h-5 text-blue-600 border-2 border-gray-300 rounded-lg focus:ring-blue-500 focus:ring-2">
+                                <span class="text-sm font-semibold text-gray-700">Include Answers</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Generate Button -->
+                <div class="text-center mt-8">
+                    <button id="generate-btn" onclick="generateQuiz()"
+                            class="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white px-12 py-4 rounded-2xl font-bold text-xl transition-all duration-200 transform hover:scale-105 active:scale-95 shadow-lg hover:shadow-xl">
+                        <i class="fas fa-magic mr-3"></i> Generate Quiz
+                    </button>
+                </div>
+
+                <!-- Generation Status -->
+                <div id="generation-status" class="generation-status hidden mt-6 text-center">
+                    <div class="inline-flex items-center space-x-3 bg-gradient-to-r from-blue-50 to-purple-50 text-blue-700 px-8 py-4 rounded-2xl border border-blue-200 shadow-lg">
+                        <div class="relative">
+                            <div class="animate-spin rounded-full h-6 w-6 border-2 border-blue-200 border-t-blue-600"></div>
+                            <div class="absolute inset-0 rounded-full border-2 border-transparent border-t-purple-600 animate-spin" style="animation-duration: 1.5s;"></div>
+                        </div>
+                        <span class="font-medium text-lg">Generating your quiz...</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quiz Display -->
+            <div id="quiz-display" class="quiz-display hidden">
+                <div class="bg-white rounded-3xl shadow-xl p-8">
+                    <div class="text-center mb-8">
+                        <h3 id="quiz-title" class="text-3xl font-bold text-gray-800 mb-2"></h3>
+                        <div class="flex justify-center items-center space-x-6 text-gray-600">
+                            <span><i class="fas fa-signal text-blue-500 mr-2"></i><span id="quiz-difficulty"></span></span>
+                            <span><i class="fas fa-question-circle text-green-500 mr-2"></i><span id="quiz-questions"></span></span>
+                            <span><i class="fas fa-robot text-purple-500 mr-2"></i><span id="quiz-model"></span></span>
+                        </div>
+                    </div>
+
+                    <div id="quiz-content" class="quiz-content space-y-8"></div>
+                    
+                    <!-- Empty State -->
+                    <div id="quiz-empty-state" class="text-center py-12 hidden">
+                        <div class="w-24 h-24 bg-gradient-to-r from-blue-100 to-purple-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                            <i class="fas fa-question-circle text-4xl text-blue-500"></i>
+                        </div>
+                        <h4 class="text-2xl font-bold text-gray-800 mb-3">Ready to Generate Your Quiz!</h4>
+                        <p class="text-gray-600 max-w-md mx-auto">
+                            Enter a topic, upload a file, or paste content above to create your first AI-powered quiz.
+                        </p>
+                    </div>
+
+                    <!-- Export Options -->
+                    <div class="mt-8 pt-8 border-t border-gray-200">
+                        <h4 class="text-xl font-semibold text-gray-800 mb-4 text-center">Export Options</h4>
+                        <div class="flex justify-center space-x-4">
+                            <button onclick="exportQuiz('md')" 
+                                    class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-xl font-medium transition-all duration-200 transform hover:scale-105">
+                                <i class="fas fa-file-alt mr-2"></i> Markdown
+                            </button>
+                            <button onclick="exportQuiz('json')" 
+                                    class="bg-green-500 hover:bg-green-600 text-white px-6 py-3 rounded-xl font-medium transition-all duration-200 transform hover:scale-105">
+                                <i class="fas fa-code mr-2"></i> JSON
+                            </button>
+                            <button onclick="exportQuiz('csv')" 
+                                    class="bg-orange-500 hover:bg-orange-600 text-white px-6 py-3 rounded-xl font-medium transition-all duration-200 transform hover:scale-105">
+                                <i class="fas fa-table mr-2"></i> CSV
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- History Section -->
+        <section id="history" class="section hidden">
+            <div class="text-center mb-12">
+                <h2 class="text-4xl font-bold text-gray-800 mb-4">
+                    <i class="fas fa-history text-blue-500 mr-3"></i> Quiz History
+                </h2>
+                <p class="text-xl text-gray-600">View your previously generated quizzes</p>
+            </div>
+            <div id="history-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+        </section>
+
+        <!-- Statistics Section -->
+        <section id="stats" class="section hidden">
+            <div class="text-center mb-12">
+                <h2 class="text-4xl font-bold text-gray-800 mb-4">
+                    <i class="fas fa-chart-bar text-blue-500 mr-3"></i> Statistics
+                </h2>
+                <p class="text-xl text-gray-600">Track your quiz generation activity</p>
+            </div>
+            <div id="stats-content" class="bg-white rounded-3xl shadow-xl p-8">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <div class="text-center">
+                        <div class="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <i class="fas fa-question-circle text-3xl text-blue-600"></i>
+                        </div>
+                        <h3 class="text-2xl font-bold text-gray-800 mb-2">Total Questions</h3>
+                        <p id="total-questions" class="text-4xl font-bold text-blue-600">0</p>
+                    </div>
+                    <div class="text-center">
+                        <div class="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <i class="fas fa-magic text-3xl text-green-600"></i>
+                        </div>
+                        <h3 class="text-2xl font-bold text-gray-800 mb-2">Quizzes Generated</h3>
+                        <p id="total-quizzes" class="text-4xl font-bold text-green-600">0</p>
+                    </div>
+                    <div class="text-center">
+                        <div class="w-20 h-20 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <i class="fas fa-clock text-3xl text-purple-600"></i>
+                        </div>
+                        <h3 class="text-2xl font-bold text-gray-800 mb-2">Last Generated</h3>
+                        <p id="last-generated" class="text-lg text-gray-600">Never</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white/80 backdrop-blur-md border-t border-gray-200/50 mt-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <div class="text-center">
+                <div class="flex items-center justify-center space-x-3 mb-4">
+                    <div class="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-brain text-white text-sm"></i>
+                    </div>
+                    <span class="text-lg font-semibold text-gray-800">AI Quiz Maker</span>
+                </div>
+                <p class="text-gray-600 mb-4">Day 33 of #100DaysOfAI-Agents</p>
+                <p class="text-sm text-gray-500">Built with ❤️ using OpenAI GPT and Flask</p>
+                <p class="text-sm text-gray-500">developer: Muhammad Sami Asghar Mughal</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Toast Container -->
+    <div id="toast-container" class="fixed top-4 right-4 z-50 space-y-4"></div>
+
+    <!-- Loading Overlay -->
+    <div id="loading-overlay" class="loading-overlay hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-white rounded-3xl p-8 text-center">
+            <div class="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600 mx-auto mb-4"></div>
+            <p class="text-xl font-semibold text-gray-800">Generating your quiz...</p>
+            <p class="text-gray-600 mt-2">This may take a few moments</p>
+        </div>
+    </div>
+
+    <!-- JavaScript -->
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>

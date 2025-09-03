@@ -1,0 +1,110 @@
+{
+  "difficulty": "medium",
+  "generated_at": "2025-09-03T10:25:12.383632",
+  "include_answers": false,
+  "model": "gpt-4o-mini",
+  "questions": 10,
+  "quiz": [
+    {
+      "answer": "A",
+      "options": {
+        "A": "list = [1, 2, 3]",
+        "B": "list = (1, 2, 3)",
+        "C": "list = {1, 2, 3}",
+        "D": "list = <1, 2, 3>"
+      },
+      "question": "What is the correct way to create a list in Python?"
+    },
+    {
+      "answer": "C",
+      "options": {
+        "A": "function myFunc():",
+        "B": "def myFunc[]:",
+        "C": "def myFunc():",
+        "D": "function myFunc[]():"
+      },
+      "question": "Which of the following is the correct syntax to define a function in Python?"
+    },
+    {
+      "answer": "B",
+      "options": {
+        "A": "<class 'float'>",
+        "B": "<class 'int'>",
+        "C": "<class 'str'>",
+        "D": "<class 'list'>"
+      },
+      "question": "What will be the output of the following code: `print(type(5))`?"
+    },
+    {
+      "answer": "A",
+      "options": {
+        "A": "dict[key] = value",
+        "B": "dict.add(key, value)",
+        "C": "dict.insert(key, value)",
+        "D": "dict.append(key, value)"
+      },
+      "question": "How do you add a key-value pair to a dictionary in Python?"
+    },
+    {
+      "answer": "B",
+      "options": {
+        "A": "To find the maximum value in a list",
+        "B": "To return the number of items in an object",
+        "C": "To convert a string to a list",
+        "D": "To check if a list is empty"
+      },
+      "question": "What is the purpose of the `len()` function in Python?"
+    },
+    {
+      "answer": "C",
+      "options": {
+        "A": "catch",
+        "B": "handle",
+        "C": "try",
+        "D": "except"
+      },
+      "question": "Which of the following keywords is used to handle exceptions in Python?"
+    },
+    {
+      "answer": "C",
+      "options": {
+        "A": "Tuple",
+        "B": "String",
+        "C": "List",
+        "D": "Integer"
+      },
+      "question": "In Python, which of the following is a mutable data type?"
+    },
+    {
+      "answer": "C",
+      "options": {
+        "A": "It pauses the loop for a specified time.",
+        "B": "It skips the current iteration and continues with the next.",
+        "C": "It exits the loop entirely.",
+        "D": "It restarts the loop from the beginning."
+      },
+      "question": "What does the `break` statement do in a loop?"
+    },
+    {
+      "answer": "A",
+      "options": {
+        "A": "HelloHelloHello",
+        "B": "Hello, Hello, Hello",
+        "C": "Hello 3",
+        "D": "Error"
+      },
+      "question": "What will the following code output? `print(\"Hello\" * 3)`"
+    },
+    {
+      "answer": "A",
+      "options": {
+        "A": "remove(item)",
+        "B": "delete(item)",
+        "C": "discard(item)",
+        "D": "pop(item)"
+      },
+      "question": "Which of the following methods can be used to remove an item from a list in Python?"
+    }
+  ],
+  "topic": "python base"
+}
