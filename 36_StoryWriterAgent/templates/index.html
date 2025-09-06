@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StoryWriterAgent - AI Story Generation</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="{{ url_for('static', path='/css/style.css') }}" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <h1><i class="fas fa-book-open"></i> StoryWriterAgent</h1>
+                <p>Transform your ideas into captivating stories with AI</p>
+            </div>
+            <nav class="nav-links">
+                <a href="/" class="nav-link active"><i class="fas fa-magic"></i> Generate</a>
+                <a href="/stories" class="nav-link"><i class="fas fa-list"></i> My Stories</a>
+            </nav>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="story-form-container">
+                <!-- Story Generation Form -->
+                <div class="story-form">
+                    <h2><i class="fas fa-pen-fancy"></i> Create Your Story</h2>
+                    
+                    <form id="storyForm">
+                        <div class="form-group">
+                            <label for="prompt">
+                                <i class="fas fa-lightbulb"></i> What's your story idea?
+                                <span class="help-text">Press Ctrl+Enter to generate quickly</span>
+                            </label>
+                            <textarea 
+                                id="prompt" 
+                                name="prompt" 
+                                placeholder="Describe your story idea (e.g., 'A dragon who wanted to become a chef', 'A robot learning to love', 'A detective solving a mystery in space')"
+                                required
+                                maxlength="500"
+                            ></textarea>
+                            <div class="form-help">
+                                <small>💡 Tip: Be specific and creative with your prompts for better results!</small>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="genre">
+                                    <i class="fas fa-theater-masks"></i> Genre
+                                </label>
+                                <select id="genre" name="genre">
+                                    {% for key, genre in genres.items() %}
+                                    <option value="{{ key }}">{{ genre.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="tone">
+                                    <i class="fas fa-palette"></i> Tone
+                                </label>
+                                <select id="tone" name="tone">
+                                    {% for key, tone in tones.items() %}
+                                    <option value="{{ key }}">{{ tone.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="length">
+                                    <i class="fas fa-ruler"></i> Length
+                                </label>
+                                <select id="length" name="length">
+                                    {% for key, length in lengths.items() %}
+                                    <option value="{{ key }}">{{ length.name }} ({{ length.description }})</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="language">
+                                    <i class="fas fa-globe"></i> Language
+                                </label>
+                                <select id="language" name="language">
+                                    {% for key, language in languages.items() %}
+                                    <option value="{{ key }}">{{ language.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="generate-btn" id="generateBtn">
+                            <i class="fas fa-magic"></i> Generate Story
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Story Display -->
+                <div class="story-display" id="storyDisplay" style="display: none;">
+                    <div class="story-header">
+                        <h3 id="storyTitle"></h3>
+                        <div class="story-meta">
+                            <span class="meta-item" id="storyGenre"></span>
+                            <span class="meta-item" id="storyTone"></span>
+                            <span class="meta-item" id="storyLength"></span>
+                            <span class="meta-item" id="storyLanguage"></span>
+                        </div>
+                    </div>
+                    
+                    <div class="story-content" id="storyContent"></div>
+                    
+                    <div class="story-actions">
+                        <button class="action-btn" id="saveBtn">
+                            <i class="fas fa-save"></i> Save Story
+                        </button>
+                        <button class="action-btn" id="favoriteBtn">
+                            <i class="fas fa-heart"></i> Add to Favorites
+                        </button>
+                        <button class="action-btn" id="downloadBtn">
+                            <i class="fas fa-download"></i> Download
+                        </button>
+                        <button class="action-btn" id="newStoryBtn">
+                            <i class="fas fa-plus"></i> New Story
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Loading Indicator -->
+                <div class="loading" id="loading" style="display: none;">
+                    <div class="loading-spinner"></div>
+                    <p>Generating your story...</p>
+                </div>
+            </div>
+
+            <!-- Quick Examples -->
+            <div class="examples-section">
+                <h3><i class="fas fa-lightbulb"></i> Quick Examples</h3>
+                <div class="examples-grid">
+                    <div class="example-card" data-prompt="A dragon who wanted to become a chef">
+                        <h4>🐉 Dragon Chef</h4>
+                        <p>A dragon who wanted to become a chef</p>
+                    </div>
+                    <div class="example-card" data-prompt="A robot learning to love">
+                        <h4>🤖 Robot Love</h4>
+                        <p>A robot learning to love</p>
+                    </div>
+                    <div class="example-card" data-prompt="A detective solving a mystery in space">
+                        <h4>🚀 Space Detective</h4>
+                        <p>A detective solving a mystery in space</p>
+                    </div>
+                    <div class="example-card" data-prompt="A magical library where books come alive">
+                        <h4>📚 Living Library</h4>
+                        <p>A magical library where books come alive</p>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <p>&copy; 2024 StoryWriterAgent - Day 36 of #100DaysOfAI-Agents</p>
+        </footer>
+    </div>
+
+    <!-- Toast Notifications -->
+    <div id="toast" class="toast"></div>
+
+    <script src="{{ url_for('static', path='/js/app.js') }}"></script>
+</body>
+</html>

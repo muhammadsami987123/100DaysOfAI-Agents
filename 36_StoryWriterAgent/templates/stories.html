@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Stories - StoryWriterAgent</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="{{ url_for('static', path='/css/style.css') }}" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <h1><i class="fas fa-book-open"></i> StoryWriterAgent</h1>
+                <p>Manage your collection of AI-generated stories</p>
+            </div>
+            <nav class="nav-links">
+                <a href="/" class="nav-link"><i class="fas fa-magic"></i> Generate</a>
+                <a href="/stories" class="nav-link active"><i class="fas fa-list"></i> My Stories</a>
+            </nav>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Search and Filter Bar -->
+            <div class="search-section">
+                <div class="search-bar">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="searchInput" placeholder="Search stories by title, content, or prompt...">
+                </div>
+                <div class="filter-buttons">
+                    <button class="filter-btn active" data-filter="all">All Stories</button>
+                    <button class="filter-btn" data-filter="favorites">Favorites</button>
+                    <button class="filter-btn" data-filter="recent">Recent</button>
+                </div>
+            </div>
+
+            <!-- Stats Section -->
+            <div class="stats-section">
+                <div class="stat-card">
+                    <i class="fas fa-book"></i>
+                    <div>
+                        <h3 id="totalStories">{{ stories|length }}</h3>
+                        <p>Total Stories</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <i class="fas fa-heart"></i>
+                    <div>
+                        <h3 id="totalFavorites">{{ favorites|length }}</h3>
+                        <p>Favorites</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <i class="fas fa-words"></i>
+                    <div>
+                        <h3 id="totalWords">0</h3>
+                        <p>Total Words</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Stories Grid -->
+            <div class="stories-section">
+                <div class="section-header">
+                    <h2><i class="fas fa-list"></i> Your Stories</h2>
+                    <div class="view-controls">
+                        <button class="view-btn active" data-view="grid"><i class="fas fa-th"></i></button>
+                        <button class="view-btn" data-view="list"><i class="fas fa-list"></i></button>
+                    </div>
+                </div>
+
+                <div class="stories-grid" id="storiesGrid">
+                    {% for story in stories %}
+                    <div class="story-card" data-story-id="{{ story.id }}" data-genre="{{ story.genre }}" data-tone="{{ story.tone }}">
+                        <div class="story-card-header">
+                            <h3 class="story-title">{{ story.title }}</h3>
+                            <div class="story-actions">
+                                <button class="action-btn favorite-btn" data-story-id="{{ story.id }}" title="Toggle Favorite">
+                                    <i class="fas fa-heart {% if story.id in favorites %}favorited{% endif %}"></i>
+                                </button>
+                                <button class="action-btn download-btn" data-story-id="{{ story.id }}" title="Download">
+                                    <i class="fas fa-download"></i>
+                                </button>
+                                <button class="action-btn delete-btn" data-story-id="{{ story.id }}" title="Delete">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="story-meta">
+                            <span class="meta-tag genre">{{ story.genre }}</span>
+                            <span class="meta-tag tone">{{ story.tone }}</span>
+                            <span class="meta-tag length">{{ story.length }}</span>
+                            <span class="meta-tag language">{{ story.language }}</span>
+                        </div>
+                        
+                        <div class="story-preview">
+                            {{ story.content[:200] }}{% if story.content|length > 200 %}...{% endif %}
+                        </div>
+                        
+                        <div class="story-footer">
+                            <div class="story-stats">
+                                <span><i class="fas fa-words"></i> {{ story.word_count }} words</span>
+                                <span><i class="fas fa-calendar"></i> {{ story.created_at[:10] }}</span>
+                            </div>
+                            <button class="read-more-btn" data-story-id="{{ story.id }}">Read More</button>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <!-- Empty State -->
+                <div class="empty-state" id="emptyState" style="display: none;">
+                    <i class="fas fa-book-open"></i>
+                    <h3>No stories found</h3>
+                    <p>Start creating amazing stories with AI!</p>
+                    <a href="/" class="btn-primary">Generate Your First Story</a>
+                </div>
+            </div>
+        </main>
+
+        <!-- Story Modal -->
+        <div class="modal" id="storyModal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 id="modalTitle"></h2>
+                    <button class="close-btn" id="closeModal">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="story-meta" id="modalMeta"></div>
+                    <div class="story-content" id="modalContent"></div>
+                </div>
+                <div class="modal-footer">
+                    <button class="action-btn" id="modalFavorite">
+                        <i class="fas fa-heart"></i> Toggle Favorite
+                    </button>
+                    <button class="action-btn" id="modalDownload">
+                        <i class="fas fa-download"></i> Download
+                    </button>
+                    <button class="action-btn" id="modalClose">Close</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <p>&copy; 2024 StoryWriterAgent - Day 36 of #100DaysOfAI-Agents</p>
+        </footer>
+    </div>
+
+    <!-- Toast Notifications -->
+    <div id="toast" class="toast"></div>
+
+    <script src="{{ url_for('static', path='/js/stories.js') }}"></script>
+</body>
+</html>
