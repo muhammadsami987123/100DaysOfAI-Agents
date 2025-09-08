@@ -48,8 +48,13 @@ def create_app() -> Flask:
             try:
                 encrypt_file(temp_in, out_path, pw)
                 log_event("encrypt_success_web", {"input": up.filename, "output": out_name})
-                flash(f"Encrypted to {out_name}", "success")
-                return redirect(url_for("download_encrypted", filename=out_name))
+                # Render result with download link instead of forced download
+                return render_template(
+                    "index.html",
+                    result_text=f"Encrypted to {out_name}",
+                    result_link=url_for("download_encrypted", filename=out_name),
+                    result_label="Download Encrypted File",
+                )
             except Exception as exc:
                 log_event("encrypt_error_web", {"input": up.filename, "error": str(exc)})
                 flash(f"Encrypt failed: {exc}", "error")
@@ -76,8 +81,19 @@ def create_app() -> Flask:
             try:
                 decrypt_file(temp_in, out_path, pw)
                 log_event("decrypt_success_web", {"input": up.filename, "output": out_name})
-                flash(f"Decrypted to {out_name}", "success")
-                return redirect(url_for("download_decrypted", filename=out_name))
+                # If the output looks like an image, offer a preview
+                _, ext = os.path.splitext(out_name.lower())
+                image_exts = {".png", ".jpg", ".jpeg", ".gif", ".webp", ".bmp"}
+                preview_url = None
+                if ext in image_exts:
+                    preview_url = url_for("download_decrypted", filename=out_name)
+                return render_template(
+                    "index.html",
+                    result_text=f"Decrypted to {out_name}",
+                    result_link=url_for("download_decrypted", filename=out_name),
+                    result_label="Download Decrypted File",
+                    preview_url=preview_url,
+                )
             except Exception as exc:
                 log_event("decrypt_error_web", {"input": up.filename, "error": str(exc)})
                 flash(f"Decrypt failed: {exc}", "error")

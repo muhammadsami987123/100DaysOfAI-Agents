@@ -78,9 +78,19 @@
     </div>
 
     <!-- Result Panel -->
-    <div id="resultPanel" class="mt-8 hidden">
+    <div id="resultPanel" class="mt-8 {{ 'hidden' if not result_text else '' }}">
       <div class="bg-white border rounded-xl p-5 shadow-sm">
-        <div id="resultText" class="text-sm text-gray-700"></div>
+        {% if result_text %}
+          <div id="resultText" class="text-sm text-gray-700 mb-3">{{ result_text }}</div>
+          {% if preview_url %}
+            <img src="{{ preview_url }}" alt="Decrypted preview" class="max-h-80 rounded border mb-3" />
+          {% endif %}
+          {% if result_link and result_label %}
+            <a href="{{ result_link }}" class="inline-block bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded">{{ result_label }}</a>
+          {% endif %}
+        {% else %}
+          <div class="text-sm text-gray-500">No recent result.</div>
+        {% endif %}
       </div>
     </div>
   </main>
