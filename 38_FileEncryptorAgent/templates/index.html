@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>FileEncryptorAgent</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gradient-to-br from-gray-50 to-gray-100 text-gray-900 min-h-screen flex flex-col">
+  <!-- Header -->
+  <header class="bg-white shadow-sm border-b sticky top-0 z-50">
+    <div class="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
+      <div class="text-xl font-bold tracking-tight text-gray-800">🔐 FileEncryptorAgent</div>
+      <nav class="text-sm text-gray-600 italic">Local-first AES-256 (GCM)</nav>
+    </div>
+  </header>
+
+  <!-- Main -->
+  <main class="flex-1 max-w-5xl mx-auto p-6">
+    <p class="text-sm text-gray-600 mb-6 text-center">
+      Encrypt and decrypt files <span class="font-medium">locally</span> — no external APIs.  
+      Outputs are saved to <code class="bg-gray-100 px-1 rounded">encrypted/</code> and  
+      <code class="bg-gray-100 px-1 rounded">decrypted/</code>.
+    </p>
+
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    <div class="space-y-2 mb-6">
+      {% for category, message in messages %}
+      <div class="p-3 rounded-lg font-medium shadow-sm 
+        {{ 'bg-green-50 text-green-700 border border-green-200' if category=='success' 
+           else 'bg-red-50 text-red-700 border border-red-200' if category=='error' 
+           else 'bg-blue-50 text-blue-700 border border-blue-200' }}">
+        {{ message }}
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+    {% endwith %}
+
+    <!-- Encrypt / Decrypt Panels -->
+    <div class="grid md:grid-cols-2 gap-8">
+      <!-- Encrypt -->
+      <div class="bg-white rounded-2xl shadow-md border border-gray-100 p-6 hover:shadow-lg transition">
+        <h2 class="text-lg font-semibold mb-4 flex items-center gap-2">🔒 Encrypt</h2>
+        <form id="encForm" method="POST" action="/encrypt" enctype="multipart/form-data" class="space-y-4">
+          <div id="encDrop" 
+               class="cursor-pointer w-full border-2 border-dashed border-gray-300 rounded-xl p-8 text-center text-sm text-gray-500 hover:border-blue-400 hover:bg-blue-50 transition">
+            Drop file here or click to choose
+          </div>
+          <input id="encFile" type="file" name="file" accept="*/*" class="hidden" required />
+          <input type="password" name="password" placeholder="Password" class="w-full border p-3 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none" required />
+          <input type="password" name="password_confirm" placeholder="Confirm Password" class="w-full border p-3 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none" required />
+          <button class="bg-blue-600 hover:bg-blue-700 transition text-white px-4 py-3 rounded-lg w-full font-medium shadow">
+            Encrypt
+          </button>
+        </form>
+        <p class="text-xs text-gray-500 mt-3">Uses PBKDF2-SHA256 with random salt and IV; authenticated with GCM.</p>
+      </div>
+
+      <!-- Decrypt -->
+      <div class="bg-white rounded-2xl shadow-md border border-gray-100 p-6 hover:shadow-lg transition">
+        <h2 class="text-lg font-semibold mb-4 flex items-center gap-2">🔓 Decrypt</h2>
+        <form id="decForm" method="POST" action="/decrypt" enctype="multipart/form-data" class="space-y-4">
+          <div id="decDrop" 
+               class="cursor-pointer w-full border-2 border-dashed border-gray-300 rounded-xl p-8 text-center text-sm text-gray-500 hover:border-green-400 hover:bg-green-50 transition">
+            Drop .enc here or click to choose
+          </div>
+          <input id="decFile" type="file" name="file" accept=".enc" class="hidden" required />
+          <input type="password" name="password" placeholder="Password" class="w-full border p-3 rounded-lg focus:ring-2 focus:ring-green-500 focus:outline-none" required />
+          <button class="bg-green-600 hover:bg-green-700 transition text-white px-4 py-3 rounded-lg w-full font-medium shadow">
+            Decrypt
+          </button>
+        </form>
+        <p class="text-xs text-gray-500 mt-3">Wrong password or corrupted files will fail integrity checks.</p>
+      </div>
+    </div>
+
+    <!-- Result Panel -->
+    <div id="resultPanel" class="mt-8 hidden">
+      <div class="bg-white border rounded-xl p-5 shadow-sm">
+        <div id="resultText" class="text-sm text-gray-700"></div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="text-center text-xs text-gray-500 py-6 border-t mt-8">
+    Local-first • AES-256 GCM • PBKDF2-SHA256 • No external APIs
+  </footer>
+
+  <!-- Scripts -->
+  <script>
+    function setupDnD(dropId, inputId, acceptExt) {
+      const drop = document.getElementById(dropId);
+      const input = document.getElementById(inputId);
+      drop.addEventListener('click', () => input.click());
+      ['dragenter','dragover'].forEach(evt => drop.addEventListener(evt, e => { e.preventDefault(); drop.classList.add('bg-blue-50'); }));
+      ['dragleave','drop'].forEach(evt => drop.addEventListener(evt, e => { e.preventDefault(); drop.classList.remove('bg-blue-50'); }));
+      drop.addEventListener('drop', e => {
+        if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+          const f = e.dataTransfer.files[0];
+          if (acceptExt && !f.name.toLowerCase().endsWith(acceptExt)) {
+            alert('Please drop a ' + acceptExt + ' file');
+            return;
+          }
+          input.files = e.dataTransfer.files;
+          drop.textContent = f.name;
+        }
+      });
+      input.addEventListener('change', () => {
+        if (input.files && input.files[0]) {
+          drop.textContent = input.files[0].name;
+        }
+      });
+    }
+    setupDnD('encDrop', 'encFile', null);
+    setupDnD('decDrop', 'decFile', '.enc');
+    setTimeout(() => {
+      const el = document.querySelector('.space-y-2.mb-6');
+      if (el) el.classList.add('hidden');
+    }, 4000);
+  </script>
+</body>
+</html>
