@@ -1,0 +1,15 @@
+{
+  "base": "USD",
+  "timestamp": null,
+  "rates": {
+    "USD": 1.0,
+    "EUR": 0.92,
+    "GBP": 0.78,
+    "INR": 83.0,
+    "PKR": 278.0,
+    "JPY": 157.0,
+    "CAD": 1.36
+  },
+  "_fetched_at": null
+}
+
