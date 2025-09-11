@@ -1,0 +1,11 @@
+{
+  "holdings": {
+    "bitcoin": {
+      "amount": 100.0,
+      "purchase_price": 20.0,
+      "total_invested": 2000.0
+    }
+  },
+  "currency": "usd",
+  "last_updated": "2025-09-11T10:15:50.419991"
+}

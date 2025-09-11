@@ -1,0 +1,41 @@
+# CryptoInsightsAgent Configuration
+# Copy this file to .env and fill in your actual values
+
+# OpenAI API Configuration (Required for AI insights)
+# Get your API key from: https://platform.openai.com/api-keys
+OPENAI_API_KEY=your_openai_api_key_here
+
+# OpenAI Model (Optional - defaults to gpt-4o-mini)
+# Available models: gpt-4o, gpt-4o-mini, gpt-4-turbo, gpt-3.5-turbo
+OPENAI_MODEL=gpt-4o-mini
+
+# CoinGecko API Configuration (Optional - for higher rate limits)
+# Get your API key from: https://www.coingecko.com/en/api
+# Free tier allows 10-50 calls/minute, Pro tier allows 500+ calls/minute
+COINGECKO_API_KEY=
+
+# CoinGecko API Base URL (Optional - defaults to official API)
+COINGECKO_API_BASE=https://api.coingecko.com/api/v3
+
+# Request Timeout (Optional - defaults to 10 seconds)
+REQUEST_TIMEOUT_SECONDS=10
+
+# Default Currency (Optional - defaults to usd)
+# Supported currencies: usd, eur, gbp, jpy, inr, cad, aud, chf, cny, etc.
+DEFAULT_CURRENCY=usd
+
+# Default Cryptocurrencies to Display (Optional)
+# Comma-separated list of crypto IDs for quick access
+DEFAULT_CRYPTOS=bitcoin,ethereum,binancecoin,cardano,solana,polkadot,dogecoin,chainlink
+
+# Portfolio Settings (Optional)
+# Default portfolio currency
+PORTFOLIO_CURRENCY=usd
+
+# Cache Settings (Optional)
+# Enable/disable API response caching
+ENABLE_CACHE=true
+
+# Logging Level (Optional)
+# Available levels: DEBUG, INFO, WARNING, ERROR
+LOG_LEVEL=INFO
