@@ -1,0 +1,18 @@
+{
+  "profile": {
+    "income": 1500.0,
+    "age": 29,
+    "risk": "medium",
+    "goal": "retirement",
+    "currency": "USD",
+    "save_pct": null
+  },
+  "allocation": {
+    "allocation": {
+      "stocks": 60,
+      "bonds": 30,
+      "cash": 10
+    }
+  },
+  "markdown": "## Financial Summary\nAt 29 years old, with a monthly income of $1,500 and a medium risk tolerance, you're in a great position to start planning for retirement. Saving consistently is key, and even small contributions can grow significantly over time due to compound interest.\n\n## Investment Plan\nTo work towards retirement, it's recommended to save a percentage of your income monthly. A good starting point could be 15%. This would mean saving $225 each month. Consider the following allocation for your retirement savings:\n\n1. **Stocks (Equities)**: 60% - Invest in a mix of domestic and international stocks for growth.\n2. **Bonds (Fixed Income)**: 30% - These provide stability and income, balancing the volatility of stocks.\n3. **Cash or Cash Equivalents**: 10% - Keep a portion in savings or money market accounts for liquidity.\n\n## Diversification Strategy\nDiversifying your investments helps manage risk. By spreading your investments across different asset classes (stocks, bonds, and cash), you reduce the impact of poor performance in any single area. Consider low-cost index funds or ETFs to achieve this diversification easily.\n\n## Recommendations\n- **Start Saving**: Aim to save at least 15% of your income ($225/month).\n- **Set Up Automatic Contributions**: This helps in building your savings without having to think about it.\n- **Reassess Annually**: As your income grows or your risk tolerance changes, adjust your investment allocations accordingly.\n\n```json\n{\n  \"allocation\": {\n    \"stocks\": 60,\n    \"bonds\": 30,\n    \"cash\": 10\n  }\n}\n```"
+}
