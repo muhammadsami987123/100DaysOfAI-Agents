@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StudyPlannerAgent - AI-Powered Study Planning</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .gradient-bg {
+            background: linear-gradient(135deg, #ff6b6b 0%, #4ecdc4 50%, #45b7d1 100%);
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .pulse-animation {
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ff8e8e 100%);
+            transition: all 0.3s ease;
+        }
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #ff5252 0%, #ff7979 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(255, 107, 107, 0.3);
+        }
+        .btn-secondary {
+            background: linear-gradient(135deg, #4ecdc4 0%, #6dd5ed 100%);
+            transition: all 0.3s ease;
+        }
+        .btn-secondary:hover {
+            background: linear-gradient(135deg, #26a69a 0%, #4fc3f7 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(78, 205, 196, 0.3);
+        }
+        .btn-success {
+            background: linear-gradient(135deg, #45b7d1 0%, #96c7ed 100%);
+            transition: all 0.3s ease;
+        }
+        .btn-success:hover {
+            background: linear-gradient(135deg, #2196f3 0%, #64b5f6 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(69, 183, 209, 0.3);
+        }
+        .radio-card:hover {
+            background: rgba(255, 255, 255, 0.25);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        }
+        .radio-card input[type="radio"]:checked + div {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: rgba(255, 255, 255, 0.5);
+        }
+        .input-field:focus {
+            box-shadow: 0 0 0 3px rgba(255, 107, 107, 0.3);
+            border-color: #ff6b6b;
+        }
+    </style>
+</head>
+<body class="gradient-bg min-h-screen">
+    <!-- Header -->
+    <header class="bg-white/10 backdrop-blur-md border-b border-white/20">
+        <div class="container mx-auto px-4 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                    <a href="/" class="flex items-center space-x-3 ">
+                        <i class="fas fa-graduation-cap text-3xl text-white"></i>
+                        <h1 class="text-2xl font-bold text-white">StudyPlannerAgent</h1>
+                    </a>
+                </div>
+                 <div class="flex items-center space-x-4">
+                     <button id="view-plans-btn" class="btn-secondary text-white px-4 py-2 rounded-lg font-semibold">
+                         <i class="fas fa-list mr-2"></i>View Plans
+                     </button>
+                     <button id="help-btn" class="btn-success text-white px-4 py-2 rounded-lg font-semibold">
+                         <i class="fas fa-question-circle mr-2"></i>Help
+                     </button>
+                 </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 py-8">
+        <!-- Welcome Section -->
+        <div class="text-center mb-12 fade-in">
+            <h2 class="text-4xl font-bold text-white mb-4">Create Your Perfect Study Plan</h2>
+            <p class="text-xl text-white/80 mb-8">AI-powered personalized study plans tailored to your goals and learning style</p>
+        </div>
+
+        <!-- Study Plan Form -->
+        <div class="max-w-4xl mx-auto">
+            <div class="glass-card rounded-2xl p-8 mb-8 fade-in">
+                <h3 class="text-2xl font-bold text-white mb-6">
+                    <i class="fas fa-edit mr-3"></i>Study Plan Details
+                </h3>
+                
+                <form id="study-plan-form" class="space-y-6">
+                    <!-- Study Goal -->
+                    <div>
+                        <label for="goal" class="block text-white font-semibold mb-2">
+                            <i class="fas fa-target mr-2"></i>Study Goal
+                        </label>
+                         <input type="text" id="goal" name="goal" required
+                                placeholder="e.g., Learn JavaScript, Prepare for IELTS, Master Python"
+                                class="input-field w-full px-4 py-3 rounded-lg bg-white/20 border border-white/30 text-white placeholder-white/60 focus:outline-none">
+                    </div>
+
+                    <!-- Time Constraints -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label for="days-available" class="block text-white font-semibold mb-2">
+                                <i class="fas fa-calendar-alt mr-2"></i>Days Available
+                            </label>
+                             <input type="number" id="days-available" name="days_available" min="1" max="365" value="30"
+                                    class="input-field w-full px-4 py-3 rounded-lg bg-white/20 border border-white/30 text-white focus:outline-none">
+                        </div>
+                        <div>
+                            <label for="hours-per-day" class="block text-white font-semibold mb-2">
+                                <i class="fas fa-clock mr-2"></i>Hours per Day
+                            </label>
+                             <input type="number" id="hours-per-day" name="hours_per_day" min="1" max="12" value="2"
+                                    class="input-field w-full px-4 py-3 rounded-lg bg-white/20 border border-white/30 text-white focus:outline-none">
+                        </div>
+                    </div>
+
+                    <!-- Learning Style -->
+                    <div>
+                        <label class="block text-white font-semibold mb-3">
+                            <i class="fas fa-palette mr-2"></i>Learning Style
+                        </label>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                             <label class="radio-card flex items-center p-4 rounded-lg bg-white/10 border border-white/20 cursor-pointer transition-all duration-200">
+                                 <input type="radio" name="learning_style" value="reading" class="mr-3">
+                                 <div>
+                                     <div class="text-white font-semibold">📚 Reading</div>
+                                     <div class="text-white/70 text-sm">Textbooks, articles, documentation</div>
+                                 </div>
+                             </label>
+                            <label class="radio-card flex items-center p-4 rounded-lg bg-white/10 border border-white/20 cursor-pointer transition-all duration-200">
+                                <input type="radio" name="learning_style" value="practice" class="mr-3">
+                                <div>
+                                    <div class="text-white font-semibold">💻 Practice</div>
+                                    <div class="text-white/70 text-sm">Hands-on exercises and projects</div>
+                                </div>
+                            </label>
+                            <label class="radio-card flex items-center p-4 rounded-lg bg-white/10 border border-white/20 cursor-pointer transition-all duration-200">
+                                <input type="radio" name="learning_style" value="videos" class="mr-3">
+                                <div>
+                                    <div class="text-white font-semibold">🎥 Videos</div>
+                                    <div class="text-white/70 text-sm">Video tutorials and lectures</div>
+                                </div>
+                            </label>
+                            <label class="radio-card flex items-center p-4 rounded-lg bg-white/10 border border-white/20 cursor-pointer transition-all duration-200">
+                                <input type="radio" name="learning_style" value="mixed" checked class="mr-3">
+                                <div>
+                                    <div class="text-white font-semibold">🎯 Mixed</div>
+                                    <div class="text-white/70 text-sm">Combination of all methods</div>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Difficulty Level -->
+                    <div>
+                        <label class="block text-white font-semibold mb-3">
+                            <i class="fas fa-chart-line mr-2"></i>Difficulty Level
+                        </label>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                             <label class="radio-card flex items-center p-4 rounded-lg bg-white/10 border border-white/20 cursor-pointer transition-all duration-200">
+                                 <input type="radio" name="difficulty" value="beginner" class="mr-3">
+                                 <div>
+                                     <div class="text-white font-semibold">🌱 Beginner</div>
+                                     <div class="text-white/70 text-sm">No prior knowledge required</div>
+                                 </div>
+                             </label>
+                             <label class="radio-card flex items-center p-4 rounded-lg bg-white/10 border border-white/20 cursor-pointer transition-all duration-200">
+                                 <input type="radio" name="difficulty" value="intermediate" checked class="mr-3">
+                                 <div>
+                                     <div class="text-white font-semibold">📈 Intermediate</div>
+                                     <div class="text-white/70 text-sm">Some prior knowledge helpful</div>
+                                 </div>
+                             </label>
+                             <label class="radio-card flex items-center p-4 rounded-lg bg-white/10 border border-white/20 cursor-pointer transition-all duration-200">
+                                 <input type="radio" name="difficulty" value="advanced" class="mr-3">
+                                 <div>
+                                     <div class="text-white font-semibold">🚀 Advanced</div>
+                                     <div class="text-white/70 text-sm">Strong foundation required</div>
+                                 </div>
+                             </label>
+                        </div>
+                    </div>
+
+                    <!-- Subject Area -->
+                    <div>
+                        <label for="subject" class="block text-white font-semibold mb-2">
+                            <i class="fas fa-book mr-2"></i>Subject Area (Optional)
+                        </label>
+                         <input type="text" id="subject" name="subject"
+                                placeholder="e.g., Programming, Languages, Academic, Certifications"
+                                class="input-field w-full px-4 py-3 rounded-lg bg-white/20 border border-white/30 text-white placeholder-white/60 focus:outline-none">
+                    </div>
+
+                    <!-- Plan Template -->
+                    <div>
+                        <label class="block text-white font-semibold mb-3">
+                            <i class="fas fa-file-alt mr-2"></i>Plan Template
+                        </label>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                             <label class="radio-card flex items-center p-4 rounded-lg bg-white/10 border border-white/20 cursor-pointer transition-all duration-200">
+                                 <input type="radio" name="template" value="basic" class="mr-3">
+                                 <div>
+                                     <div class="text-white font-semibold">📋 Basic</div>
+                                     <div class="text-white/70 text-sm">Simple weekly breakdown</div>
+                                 </div>
+                             </label>
+                             <label class="radio-card flex items-center p-4 rounded-lg bg-white/10 border border-white/20 cursor-pointer transition-all duration-200">
+                                 <input type="radio" name="template" value="detailed" checked class="mr-3">
+                                 <div>
+                                     <div class="text-white font-semibold">📊 Detailed</div>
+                                     <div class="text-white/70 text-sm">Comprehensive with tracking</div>
+                                 </div>
+                             </label>
+                             <label class="radio-card flex items-center p-4 rounded-lg bg-white/10 border border-white/20 cursor-pointer transition-all duration-200">
+                                 <input type="radio" name="template" value="intensive" class="mr-3">
+                                 <div>
+                                     <div class="text-white font-semibold">⚡ Intensive</div>
+                                     <div class="text-white/70 text-sm">Fast-paced learning</div>
+                                 </div>
+                             </label>
+                        </div>
+                    </div>
+
+                    <!-- Generate Button -->
+                     <div class="text-center pt-6">
+                         <button type="submit" id="generate-btn"
+                                 class="btn-primary text-white font-bold py-4 px-8 rounded-lg text-lg transform hover:scale-105 shadow-lg">
+                             <i class="fas fa-magic mr-2"></i>Generate Study Plan
+                         </button>
+                     </div>
+                </form>
+            </div>
+
+            <!-- Loading State -->
+            <div id="loading-state" class="hidden glass-card rounded-2xl p-8 mb-8 text-center">
+                <div class="pulse-animation">
+                    <i class="fas fa-brain text-6xl text-white mb-4"></i>
+                    <h3 class="text-2xl font-bold text-white mb-2">Generating Your Study Plan</h3>
+                    <p class="text-white/80 mb-4">Our AI is creating a personalized study plan just for you...</p>
+                     <div class="w-full bg-white/20 rounded-full h-2">
+                         <div class="h-2 rounded-full animate-pulse" style="width: 100%; background: linear-gradient(90deg, #ff6b6b 0%, #4ecdc4 100%);"></div>
+                     </div>
+                </div>
+            </div>
+
+            <!-- Study Plan Display -->
+            <div id="study-plan-display" class="hidden glass-card rounded-2xl p-8 mb-8">
+                <div class="flex items-center justify-between mb-6">
+                    <h3 class="text-2xl font-bold text-white">
+                        <i class="fas fa-graduation-cap mr-3"></i>Your Study Plan
+                    </h3>
+                     <div class="flex space-x-2">
+                         <button id="download-md" class="btn-success text-white px-4 py-2 rounded-lg font-semibold">
+                             <i class="fas fa-download mr-2"></i>Markdown
+                         </button>
+                         <button id="download-json" class="btn-secondary text-white px-4 py-2 rounded-lg font-semibold">
+                             <i class="fas fa-download mr-2"></i>JSON
+                         </button>
+                         <button id="download-pdf" class="btn-primary text-white px-4 py-2 rounded-lg font-semibold">
+                             <i class="fas fa-download mr-2"></i>PDF
+                         </button>
+                     </div>
+                </div>
+                
+                <div id="plan-content" class="prose prose-invert max-w-none">
+                    <!-- Plan content will be inserted here -->
+                </div>
+            </div>
+
+            <!-- Saved Plans Modal -->
+            <div id="plans-modal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+                <div class="glass-card rounded-2xl p-8 max-w-4xl w-full max-h-[80vh] overflow-y-auto">
+                    <div class="flex items-center justify-between mb-6">
+                        <h3 class="text-2xl font-bold text-white">
+                            <i class="fas fa-list mr-3"></i>Saved Study Plans
+                        </h3>
+                        <button id="close-plans-modal" class="text-white/60 hover:text-white text-2xl">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <div id="plans-list" class="space-y-4">
+                        <!-- Plans will be loaded here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Help Modal -->
+            <div id="help-modal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+                <div class="glass-card rounded-2xl p-8 max-w-4xl w-full max-h-[80vh] overflow-y-auto">
+                    <div class="flex items-center justify-between mb-6">
+                        <h3 class="text-2xl font-bold text-white">
+                            <i class="fas fa-question-circle mr-3"></i>Help & Usage Guide
+                        </h3>
+                        <button id="close-help-modal" class="text-white/60 hover:text-white text-2xl">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <div class="text-white space-y-6">
+                        <div>
+                            <h4 class="text-xl font-bold mb-3">🎯 Getting Started</h4>
+                            <ol class="list-decimal list-inside space-y-2 text-white/80">
+                                <li>Enter your study goal (be specific about what you want to learn)</li>
+                                <li>Set your time constraints (days available and hours per day)</li>
+                                <li>Choose your preferred learning style</li>
+                                <li>Select the appropriate difficulty level</li>
+                                <li>Optionally specify the subject area</li>
+                                <li>Choose a plan template</li>
+                                <li>Click "Generate Study Plan" and wait for AI to create your plan</li>
+                            </ol>
+                        </div>
+                        
+                        <div>
+                            <h4 class="text-xl font-bold mb-3">💡 Tips for Best Results</h4>
+                            <ul class="list-disc list-inside space-y-2 text-white/80">
+                                <li>Be specific about your study goal</li>
+                                <li>Set realistic time constraints</li>
+                                <li>Choose a learning style that matches your preferences</li>
+                                <li>Start with intermediate difficulty if unsure</li>
+                                <li>Save your plans in multiple formats for flexibility</li>
+                            </ul>
+                        </div>
+                        
+                        <div>
+                            <h4 class="text-xl font-bold mb-3">📋 Learning Styles</h4>
+                            <ul class="list-disc list-inside space-y-2 text-white/80">
+                                <li><strong>Reading:</strong> Learn through textbooks and written materials</li>
+                                <li><strong>Practice:</strong> Learn through hands-on exercises and projects</li>
+                                <li><strong>Videos:</strong> Learn through video tutorials and lectures</li>
+                                <li><strong>Mixed:</strong> Combination of all learning methods</li>
+                            </ul>
+                        </div>
+                        
+                        <div>
+                            <h4 class="text-xl font-bold mb-3">📊 Difficulty Levels</h4>
+                            <ul class="list-disc list-inside space-y-2 text-white/80">
+                                <li><strong>Beginner:</strong> No prior knowledge required</li>
+                                <li><strong>Intermediate:</strong> Some prior knowledge helpful</li>
+                                <li><strong>Advanced:</strong> Strong foundation required</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Toast Notifications -->
+    <div id="toast-container" class="fixed top-4 right-4 z-50 space-y-2">
+        <!-- Toast notifications will be inserted here -->
+    </div>
+
+    <script src="/static/js/app.js"></script>
+</body>
+</html>
