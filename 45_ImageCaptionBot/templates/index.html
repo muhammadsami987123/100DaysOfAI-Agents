@@ -1,0 +1,254 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ImageCaptionBot — Day 45 (Improved UI)</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --bg-1: #020617;
+      --bg-2: #0a1224;
+      --glass-1: rgba(255,255,255,0.03);
+      --muted: #9fb3d6;
+      --accent-from: #7c3aed;
+      --accent-to: #06b6d4;
+    }
+    html,body{height:100%}
+    body{
+      font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+      margin:0; padding:0; color:#e6eef8; background: radial-gradient(1200px 600px at 10% 10%, rgba(124,58,237,0.08), transparent 8%), radial-gradient(1000px 600px at 90% 90%, rgba(6,182,212,0.06), transparent 8%), linear-gradient(180deg,var(--bg-1) 0%, var(--bg-2) 60%, #0b1220 100%);
+      -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale;
+      overflow-y: scroll; /* Ensure scrolling is always available */
+    }
+    .shell{ max-width:1400px; margin:0 auto }
+    .glass{ background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01)); border: 1px solid rgba(255,255,255,0.04); backdrop-filter: blur(10px) saturate(140%); }
+    .dropzone{ border: 1px dashed rgba(255,255,255,0.08); min-height:200px; transition: .18s ease; }
+    .dropzone.dragover{ border-color: rgba(124,58,237,0.65); background: linear-gradient(90deg, rgba(124,58,237,0.06), rgba(6,182,212,0.04)); transform: translateY(-4px); box-shadow: 0 10px 30px rgba(2,6,23,0.6); }
+    .btn-prim{ background-image: linear-gradient(90deg,var(--accent-from), #5b21b6 60%, var(--accent-to)); box-shadow: 0 10px 30px rgba(124,58,237,0.12), inset 0 -2px 0 rgba(0,0,0,0.1); }
+    .chip{ background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.04); }
+    .chip.active{ background: rgba(124,58,237,0.24); border-color: rgba(124,58,237,0.6); }
+    .md-box{ background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); }
+
+    /* Custom components */
+    .faded{ color:var(--muted) }
+    .shadow-soft{ box-shadow: 0 8px 30px rgba(2,6,23,0.6) }
+
+    /* responsive image previews */
+    .preview-img{ width:100%; height:160px; object-fit:cover; border-radius:12px; display:block }
+    .badge{ font-size:11px; padding:4px 8px; border-radius:999px }
+
+    /* caption card */
+    .caption-card{ background:linear-gradient(180deg, rgba(255,255,255,0.015), rgba(255,255,255,0.01)); border:1px solid rgba(255,255,255,0.03); padding:12px; border-radius:12px }
+
+    /* small helpers */
+    .mono{ font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, monospace }
+
+    /* accessibility focus */
+    :focus{ outline: 3px solid rgba(99,102,241,0.14); outline-offset: 2px }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <header class="sticky top-0 z-40 glass"> <!-- Increased z-index to 40 -->
+    <div class="shell px-6 py-4 flex items-center justify-between">
+      <div class="flex items-center gap-4">
+        <div class="w-11 h-11 rounded-2xl bg-gradient-to-br from-[rgba(124,58,237,0.16)] to-[rgba(6,182,212,0.08)] flex items-center justify-center border border-[rgba(255,255,255,0.03)]">🖼️</div>
+        <div>
+          <div class="text-lg md:text-xl font-extrabold tracking-tight">ImageCaptionBot</div>
+          <div class="text-xs text-slate-400">Day 45 · GPT‑4 Vision · Improved UI</div>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-3">
+        <div class="hidden md:flex items-center gap-3 text-xs text-slate-400">
+          <div class="faded">Status</div>
+          <div id="status" class="px-3 py-1 rounded-full bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.03)] text-xs">Idle</div>
+        </div>
+        <div class="flex items-center gap-2">
+          <button id="openDocs" class="px-3 py-2 rounded-lg chip text-sm">Docs</button>
+          <button id="openExamples" class="px-3 py-2 rounded-lg chip text-sm">Examples</button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="min-h-screen px-6 py-8">
+    <section class="shell">
+      <div class="glass rounded-3xl p-6 md:p-8 shadow-soft">
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+          <!-- Left: Upload + Previews -->
+          <div class="lg:col-span-2 space-y-4">
+            <div id="dropzone" class="dropzone rounded-2xl flex items-center justify-center relative p-6">
+              <input id="imageFile" type="file" accept="image/*" class="absolute inset-0 opacity-0 cursor-pointer z-0" multiple /> <!-- Changed hidden to visually hidden but clickable -->
+              <div class="w-full flex flex-col md:flex-row items-center gap-6">
+                <div class="flex-1 text-center md:text-left">
+                  <div class="text-slate-200 font-semibold">Drag & drop up to 20 images</div>
+                  <div class="text-slate-400 text-sm mt-1">Supports JPG, PNG, WEBP — max 10MB per file</div>
+                  <div class="mt-4 flex items-center gap-3">
+                    <label for="imageFile" class="cursor-pointer inline-block px-4 py-2 rounded-full btn-prim text-sm font-semibold">Choose files</label>
+                    <button id="pasteUrlBtn" class="px-4 py-2 rounded-lg chip text-sm">Paste image URL</button>
+                    <button id="clearAllBtn" class="px-4 py-2 rounded-lg chip text-sm">Clear</button>
+                  </div>
+                </div>
+                <div class="w-full md:w-72 md:text-right">
+                  <div class="text-xs text-slate-400">Quick actions</div>
+                  <div class="mt-2 flex gap-2 justify-center md:justify-end">
+                    <button id="autoSelect" class="px-3 py-1 rounded-full chip text-xs">Auto-select best</button>
+                    <button id="balanceColors" class="px-3 py-1 rounded-full chip text-xs">Balance colors</button>
+                  </div>
+                </div>
+              </div>
+
+              <div id="dropOverlay" class="absolute inset-0 rounded-2xl pointer-events-none hidden"></div>
+            </div>
+
+            <div id="previewList" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 min-h-[100px] mt-4"></div> <!-- Added min-h-[100px] and mt-4 -->
+
+            <div class="mt-4 p-4 rounded-2xl md:flex md:items-center md:justify-between bg-[rgba(255,255,255,0.01)] border border-[rgba(255,255,255,0.03)]">
+              <div>
+                <div class="text-sm text-slate-200 font-medium">Selected image</div>
+                <div id="selectedInfo" class="text-xs faded mt-1"><span id="fileName">No image selected</span></div>
+              </div>
+              <div class="mt-3 md:mt-0 flex gap-2">
+                <button id="prevImg" class="px-3 py-2 rounded-lg chip text-sm">Prev</button>
+                <button id="nextImg" class="px-3 py-2 rounded-lg chip text-sm">Next</button>
+                <button id="zoomImg" class="px-3 py-2 rounded-lg chip text-sm">Zoom</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right: Controls + Output -->
+          <aside class="space-y-4 lg:col-span-2">
+            <div class="p-4 rounded-2xl bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.03)] sticky top-20 z-20"> <!-- Increased z-index for dropdowns/controls -->
+              <div class="flex items-center justify-between">
+                <div>
+                  <label class="text-xs text-slate-300 font-semibold">Language</label>
+                  <select id="language" class="w-full mt-2 p-2 rounded-lg bg-slate-800 text-slate-100">
+                    {% for lang in languages %}
+                    <option value="{{ lang.code }}">{{ lang.name }}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+                <div class="w-44 md:w-56 ml-4">
+                  <label class="text-xs text-slate-300 font-semibold">Tone</label>
+                  <select id="tone" class="w-full mt-2 p-2 rounded-lg bg-slate-800 text-slate-100">
+                    <option value="professional">Professional</option>
+                    <option value="funny">Funny</option>
+                    <option value="emotional">Emotional</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mt-4">
+                <div>
+                  <label class="text-xs text-slate-300 font-semibold">Style</label>
+                  <select id="style" class="w-full mt-2 p-2 rounded-lg bg-slate-800 text-slate-100">
+                    {% for st in styles %}
+                    <option value="{{ st.code }}">{{ st.name }}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+                <div>
+                  <label class="text-xs text-slate-300 font-semibold">Length</label>
+                  <select id="length" class="w-full mt-2 p-2 rounded-lg bg-slate-800 text-slate-100">
+                    <option value="short">Short (1–2 lines)</option>
+                    <option value="medium" selected>Medium (1 paragraph)</option>
+                    <option value="long">Long (detailed)</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="mt-4">
+                <label class="text-xs text-slate-300 font-semibold">Advanced options</label>
+                <div class="mt-2 grid grid-cols-2 gap-2">
+                  <label class="inline-flex items-center gap-2 text-sm"><input id="hashtags" type="checkbox" class="accent-indigo-400" /> Add hashtags</label>
+                  <label class="inline-flex items-center gap-2 text-sm"><input id="mention" type="checkbox" class="accent-indigo-400" /> Add mentions</label>
+                  <label class="inline-flex items-center gap-2 text-sm"><input id="emojis" type="checkbox" class="accent-indigo-400" /> Add emojis</label>
+                  <label class="inline-flex items-center gap-2 text-sm"><input id="includeAlt" type="checkbox" class="accent-indigo-400" /> Generate alt text</label>
+                </div>
+              </div>
+
+              <div class="mt-4 flex items-center gap-3">
+                <input id="promptOverride" type="text" placeholder="Custom prompt (optional)" class="flex-1 p-2 rounded-lg bg-slate-800 text-slate-100" />
+                <button id="generate" class="btn-prim px-4 py-2 rounded-xl text-sm font-semibold flex items-center gap-2">
+                  <span id="genSpinner" class="hidden h-4 w-4 border-2 border-white/40 border-t-white rounded-full animate-spin"></span>
+                  <span>✨ Generate Captions</span>
+                </button>
+              </div>
+
+              <div class="mt-4 text-xs faded">Variations: <input id="variations" type="range" min="1" max="30" value="10" class="align-middle" /> <span id="variationsCount" class="mono">10</span></div>
+
+              <div class="mt-4 text-right text-xs text-slate-400">Tip: You can select multiple images and generate captions in batch.</div>
+            </div>
+
+            
+
+            <div id="historyPanel" class="p-4 rounded-2xl bg-[rgba(255,255,255,0.01)] border border-[rgba(255,255,255,0.03)]">
+              <div class="flex items-center justify-between">
+                <div class="text-sm text-slate-200 font-medium">History</div>
+                <div class="text-xs text-slate-400">Recent generations</div>
+              </div>
+              <div id="historyList" class="mt-3 space-y-2 text-xs faded"></div>
+            </div>
+          </aside>
+        </div>
+
+        <!-- Output: full-width beneath main grid -->
+        <div class="mt-6 p-4 rounded-2xl bg-[rgba(255,255,255,0.01)] border border-[rgba(255,255,255,0.03)] space-y-3 z-10 relative"> <!-- Added z-10 and relative positioning -->
+          <div class="flex items-center justify-between">
+            <div class="text-sm text-slate-200 font-medium">Output</div>
+            <div class="text-xs text-slate-400">Ready</div>
+          </div>
+
+          <div class="flex flex-wrap gap-2">
+            <button id="filterAll" class="chip px-3 py-1 rounded-full text-xs active">All</button>
+            <button id="filterInstagram" class="chip px-3 py-1 rounded-full text-xs">Instagram</button>
+            <button id="filterLinkedin" class="chip px-3 py-1 rounded-full text-xs">LinkedIn</button>
+            <button id="filterFacebook" class="chip px-3 py-1 rounded-full text-xs">Facebook</button>
+            <button id="filterTwitter" class="chip px-3 py-1 rounded-full text-xs">X / Twitter</button>
+            <button id="filterWhatsapp" class="chip px-3 py-1 rounded-full text-xs">WhatsApp</button>
+            <button id="filterTiktok" class="chip px-3 py-1 rounded-full text-xs">TikTok</button>
+          </div>
+
+          <div id="resultsWrap" class="mt-4 space-y-4"></div>
+
+          <div class="flex gap-2">
+            <button id="saveAllTxt" class="px-3 py-2 rounded-lg bg-white/10 text-sm">All .txt</button>
+            <button id="saveAllJson" class="px-3 py-2 rounded-lg bg-white/10 text-sm">All .json</button>
+            <button id="saveAllMd" class="px-3 py-2 rounded-lg bg-white/10 text-sm">All .md</button>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Toast host -->
+  <div id="toastHost" class="fixed top-4 right-4 z-50 space-y-2"></div>
+
+  <!-- Image modal (hidden) -->
+  <div id="imageModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/60">
+    <div class="max-w-4xl w-full p-6">
+      <div class="bg-[rgba(255,255,255,0.02)] p-4 rounded-2xl border border-[rgba(255,255,255,0.03)]">
+        <div class="flex items-start justify-between gap-4">
+          <div class="flex-1">
+            <img id="modalImg" src="" alt="preview" class="w-full rounded-lg" />
+            <div id="modalMeta" class="mt-2 text-xs faded"></div>
+          </div>
+          <div class="w-48 flex-shrink-0 flex flex-col gap-2">
+            <button id="copyAlt" class="px-3 py-2 rounded-lg chip">Copy Alt Text</button>
+            <button id="regenerateSingle" class="px-3 py-2 rounded-lg btn-prim text-sm">Regenerate</button>
+            <button id="closeModal" class="px-3 py-2 rounded-lg chip">Close</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="/static/js/app.js"></script>
+
+</body>
+</html>
