@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Text Analyzer Agent</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/output.css') }}" rel="stylesheet">
+</head>
+<body class="bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200 font-inter antialiased flex justify-center items-start min-h-screen p-5 transition-colors duration-500">
+    <div class="bg-white dark:bg-gray-800 p-8 rounded-lg shadow-xl w-full max-w-2xl animate-fade-in transition-colors duration-500">
+        <div class="flex justify-between items-center mb-6">
+            <h1 class="text-3xl font-bold text-blue-700 dark:text-blue-400 text-center flex-grow">Text Analyzer Agent</h1>
+            <button id="themeToggle" class="p-2 rounded-full bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors duration-300">
+                <svg id="lightIcon" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h1M3 12H2m15.394 6.606l-.707-.707M6.313 6.313l-.707-.707m12.728 0l-.707.707M6.313 17.687l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+                </svg>
+                <svg id="darkIcon" class="h-6 w-6 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                </svg>
+            </button>
+        </div>
+        <div class="relative mb-5">
+            <textarea id="inputText" class="block w-full p-4 pt-6 text-lg bg-gray-50 dark:bg-gray-700 rounded-lg border border-gray-300 dark:border-gray-600 appearance-none focus:outline-none focus:ring-0 focus:border-blue-500 dark:focus:border-blue-400 peer resize-y min-h-[150px] transition duration-300 ease-in-out" placeholder=" "></textarea>
+            <label for="inputText" class="absolute text-lg text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-4 scale-75 top-4 z-10 origin-[0] left-4 peer-focus:text-blue-600 peer-focus:dark:text-blue-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-4">
+                Enter text here to analyze its tone and sentiment...
+            </label>
+        </div>
+        <button id="analyzeButton" class="bg-blue-600 text-white py-3 px-6 rounded-lg text-lg cursor-pointer w-full transition duration-300 ease-in-out hover:bg-blue-700 hover:shadow-lg active:translate-y-0.5">
+            Analyze Text
+        </button>
+        
+        <div id="statusIndicator" class="text-center mt-4 text-lg font-medium text-gray-700 dark:text-gray-300 transition-colors duration-500">Ready to analyze</div>
+
+        <div id="loadingIndicator" class="text-center mt-5 text-2xl text-blue-600 dark:text-blue-400 flex justify-center items-center hidden">
+            <svg class="animate-spin -ml-1 mr-3 h-8 w-8 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            Analyzing...
+        </div>
+
+        <div id="resultContainer" class="bg-gray-50 dark:bg-gray-700 p-6 rounded-lg mt-6 break-words whitespace-pre-wrap leading-relaxed text-gray-800 dark:text-gray-100 border border-gray-200 dark:border-gray-600 min-h-[100px] flex flex-col justify-center items-center text-center text-lg animate-slide-in-up hidden transition-colors duration-500">
+            <h2 class="text-2xl font-semibold text-blue-600 dark:text-blue-400 mb-4">Analysis Result:</h2>
+            <div id="summary" class="bg-gray-100 dark:bg-gray-800 p-3 pl-5 border-l-4 border-blue-500 dark:border-blue-400 mb-3 rounded-md text-left w-full transition-colors duration-500"></div>
+            <div id="tone" class="bg-gray-100 dark:bg-gray-800 p-3 pl-5 border-l-4 border-blue-500 dark:border-blue-400 mb-3 rounded-md text-left w-full transition-colors duration-500"></div>
+            <div id="sentiment" class="bg-gray-100 dark:bg-gray-800 p-3 pl-5 border-l-4 border-blue-500 dark:border-blue-400 mb-3 rounded-md text-left w-full transition-colors duration-500"></div>
+        </div>
+    </div>
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>

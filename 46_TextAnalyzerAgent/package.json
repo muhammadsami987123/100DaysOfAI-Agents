@@ -1,0 +1,22 @@
+{
+  "name": "text-analyzer-agent-ui",
+  "version": "1.0.0",
+  "description": "Frontend assets for the Text Analyzer Agent",
+  "main": "index.js",
+  "scripts": {
+    "dev": "tailwindcss -i ./static/css/input.css -o ./static/css/output.css --watch",
+    "build": "tailwindcss -i ./static/css/input.css -o ./static/css/output.css --minify"
+  },
+  "keywords": [
+    "tailwind",
+    "css",
+    "flask"
+  ],
+  "author": "Your Name",
+  "license": "MIT",
+  "devDependencies": {
+    "autoprefixer": "^10.4.19",
+    "postcss": "^8.4.38",
+    "tailwindcss": "^3.4.4"
+  }
+}
