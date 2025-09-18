@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AIFlashcardMaker</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 font-sans leading-normal tracking-normal">
+    <div class="container mx-auto p-4">
+        <h1 class="text-4xl font-bold text-center text-gray-800 mb-8">AIFlashcardMaker</h1>
+
+        <div class="bg-white shadow-md rounded-lg p-6 mb-8">
+            <h2 class="text-2xl font-semibold text-gray-700 mb-4">Input Panel</h2>
+            <form id="generate-form" enctype="multipart/form-data">
+                <div class="mb-4">
+                    <label for="text_input" class="block text-gray-700 text-sm font-bold mb-2">Paste Raw Notes or Text:</label>
+                    <textarea id="text_input" name="text_input" rows="10" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"></textarea>
+                </div>
+                <div class="mb-4">
+                    <label for="file" class="block text-gray-700 text-sm font-bold mb-2">Upload PDF or Text File:</label>
+                    <input type="file" id="file" name="file" accept=".pdf,.txt" class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                    <div>
+                        <label for="num_flashcards" class="block text-gray-700 text-sm font-bold mb-2">Number of Flashcards:</label>
+                        <input type="number" id="num_flashcards" name="num_flashcards" value="5" min="1" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                    </div>
+                    <div>
+                        <label for="difficulty" class="block text-gray-700 text-sm font-bold mb-2">Difficulty:</label>
+                        <select id="difficulty" name="difficulty" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                            <option value="Easy">Easy</option>
+                            <option value="Medium" selected>Medium</option>
+                            <option value="Advanced">Advanced</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="subject" class="block text-gray-700 text-sm font-bold mb-2">Subject Context:</label>
+                        <input type="text" id="subject" name="subject" placeholder="e.g., Biology" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                    </div>
+                </div>
+                <div class="mb-4">
+                    <label for="language" class="block text-gray-700 text-sm font-bold mb-2">Language:</label>
+                    <select id="language" name="language" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                        <option value="English" selected>English</option>
+                        <option value="Urdu">Urdu</option>
+                        <option value="Hindi">Hindi</option>
+                    </select>
+                </div>
+                <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
+                    Generate Flashcards
+                </button>
+            </form>
+        </div>
+
+        <div class="bg-white shadow-md rounded-lg p-6">
+            <h2 class="text-2xl font-semibold text-gray-700 mb-4">Output Panel</h2>
+            <div id="flashcards-output" class="min-h-[200px] bg-gray-50 p-4 rounded-md">
+                <p class="text-gray-500">Flashcards will appear here...</p>
+            </div>
+            <div class="mt-4 flex space-x-2">
+                <button id="download-markdown" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">Download Markdown</button>
+                <button id="download-json" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">Download JSON</button>
+                <button id="download-csv" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">Download CSV</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>
