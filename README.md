@@ -86,7 +86,7 @@ Build 100 useful, functional, and diverse AI agents in 100 days. Each agent will
 | 46  | TextAnalyzerAgent      | Analyze tone/sentiment of text                                  |
 | 47  | AIFlashcardMaker       | Convert notes to flashcards                                     |
 | 48  | HTMLHelperBot          | Explain or generate HTML code                                   |
-| 49  | LangChainStarter       | Simple multi-tool LangChain agent                               |
+| 49  | TSHelperBot            | Assist developers in writing, explaining, debugging, and refactoring JavaScript/TypeScript code in real time via the terminalt              |
 | 50  | AutoTyperAgent         | Type phrases on keyboard via voice                              |
 | 51  | AIComicWriter          | Write a comic script                                            |
 | 52  | SubtitleGeneratorBot   | Create subtitles from video/audio                               |
