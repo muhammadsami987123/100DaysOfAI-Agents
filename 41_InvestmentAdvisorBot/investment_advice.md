@@ -1,33 +1,35 @@
 ## Financial Summary
-At 30 years old, you have a great opportunity to start investing for retirement. With a monthly income of $2,500 and a medium risk tolerance, it's important to build a balanced portfolio that can grow over time while managing potential risks.
+At 29 years old with an income of $1,500 per month, you're in a great position to start planning for retirement. With a medium risk tolerance, you can balance growth potential with some stability in your investment strategy. 
 
 ## Investment Plan
-To work towards your retirement goal, consider allocating a portion of your monthly income towards investments. A suggested savings rate could be around 15% of your income, which would be $375 per month. This will allow you to gradually build your retirement fund. 
+To prepare for retirement, it's advisable to save a percentage of your income regularly. Given your medium risk profile, a balanced approach will help grow your savings while managing potential losses.
+
+### Suggested Savings Rate
+- Aim to save around 15% of your income monthly. This equates to $225 per month.
+
+### Investment Horizon
+- With retirement likely several decades away, you have time to ride out market fluctuations.
 
 ## Diversification Strategy
-A diversified investment portfolio can help reduce risk while allowing for growth. Here’s a simple allocation strategy based on your medium risk tolerance:
+Diversifying your investments can reduce risk. A simple allocation plan might include:
 
-- **Stocks (Equities)**: 60%
-  - Focus on a mix of large-cap, mid-cap, and international stocks for growth potential.
-  
-- **Bonds (Fixed Income)**: 30%
-  - Include a mix of government and corporate bonds to provide stability.
-  
-- **Real Estate Investment Trusts (REITs)**: 10%
-  - These can provide exposure to real estate markets without needing to own physical properties.
+- **Stocks (50%)**: Focus on a mix of U.S. and international stocks for growth.
+- **Bonds (30%)**: Invest in a mix of government and corporate bonds for stability.
+- **Real Estate (10%)**: Consider a Real Estate Investment Trust (REIT) for exposure to property markets.
+- **Cash or Cash Equivalents (10%)**: Keep a small portion in savings or money market accounts for liquidity.
 
 ## Recommendations
-1. **Start Saving**: Aim to set aside $375 each month. Automate your savings to make it easier.
-2. **Open an Investment Account**: Choose a brokerage that offers low fees and a user-friendly platform.
-3. **Invest in Index Funds or ETFs**: These funds provide instant diversification and are usually lower in cost compared to actively managed funds.
-4. **Review Annually**: Reassess your investment strategy and adjust your allocation based on performance and changes in your financial situation.
+1. **Open a Retirement Account**: Consider an IRA or 401(k) to take advantage of tax benefits.
+2. **Automate Savings**: Set up automatic transfers to your investment accounts to ensure you save consistently.
+3. **Review Regularly**: Check your investment performance annually and adjust your allocations as needed.
 
 ```json
 {
   "allocation": {
-    "Stocks": 60,
+    "Stocks": 50,
     "Bonds": 30,
-    "REITs": 10
+    "Real Estate": 10,
+    "Cash": 10
   }
 }
 ```
