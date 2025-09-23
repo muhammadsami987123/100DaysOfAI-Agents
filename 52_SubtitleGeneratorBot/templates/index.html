@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1" />
+	<title>SubtitleGeneratorBot</title>
+	<script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-50 min-h-screen">
+	<main class="max-w-4xl mx-auto p-6 space-y-6">
+		<header>
+			<h1 class="text-2xl font-bold text-slate-900">SubtitleGeneratorBot</h1>
+			<p class="text-slate-600">Generate accurate, editable subtitles from audio/video or URLs.</p>
+		</header>
+
+		<section class="rounded-xl border bg-white p-5 shadow-sm">
+			<form id="form" class="space-y-4" enctype="multipart/form-data">
+				<div class="grid md:grid-cols-2 gap-4">
+					<div>
+						<label class="block text-sm font-medium text-slate-700">Upload File</label>
+						<input type="file" name="file" accept=".mp4,.mp3,.wav,.mov" class="mt-1 block w-full" />
+						<p class="text-xs text-slate-500 mt-1">MP4, MP3, WAV, MOV</p>
+					</div>
+					<div>
+						<label class="block text-sm font-medium text-slate-700">Or Media URL</label>
+						<input type="url" name="media_url" placeholder="https://..." class="mt-1 block w-full border rounded-md p-2" />
+					</div>
+				</div>
+
+				<div class="grid md:grid-cols-3 gap-4">
+					<div>
+						<label class="block text-sm font-medium text-slate-700">Source Language</label>
+						<select name="source_lang" class="mt-1 block w-full border rounded-md p-2">
+							<option value="en">English</option>
+							<option value="ur">Urdu</option>
+							<option value="hi">Hindi</option>
+						</select>
+					</div>
+					<div>
+						<label class="block text-sm font-medium text-slate-700">Output Format</label>
+						<select name="fmt" class="mt-1 block w-full border rounded-md p-2">
+							<option value="srt">SRT</option>
+							<option value="vtt">VTT</option>
+							<option value="txt">TXT</option>
+						</select>
+					</div>
+					<div class="flex items-end gap-4">
+						<label class="inline-flex items-center gap-2 text-sm text-slate-700">
+							<input type="checkbox" name="auto_sync" checked /> Auto-sync
+						</label>
+						<label class="inline-flex items-center gap-2 text-sm text-slate-700">
+							<input type="checkbox" name="speaker_labels" /> Speaker labels
+						</label>
+					</div>
+				</div>
+
+				<div class="grid md:grid-cols-2 gap-4">
+					<div>
+						<label class="block text-sm font-medium text-slate-700">Translate To (optional)</label>
+						<input type="text" name="translate" placeholder="e.g., es, fr" class="mt-1 block w-full border rounded-md p-2" />
+					</div>
+				</div>
+
+				<button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-md">Generate</button>
+				<span id="status" class="ml-3 text-sm text-slate-600"></span>
+			</form>
+		</section>
+
+		<section id="results" class="hidden rounded-xl border bg-white p-5 shadow-sm">
+			<h2 class="text-lg font-semibold text-slate-900">Subtitle Files</h2>
+			<div class="mt-3 flex gap-3">
+				<a id="dl-srt" class="px-3 py-2 bg-slate-800 text-white rounded-md" href="#" download>Download SRT</a>
+				<a id="dl-vtt" class="px-3 py-2 bg-slate-800 text-white rounded-md" href="#" download>Download VTT</a>
+				<a id="dl-txt" class="px-3 py-2 bg-slate-800 text-white rounded-md" href="#" download>Download TXT</a>
+			</div>
+			<p class="mt-3 text-sm text-slate-600">Open SRT/VTT in your editor to refine. Inline editing preview is planned.</p>
+		</section>
+	</main>
+	<script src="/static/js/app.js"></script>
+</body>
+</html>
