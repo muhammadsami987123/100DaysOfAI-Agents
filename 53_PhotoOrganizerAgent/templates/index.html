@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PhotoOrganizerAgent</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2.0.6/css/pico.min.css">
+    <style>
+        body { background: #f8fafc; }
+        main { max-width: 500px; margin: 2rem auto; background: #fff; border-radius: 1rem; box-shadow: 0 2px 8px #0001; padding: 2rem; }
+        .result { background: #e9fbe5; color: #1a7f37; border-radius: 0.5rem; padding: 1rem; margin-top: 1rem; }
+        .error { background: #ffeaea; color: #c0392b; border-radius: 0.5rem; padding: 1rem; margin-top: 1rem; }
+        #loading { display: none; text-align: center; margin-top: 1rem; }
+    </style>
+    <script src="/static/script.js"></script>
+</head>
+<body>
+<main>
+    <h2>📸 Photo Organizer Agent</h2>
+    <form method="post" action="/organize">
+        <label for="folder">Photo Folder Path</label>
+        <input type="text" id="folder" name="folder" placeholder="e.g. D:/Photos" required>
+        <label>Organize by</label>
+        <select name="mode">
+            <option value="face">Face (mocked)</option>
+            <option value="location">Location (mocked)</option>
+        </select>
+        <button type="submit">Organize Photos</button>
+    </form>
+    <div id="loading">
+        <progress></progress>
+        <p>Organizing photos, please wait...</p>
+    </div>
+    {% if result %}
+        {% if 'Error:' in result %}
+        <div class="error">
+            {{ result|safe }}
+        </div>
+        {% else %}
+        <div class="result">
+            {{ result|safe }}
+        </div>
+        {% endif %}
+    {% endif %}
+</main>
+</body>
+</html>
