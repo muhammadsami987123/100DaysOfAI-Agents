@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>URL Shortener Bot</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="theme-switch">
+        <label for="themeToggle">Dark Mode</label>
+        <input type="checkbox" id="themeToggle">
+    </div>
+
+    <div class="container">
+        <h1>URL Shortener Bot</h1>
+        <form id="shortenForm">
+            <div class="form-group">
+                <label for="longUrl">Long URL:</label>
+                <input type="text" id="longUrl" name="long_url" placeholder="Enter your long URL here" required autocomplete="off">
+            </div>
+            <div class="form-group">
+                <label for="alias">Custom Alias (Optional):</label>
+                <input type="text" id="alias" name="alias" placeholder="e.g., my-awesome-link" autocomplete="off">
+            </div>
+            
+            <div class="options">
+                <div class="option-group">
+                    <input type="checkbox" id="copyToClipboard" name="copy_to_clipboard">
+                    <label for="copyToClipboard">Copy to Clipboard</label>
+                </div>
+                <div class="option-group">
+                    <input type="checkbox" id="generateQr" name="generate_qr">
+                    <label for="generateQr">Generate QR Code</label>
+                </div>
+                <!-- <div class="option-group">
+                    <input type="checkbox" id="trackUsage" name="track_usage" disabled>
+                    <label for="trackUsage">Track Usage (Pro Feature)</label>
+                </div> -->
+            </div>
+
+            <button type="submit">Shorten URL</button>
+            <div id="loadingSpinner" class="loading-spinner"></div>
+        </form>
+
+        <div id="message" class="message"></div>
+
+        <div id="resultSection" class="result-section">
+            <h2>Result:</h2>
+            <div class="result-item">
+                <strong>Short Link:</strong>
+                <p id="shortLinkOutput"></p>
+            </div>
+            <div class="result-item">
+                <strong>QR Code:</strong>
+                <img id="qrCodeImage" src="" alt="QR Code" style="display: none;">
+            </div>
+        </div>
+
+        <div class="lang-selector">
+            <label for="langSelector">Language:</label>
+            <select id="langSelector">
+                {% for lang in languages %}
+                <option value="{{ lang }}" {% if lang == config.DEFAULT_LANGUAGE %}selected{% endif %}>{{ lang.upper() }}</option>
+                {% endfor %}
+            </select>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>

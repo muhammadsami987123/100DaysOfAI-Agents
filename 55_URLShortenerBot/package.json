@@ -1,0 +1,17 @@
+{
+  "name": "55_urlshortenerbot",
+  "version": "1.0.0",
+  "description": "URLShortenerBot is an intelligent assistant designed to shorten long URLs via public shortening APIs (like Bitly, TinyURL, or shrtco.de). It provides a clean, trackable short link, with optional features like custom aliases, QR code generation, and clipboard integration.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "autoprefixer": "^10.4.21",
+    "postcss": "^8.5.6",
+    "tailwindcss": "^4.1.13"
+  }
+}
