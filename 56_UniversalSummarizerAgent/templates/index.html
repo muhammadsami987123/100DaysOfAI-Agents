@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Universal Summarizer Agent</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <style>
+        /* Base variables for light mode */
+        :root {
+            --primary-color: #5b21b6; /* Deep Violet */
+            --primary-hover-color: #6d28d9;
+            --secondary-color: #8b5cf6; /* Medium Violet */
+            --accent-color: #c4b5fd; /* Light Violet */
+            --bg-color: #f3f4f6; /* Light Gray */
+            --text-color: #1f2937; /* Dark Gray */
+            --card-bg: #ffffff; /* White */
+            --border-color: #e5e7eb; /* Light Border */
+            --input-bg: #f9fafb; /* Lighter Input Background */
+            --summary-bg: #f9fafb; /* Lighter Summary Background */
+            --shadow-color: rgba(0, 0, 0, 0.08);
+            --glass-shadow: rgba(0, 0, 0, 0.1);
+            --glass-border: rgba(255, 255, 255, 0.2);
+            --backdrop-filter: blur(10px);
+            --scrollbar-thumb: #9ca3af;
+            --scrollbar-track: #e0e0e0;
+        }
+
+        /* Dark mode variables */
+        [data-theme="dark"] {
+            --primary-color: #8b5cf6; /* Medium Violet */
+            --primary-hover-color: #a78bfa;
+            --secondary-color: #a78bfa; /* Lighter Violet */
+            --accent-color: #c4b5fd; /* Even Lighter Violet */
+            --bg-color: #111827; /* Dark Blue-Gray */
+            --text-color: #e5e7eb; /* Light Gray */
+            --card-bg: rgba(31, 41, 55, 0.7); /* Translucent Dark Card */
+            --border-color: #374151; /* Darker Border */
+            --input-bg: #1f2937; /* Darker Input Background */
+            --summary-bg: #1f2937; /* Darker Summary Background */
+            --shadow-color: rgba(0, 0, 0, 0.4);
+            --glass-shadow: rgba(0, 0, 0, 0.3);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --backdrop-filter: blur(15px) brightness(0.8);
+            --scrollbar-thumb: #6b7280;
+            --scrollbar-track: #2a3340;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            transition: background-color 0.6s ease, color 0.6s ease;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            margin: 0;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1000px;
+            width: 100%;
+            background-color: var(--card-bg);
+            padding: 50px;
+            border-radius: 25px;
+            box-shadow: 0 15px 60px var(--shadow-color);
+            transition: background-color 0.6s ease, box-shadow 0.6s ease;
+            margin: 40px auto;
+            backdrop-filter: var(--backdrop-filter);
+            border: 1px solid var(--glass-border);
+        }
+
+        h1 {
+            color: var(--primary-color);
+            text-align: center;
+            margin-bottom: 55px;
+            font-weight: 800;
+            font-size: 3.5em;
+            letter-spacing: -1.5px;
+            animation: fadeInScale 1s ease-out forwards;
+            opacity: 0;
+            text-shadow: 3px 3px 6px var(--glass-shadow);
+        }
+
+        @keyframes fadeInScale {
+            from { opacity: 0; transform: translateY(-40px) scale(0.95); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        .form-label {
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: var(--text-color);
+            font-size: 1.1em;
+        }
+
+        .form-control,
+        .form-select {
+            background-color: var(--input-bg);
+            color: var(--text-color);
+            border: 1px solid var(--border-color);
+            border-radius: 15px;
+            padding: 16px 22px;
+            font-size: 1.05em;
+            transition: all 0.4s ease;
+        }
+
+        .form-control::placeholder {
+            color: var(--text-color);
+            opacity: 0.7;
+        }
+
+        .form-control:focus,
+        .form-select:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.25rem var(--accent-color);
+            background-color: var(--card-bg);
+            transform: translateY(-3px);
+        }
+
+        textarea {
+            min-height: 250px;
+            resize: vertical;
+        }
+
+        .btn-primary {
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+            border: none;
+            padding: 18px 35px;
+            border-radius: 15px;
+            font-weight: 700;
+            font-size: 1.2em;
+            transition: all 0.4s ease;
+            box-shadow: 0 6px 20px var(--shadow-color);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-5px) scale(1.03);
+            box-shadow: 0 8px 30px var(--shadow-color);
+            opacity: 0.98;
+        }
+
+        .btn-secondary {
+            background-color: #6b7280; /* Gray-600 */
+            border-color: #6b7280;
+            padding: 15px 30px;
+            border-radius: 15px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-secondary:hover {
+            background-color: #4b5563; /* Gray-700 */
+            border-color: #4b5563;
+            transform: translateY(-2px);
+        }
+
+        #loadingSpinner {
+            display: none;
+            text-align: center;
+            margin-top: 50px;
+            color: var(--primary-color);
+            animation: pulse 1.8s infinite ease-in-out;
+        }
+
+        .spinner-border {
+            width: 4.5rem;
+            height: 4.5rem;
+            border-width: .5em;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.1); opacity: 0.8; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .summary-output {
+            background-color: var(--summary-bg);
+            padding: 35px;
+            border-radius: 18px;
+            min-height: 250px;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            font-size: 1.1em;
+            line-height: 1.9;
+            border: 1px solid var(--border-color);
+            transition: background-color 0.6s ease, color 0.6s ease, border-color 0.6s ease;
+            margin-top: 40px;
+            box-shadow: inset 0 3px 15px var(--glass-shadow);
+        }
+
+        .dark-mode-toggle {
+            position: fixed;
+            top: 35px;
+            right: 35px;
+            cursor: pointer;
+            font-size: 2.5em;
+            color: var(--text-color);
+            z-index: 1000;
+            transition: color 0.4s ease, transform 0.3s ease;
+        }
+
+        .dark-mode-toggle:hover {
+            color: var(--primary-color);
+            transform: rotate(20deg) scale(1.2);
+        }
+
+        /* Custom scrollbar for webkit browsers */
+        ::-webkit-scrollbar {
+            width: 12px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--scrollbar-track);
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--scrollbar-thumb);
+            border-radius: 10px;
+            border: 3px solid var(--scrollbar-track);
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--primary-color);
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .container {
+                padding: 30px;
+                margin: 20px auto;
+            }
+            h1 {
+                font-size: 2.5em;
+                margin-bottom: 40px;
+            }
+            .form-control, .form-select, .btn {
+                padding: 12px 18px;
+                font-size: 1em;
+            }
+            textarea {
+                min-height: 180px;
+            }
+            .dark-mode-toggle {
+                font-size: 2em;
+                top: 25px;
+                right: 25px;
+            }
+            .summary-output {
+                padding: 25px;
+                min-height: 180px;
+                font-size: 1em;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .container {
+                padding: 20px;
+                margin: 15px auto;
+            }
+            h1 {
+                font-size: 2em;
+                margin-bottom: 30px;
+            }
+            .form-label {
+                font-size: 0.95em;
+            }
+            .form-control, .form-select, .btn {
+                padding: 10px 15px;
+                font-size: 0.95em;
+            }
+            .btn-primary {
+                font-size: 1em;
+            }
+            .dark-mode-toggle {
+                font-size: 1.8em;
+                top: 20px;
+                right: 20px;
+            }
+            .summary-output {
+                padding: 20px;
+                min-height: 150px;
+                font-size: 0.95em;
+            }
+            .d-flex.justify-content-end button {
+                width: 100%;
+                margin-bottom: 10px;
+            }
+            .d-flex.justify-content-end button:last-child {
+                margin-bottom: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="dark-mode-toggle" onclick="toggleDarkMode()">
+        <i class="fas fa-sun"></i>
+    </div>
+    <div class="container">
+        <h1>Universal Summarizer Agent</h1>
+        <form id="summarizeForm" onsubmit="event.preventDefault(); summarizeContent();">
+            <div class="mb-4">
+                <label for="contentType" class="form-label">Content Type</label>
+                <select class="form-select" id="contentType" onchange="toggleInputFields()">
+                    {% for type in content_types %}
+                    <option value="{{ type }}">{{ type | title }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="mb-4" id="textInputGroup">
+                <label for="text_content" class="form-label">Paste Text Content</label>
+                <textarea class="form-control" id="text_content" rows="10" placeholder="Paste your text content here..."></textarea>
+            </div>
+
+            <div class="mb-4" id="urlInputGroup" style="display: none;">
+                <label for="url_content" class="form-label">Enter URL</label>
+                <input type="url" class="form-control" id="url_content" placeholder="e.g., https://example.com/article">
+            </div>
+
+            <div class="mb-4" id="fileInputGroup" style="display: none;">
+                <label for="file_content" class="form-label">Upload File (.pdf, .docx, .txt)</label>
+                <input type="file" class="form-control-file" id="file_content">
+            </div>
+
+            <div class="mb-4">
+                <label for="summaryFormat" class="form-label">Summary Format</label>
+                <select class="form-select" id="summaryFormat">
+                    {% for key, value in formats.items() %}
+                    <option value="{{ key }}">{{ key }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="mb-5">
+                <label for="languageSelect" class="form-label">Language</label>
+                <select class="form-select" id="languageSelect">
+                    {% for key, value in languages.items() %}
+                    <option value="{{ key }}">{{ key }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <button type="submit" class="btn btn-primary btn-block">Summarize Content</button>
+        </form>
+
+        <div id="loadingSpinner" class="mt-5">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <p class="mt-3 fw-bold">Summarizing, please wait...</p>
+        </div>
+
+        <h2 class="mt-5 mb-4 text-center text-primary">Summary Output</h2>
+        <div class="summary-output" id="summaryOutput"></div>
+        <div class="mt-4 d-flex flex-column flex-md-row justify-content-end">
+            <button class="btn btn-secondary me-md-2 mb-2 mb-md-0" onclick="downloadSummary('pdf')"><i class="fas fa-file-pdf me-2"></i>Download as PDF</button>
+            <button class="btn btn-secondary" onclick="downloadSummary('txt')"><i class="fas fa-file-alt me-2"></i>Download as TXT</button>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function toggleInputFields() {
+            const contentType = document.getElementById('contentType').value;
+            document.getElementById('textInputGroup').style.display = 'none';
+            document.getElementById('urlInputGroup').style.display = 'none';
+            document.getElementById('fileInputGroup').style.display = 'none';
+
+            if (contentType === 'text') {
+                document.getElementById('textInputGroup').style.display = 'block';
+            } else if (contentType === 'url') {
+                document.getElementById('urlInputGroup').style.display = 'block';
+            } else if (contentType === 'pdf' || contentType === 'docx' || contentType === 'txt') {
+                document.getElementById('fileInputGroup').style.display = 'block';
+            }
+        }
+
+        function toggleDarkMode() {
+            const body = document.body;
+            const currentTheme = body.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            body.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            updateDarkModeIcon(newTheme);
+        }
+
+        function updateDarkModeIcon(theme) {
+            const icon = document.querySelector('.dark-mode-toggle i');
+            if (theme === 'dark') {
+                icon.classList.remove('fa-sun');
+                icon.classList.add('fa-moon');
+            } else {
+                icon.classList.remove('fa-moon');
+                icon.classList.add('fa-sun');
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            document.body.setAttribute('data-theme', savedTheme);
+            updateDarkModeIcon(savedTheme);
+            toggleInputFields();
+        });
+
+        async function summarizeContent() {
+            const contentType = document.getElementById('contentType').value;
+            const summaryFormat = document.getElementById('summaryFormat').value;
+            const language = document.getElementById('languageSelect').value;
+            const loadingSpinner = document.getElementById('loadingSpinner');
+            const summaryOutput = document.getElementById('summaryOutput');
+            
+            const formData = new FormData();
+            formData.append('content_type', contentType);
+            formData.append('summary_format', summaryFormat);
+            formData.append('language', language);
+
+            if (contentType === 'text') {
+                const textContent = document.getElementById('text_content').value;
+                if (!textContent) {
+                    summaryOutput.innerText = "Please paste text content to summarize.";
+                    return;
+                }
+                formData.append('text_content', textContent);
+            } else if (contentType === 'url') {
+                const urlContent = document.getElementById('url_content').value;
+                if (!urlContent) {
+                    summaryOutput.innerText = "Please enter a URL to summarize.";
+                    return;
+                }
+                formData.append('url_content', urlContent);
+            } else if (contentType === 'pdf' || contentType === 'docx' || contentType === 'txt') {
+                const fileContent = document.getElementById('file_content').files[0];
+                if (!fileContent) {
+                    summaryOutput.innerText = "Please upload a file to summarize.";
+                    return;
+                }
+                formData.append('file_content', fileContent);
+            } else {
+                summaryOutput.innerText = "Invalid content type selected.";
+                return;
+            }
+
+            loadingSpinner.style.display = 'block';
+            summaryOutput.innerText = '';
+
+            try {
+                const response = await fetch('/summarize', {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await response.json();
+                if (response.ok) {
+                    summaryOutput.innerText = data.summary;
+                } else {
+                    summaryOutput.innerText = `Error: ${data.error}`;
+                }
+            } catch (error) {
+                summaryOutput.innerText = `Network error: ${error}`;
+            } finally {
+                loadingSpinner.style.display = 'none';
+            }
+        }
+
+        async function downloadSummary(format) {
+            const summaryText = document.getElementById('summaryOutput').innerText;
+            if (!summaryText) {
+                alert("No summary to download.");
+                return;
+            }
+
+            try {
+                const response = await fetch('/download', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ summary: summaryText, format: format })
+                });
+
+                if (response.ok) {
+                    const blob = await response.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.style.display = 'none';
+                    a.href = url;
+                    a.download = `summary.${format}`;
+                    document.body.appendChild(a);
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                } else {
+                    const errorData = await response.json();
+                    alert(`Error downloading file: ${errorData.error}`);
+                }
+            } catch (error) {
+                alert(`Network error during download: ${error}`);
+            }
+        }
+    </script>
+</body>
+</html>

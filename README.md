@@ -93,7 +93,7 @@ Build 100 useful, functional, and diverse AI agents in 100 days. Each agent will
 | 53  | PhotoOrganizerAgent    | Organize photos by face/location (mocked)                       |
 | 54  | AppUninstaller         | Voice-based uninstall tool                                      |
 | 55  | URLShortenerBot        | Create short links via API                                      |
-| 56  | EmailSummarizer        | Summarize email threads                                         |
+| 56  | UniversalSummarizerAgent        |  summarizer any things                                          |
 | 57  | VoiceControlledJarvis  | Local voice-to-command system                                   |
 | 58  | JSONHelperBot          | Parse and explain JSON structures                              |
 | 59  | ResumeParserAgent      | Extract info from resumes                                       |
