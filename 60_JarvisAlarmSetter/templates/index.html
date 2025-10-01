@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jarvis Alarm Setter</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Jarvis Alarm Setter</h1>
+
+        <div class="alarm-form">
+            <h2>Set New Alarm</h2>
+            <form id="alarmForm">
+                <input type="text" id="time" placeholder="Time (e.g., 6 AM, in 25 minutes)" required>
+                <input type="text" id="message" placeholder="Message (e.g., Wake up, Call John)">
+                <input type="text" id="recurrence" placeholder="Recurrence (e.g., daily, every Monday)">
+                <button type="submit">Set Alarm</button>
+            </form>
+        </div>
+
+        <div class="alarm-list">
+            <h2>Current Alarms</h2>
+            <ul id="alarmsList">
+                {% if alarms %}
+                    {% for alarm in alarms %}
+                        <li data-id="{{ alarm.id }}">
+                            <span>{{ alarm.message }} at {{ alarm.time }} {% if alarm.recurrence %}({{ alarm.recurrence }}){% endif %}</span>
+                            <button class="edit-btn">Edit</button>
+                            <button class="delete-btn">Delete</button>
+                        </li>
+                    {% endfor %}
+                {% else %}
+                    <li>No alarms set.</li>
+                {% endif %}
+            </ul>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html>
