@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LocationInfoAgent</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    animation: {
+                        'fade-in': 'fadeIn 0.5s ease-in-out',
+                        'slide-up': 'slideUp 0.5s ease-out',
+                        'pulse-slow': 'pulse 2s infinite',
+                        'bounce-slow': 'bounce 2s infinite'
+                    },
+                    keyframes: {
+                        fadeIn: {
+                            '0%': { opacity: '0' },
+                            '100%': { opacity: '1' }
+                        },
+                        slideUp: {
+                            '0%': { transform: 'translateY(20px)', opacity: '0' },
+                            '100%': { transform: 'translateY(0)', opacity: '1' }
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .info-card {
+            backdrop-filter: blur(10px);
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .glass-effect {
+            backdrop-filter: blur(15px);
+            background: rgba(255, 255, 255, 0.25);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+        }
+        /* Loading overlay styles */
+        #loadingOverlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(30, 41, 59, 0.7);
+            z-index: 50;
+            display: none; /* Always hidden by default, only shown by JS */
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+        }
+        #loadingOverlay.active {
+            display: flex;
+        }
+        .map-container {
+            position: relative;
+            padding-bottom: 75%; /* 4:3 Aspect Ratio */
+            height: 0;
+            overflow: hidden;
+            max-width: 100%;
+            background: rgba(0,0,0,0.1);
+            border-radius: 0.75rem;
+        }
+        .map-container iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+    </style>
+</head>
+<body class="gradient-bg min-h-screen">
+    <!-- Warning for direct file access -->
+    <div id="directFileWarning" style="display:none; background: #f87171; color: white; padding: 1rem; text-align: center; font-weight: bold;">
+        ⚠️ Please do NOT open this file directly. Always access the app via <a href="http://127.0.0.1:8000/" style="text-decoration:underline;color:white;">http://127.0.0.1:8000/</a> after starting your FastAPI server.
+    </div>
+    <!-- Loading Overlay: always hidden by default, only shown by JS during fetch -->
+    <div id="loadingOverlay">
+        <div class="flex flex-col items-center">
+            <div class="animate-spin rounded-full h-16 w-16 border-b-4 border-white mb-6"></div>
+            <div class="text-white text-xl font-semibold">Loading, please wait...</div>
+        </div>
+    </div>
+    <!-- Header -->
+    <header class="text-center py-8">
+        <div class="container mx-auto px-4">
+            <h1 class="text-4xl md:text-6xl font-bold text-white mb-4 animate-fade-in">
+                🌍 LocationInfoAgent
+            </h1>
+            <p class="text-xl text-white/80 max-w-2xl mx-auto animate-slide-up">
+                Your AI-powered assistant to explore any place with voice capabilities
+            </p>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 pb-8">
+        <!-- Search Section -->
+        <div class="max-w-2xl mx-auto mb-8 animate-slide-up">
+            <div class="glass-effect rounded-2xl p-6 shadow-2xl">
+                <form id="locationForm" class="space-y-4">
+                    <div>
+                        <label for="placeInput" class="block text-white font-semibold mb-2 text-lg">
+                            Which place would you like to explore today?
+                        </label>
+                        <div class="relative">
+                            <input 
+                                type="text" 
+                                id="placeInput" 
+                                name="place"
+                                placeholder="e.g., Paris, Great Wall, Japan..."
+                                class="w-full px-4 py-3 rounded-xl border-2 border-white/20 bg-white/10 text-white placeholder-white/60 focus:outline-none focus:border-white/40 focus:bg-white/20 transition-all duration-300 text-lg"
+                                required
+                            >
+                            <div class="absolute right-3 top-1/2 transform -translate-y-1/2">
+                                <svg class="w-6 h-6 text-white/60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-center space-x-4">
+                        <label class="flex items-center space-x-2 text-white cursor-pointer">
+                            <input type="checkbox" id="voiceToggle" checked class="w-4 h-4 rounded">
+                            <span>Enable Voice Output</span>
+                        </label>
+                        <button type="button" id="stopVoiceBtn" class="text-white/60 hover:text-white transition-colors hidden">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 10a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1v-4z"></path>
+                            </svg>
+                        </button>
+                    </div>
+                    
+                    <button 
+                        type="submit" 
+                        id="submitBtn"
+                        class="w-full bg-white/20 hover:bg-white/30 text-white font-semibold py-3 px-6 rounded-xl transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-white/50 text-lg"
+                    >
+                        <span id="btnText">Explore</span>
+                        <div id="loadingSpinner" class="hidden">
+                            <div class="animate-spin rounded-full h-5 w-5 border-b-2 border-white mx-auto"></div>
+                        </div>
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Location Display -->
+        <div id="locationDisplay" class="max-w-4xl mx-auto hidden">
+            <!-- Main Info Card -->
+            <div class="info-card rounded-2xl p-6 mb-6 shadow-2xl animate-fade-in">
+                <h2 id="locationName" class="text-3xl font-bold text-white mb-4 text-center"></h2>
+                <div id="aiResponseText" class="text-white/90 leading-relaxed mb-6 prose prose-invert max-w-none"></div>
+                
+                <!-- Map Embed -->
+                <div id="mapContainer" class="map-container mb-6 hidden">
+                    <iframe id="googleMap" width="100%" height="450" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+                </div>
+
+                <!-- Image Gallery -->
+                <div id="imageGallery" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 hidden">
+                </div>
+            </div>
+        </div>
+
+        <!-- No Results Display -->
+        <div id="noResultsDisplay" class="max-w-2xl mx-auto hidden">
+            <div class="glass-effect rounded-2xl p-6 shadow-2xl animate-fade-in">
+                <div class="text-center">
+                    <div class="text-4xl mb-4">🔍</div>
+                    <h3 class="text-xl font-semibold text-white mb-2">No Results Found</h3>
+                    <p id="noResultsMessage" class="text-white/80">Sorry, we couldn't find information for that location. Please check the spelling or try another place.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Error Display -->
+        <div id="errorDisplay" class="max-w-2xl mx-auto hidden">
+            <div class="glass-effect rounded-2xl p-6 shadow-2xl animate-fade-in">
+                <div class="text-center">
+                    <div class="text-4xl mb-4">⚠️</div>
+                    <h3 class="text-xl font-semibold text-white mb-2">Oops! Something went wrong</h3>
+                    <p id="errorMessage" class="text-white/80"></p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="text-center py-6">
+        <p class="text-white/60">
+            Powered by AI • Built with ❤️ for Day 61 of 100 Days of AI Agents
+        </p>
+    </footer>
+
+    <script>
+        // Show warning if not running on FastAPI backend
+        if (window.location.protocol === 'file:' || window.location.port === '5500') {
+            document.getElementById('directFileWarning').style.display = 'block';
+        }
+    </script>
+    <script src="/static/js/app.js"></script>
+</body>
+</html>
