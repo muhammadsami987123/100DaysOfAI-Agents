@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ app_title }}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                fontFamily: {
+                    'sans': ['Montserrat', 'ui-sans-serif', 'system-ui'],
+                },
+                extend: {
+                    colors: {
+                        gold: '#FFD700',
+                        dark: '#18181b',
+                        dark2: '#23232b',
+                        dark3: '#1a1a1f',
+                    },
+                    boxShadow: {
+                        '3d': '0 8px 32px 0 rgba(31, 38, 135, 0.37), 0 1.5px 4px 0 #FFD70044',
+                        'gold': '0 2px 16px 0 #FFD70033',
+                    },
+                    animation: {
+                        'fade-in': 'fadeIn 0.5s ease-in-out',
+                        'slide-up': 'slideUp 0.5s ease-out',
+                        'pulse-slow': 'pulse 2s infinite',
+                    },
+                    keyframes: {
+                        fadeIn: {
+                            '0%': { opacity: '0' },
+                            '100%': { opacity: '1' }
+                        },
+                        slideUp: {
+                            '0%': { transform: 'translateY(20px)', opacity: '0' },
+                            '100%': { transform: 'translateY(0)', opacity: '1' }
+                        },
+                        pulse: {
+                            '0%, 100%': { opacity: '1' },
+                            '50%': { opacity: '0.5' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background: linear-gradient(135deg, #18181b 0%, #23232b 100%);
+            font-family: 'Montserrat', ui-sans-serif, system-ui, sans-serif;
+        }
+        .glass-card {
+            background: rgba(24, 24, 27, 0.95);
+            border-radius: 2rem;
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37), 0 1.5px 4px 0 #FFD70044;
+            border: 1.5px solid rgba(255, 215, 0, 0.12);
+        }
+        .glass-input, .glass-select {
+            background: rgba(36, 36, 40, 0.95);
+            border: 1.5px solid #FFD70055;
+            color: #fff;
+            font-weight: 600;
+            box-shadow: 0 2px 8px 0 #FFD70022;
+        }
+        .glass-input::placeholder {
+            color: #FFD70099;
+        }
+        .glass-input:focus, .glass-select:focus {
+            border-color: #FFD700;
+            outline: none;
+            box-shadow: 0 0 0 2px #FFD70055;
+        }
+        .gold-gradient {
+            background: linear-gradient(90deg, #FFD700 0%, #fffbe6 100%);
+            color: #18181b;
+        }
+        .gold-text {
+            color: #FFD700;
+        }
+        .gold-border {
+            border-color: #FFD700;
+        }
+        .shadow-3d {
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37), 0 1.5px 4px 0 #FFD70044;
+        }
+        .shadow-gold {
+            box-shadow: 0 2px 16px 0 #FFD70033;
+        }
+        .loading-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(24, 24, 27, 0.95);
+            z-index: 50;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+        }
+        .loading-overlay.hidden {
+            display: none;
+        }
+        .spinner {
+            border-top-color: #FFD700;
+            border-right-color: #fffbe6;
+            border-bottom-color: #FFD700;
+            border-left-color: #23232b;
+            animation: spin 1s ease-in-out infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #23232b;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #FFD70033;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #FFD70066;
+        }
+        /* Navbar hamburger animation */
+        .hamburger span {
+            display: block;
+            height: 3px;
+            width: 28px;
+            background: #FFD700;
+            margin: 6px 0;
+            border-radius: 2px;
+            transition: 0.4s;
+        }
+        .hamburger.active span:nth-child(1) {
+            transform: rotate(45deg) translate(5px, 5px);
+        }
+        .hamburger.active span:nth-child(2) {
+            opacity: 0;
+        }
+        .hamburger.active span:nth-child(3) {
+            transform: rotate(-45deg) translate(6px, -6px);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col font-sans antialiased text-white">
+    <!-- Navbar -->
+    <nav class="sticky top-0 z-40 bg-dark2 bg-opacity-95 border-b border-gold shadow-3d">
+        <div class="container mx-auto flex items-center justify-between py-3 px-4 md:px-8">
+            <div class="flex items-center gap-2">
+                <span class="text-2xl font-extrabold gold-text tracking-tight">AIQuoteGenerator</span>
+            </div>
+            <div class="hidden md:flex gap-8 text-lg font-semibold">
+                <a href="#" class="hover:gold-text transition-colors duration-200">Home</a>
+                <a href="#contact-section" class="hover:gold-text transition-colors duration-200 scroll-smooth">Contact</a>
+                <button id="aboutBtn" class="hover:gold-text transition-colors duration-200 focus:outline-none">About</button>
+            </div>
+            <button id="navToggle" class="md:hidden hamburger focus:outline-none" aria-label="Open Menu">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </div>
+        <!-- Mobile Menu -->
+        <div id="mobileMenu" class="md:hidden hidden flex-col bg-dark2 border-t border-gold px-4 pb-4">
+            <a href="#" class="block py-2 text-lg font-semibold hover:gold-text">Home</a>
+            <a href="#contact-section" class="block py-2 text-lg font-semibold hover:gold-text scroll-smooth">Contact</a>
+            <button id="aboutBtnMobile" class="block py-2 text-lg font-semibold hover:gold-text w-full text-left">About</button>
+        </div>
+    </nav>
+
+    <!-- About Modal -->
+    <div id="aboutModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-70 hidden">
+        <div class="bg-dark3 rounded-2xl shadow-3d max-w-lg w-full p-8 border-2 border-gold relative animate-fade-in">
+            <button id="closeAbout" class="absolute top-3 right-3 text-gold hover:text-white text-2xl font-bold">&times;</button>
+            <h2 class="text-2xl font-extrabold gold-text mb-4 text-center">About 100DaysOfAI-Agents Challenge</h2>
+            <p class="text-gray-200 mb-2 text-center">The <span class="gold-text font-bold">100DaysOfAI-Agents</span> challenge is a journey to build 100 unique, creative, and useful AI-powered agents in 100 days. Each day brings a new project, new learning, and a new opportunity to push the boundaries of what AI can do for real-world problems and creative expression.</p>
+            <ul class="text-gray-400 text-sm mb-4 list-disc pl-6">
+                <li>Daily hands-on coding and design</li>
+                <li>Focus on practical, inspiring, and impactful AI agents</li>
+                <li>Open source, community-driven, and collaborative</li>
+                <li>Showcases the power of modern AI APIs and UI/UX</li>
+            </ul>
+            <div class="text-center">
+                <a href="https://github.com/muhammadsami987123/100DaysOfAI-Agents" target="_blank" class="gold-text underline font-semibold">View the Challenge on GitHub</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="loading-overlay hidden">
+        <div class="flex flex-col items-center">
+            <div class="spinner rounded-full h-16 w-16 border-4 mb-6"></div>
+            <div class="gold-text text-xl font-semibold animate-pulse-slow">Crafting inspiration...</div>
+        </div>
+    </div>
+
+    <!-- Main Content Area -->
+    <div class="container mx-auto px-4 py-8 flex-grow">
+        <header class="text-center py-8 animate-fade-in">
+            <h1 class="text-5xl md:text-6xl font-extrabold gold-text mb-4 drop-shadow-lg">
+                ✨ {{ app_title }}
+            </h1>
+            <p class="text-xl text-gray-200 max-w-2xl mx-auto animate-slide-up">
+                {{ app_description }}
+            </p>
+        </header>
+
+        <main class="max-w-3xl mx-auto">
+            <!-- Quote Generation Form -->
+            <section class="glass-card p-8 rounded-3xl shadow-3d mb-12 animate-slide-up">
+                <h2 class="text-3xl font-extrabold gold-text mb-6 text-center drop-shadow-lg">Generate Your Spark</h2>
+                <form id="quoteForm" class="space-y-6">
+                    <div>
+                        <label for="moodSelect" class="block gold-text text-lg font-semibold mb-2">
+                            Select Mood/Theme
+                        </label>
+                        <select id="moodSelect" name="mood" class="glass-select w-full px-5 py-3 rounded-xl transition-all duration-300 focus:ring-2 focus:ring-gold cursor-pointer">
+                            {% for mood in moods %}
+                                <option value="{{ mood }}">{{ mood }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div>
+                        <label for="toneSelect" class="block gold-text text-lg font-semibold mb-2">
+                            Choose Tone
+                        </label>
+                        <select id="toneSelect" name="tone" class="glass-select w-full px-5 py-3 rounded-xl transition-all duration-300 focus:ring-2 focus:ring-gold cursor-pointer">
+                            {% for tone in tones %}
+                                <option value="{{ tone }}">{{ tone }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div>
+                        <label for="outputFormatSelect" class="block gold-text text-lg font-semibold mb-2">
+                            Output Format
+                        </label>
+                        <select id="outputFormatSelect" name="output_format" class="glass-select w-full px-5 py-3 rounded-xl transition-all duration-300 focus:ring-2 focus:ring-gold cursor-pointer">
+                            {% for format in output_formats %}
+                                <option value="{{ format }}">{{ format }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <button type="submit" id="generateBtn" class="w-full gold-gradient hover:shadow-gold text-xl font-extrabold py-3 px-6 rounded-xl transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-gold flex items-center justify-center space-x-3 shadow-3d">
+                        <span id="btnText">Generate Quote</span>
+                        <svg id="btnSpinner" class="hidden animate-spin h-5 w-5 gold-text" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                    </button>
+                </form>
+            </section>
+
+            <!-- Quote Display Area -->
+            <section id="quoteDisplay" class="hidden glass-card p-8 rounded-3xl shadow-3d animate-fade-in relative overflow-hidden">
+                <div id="quoteImageArea" class="relative w-full flex flex-col justify-center items-center min-h-[250px]">
+                    <!-- Background image for image mode only -->
+                    <img id="quoteBackground" src="" alt="Quote Background" class="absolute inset-0 w-full h-full object-cover transition-opacity duration-300 opacity-0" style="z-index:0;" />
+                    <!-- Overlay for quote text -->
+                    <div id="quoteOverlay" class="relative z-10 flex flex-col justify-center items-center w-full h-full px-4 py-8">
+                        <p id="generatedQuote" class="gold-text text-3xl md:text-4xl font-extrabold leading-relaxed mb-6 italic drop-shadow-lg text-center" style="text-shadow: 2px 2px 8px #18181b, 0 0 2px #FFD700;">
+                            "The future belongs to those who believe in the beauty of their dreams."
+                        </p>
+                    </div>
+                </div>
+                <div id="quoteActions" class="flex flex-wrap justify-center gap-4 mt-4">
+                    <button id="copyBtn" class="action-button gold-text border border-gold hover:bg-gold hover:text-dark2 flex items-center space-x-2 px-4 py-2 rounded-lg transition-colors shadow-3d"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M8 3a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z"/><path d="M6 3a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2V5a2 2 0 00-2-2H6zm2 1.5a.5.5 0 01.5-.5h5a.5.5 0 010 1h-5a.5.5 0 01-.5-.5zM8 7a.5.5 0 01.5-.5h5a.5.5 0 010 1h-5A.5.5 0 018 7zm3 4a.5.5 0 01.5-.5h2a.5.5 0 010 1h-2a.5.5 0 01-.5-.5z"/></svg><span>Copy</span></button>
+                    <button id="downloadBtn" class="action-button gold-text border border-gold hover:bg-gold hover:text-dark2 flex items-center space-x-2 px-4 py-2 rounded-lg transition-colors shadow-3d"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 11.586V3a1 1 0 112 0v8.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd"/></svg><span>Download as image</span></button>
+                    <a id="shareBtn" href="#" target="_blank" class="action-button gold-text border border-gold hover:bg-gold hover:text-dark2 flex items-center space-x-2 px-4 py-2 rounded-lg transition-colors shadow-3d"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M15 8a3 3 0 10-2.977-2.63l-4.94 2.47a3 3 0 100 4.316l4.94 2.47a3 3 0 10.832 1.664v-.001z"/></svg><span>Share</span></a>
+                </div>
+            </section>
+
+            <!-- Contact Section -->
+            <section id="contact-section" class="glass-card p-8 rounded-3xl shadow-3d mt-12 mb-8 animate-fade-in">
+                <h2 class="text-2xl font-extrabold gold-text mb-4 text-center">Contact</h2>
+                <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-8">
+                    <div class="flex-1">
+                        <p class="text-gray-200 mb-2">Have feedback, suggestions, or want to get in touch?</p>
+                        <p class="text-gray-400 text-sm">Email: <a href="mailto:contact@aiquotegenerator.com" class="gold-text underline">contact@aiquotegenerator.com</a></p>
+                        <p class="text-gray-400 text-sm">Twitter: <a href="https://twitter.com/aiquotegenerator" class="gold-text underline" target="_blank">@aiquotegenerator</a></p>
+                    </div>
+                    <form class="flex-1 flex flex-col gap-4" onsubmit="event.preventDefault(); alert('Thank you for your message!');">
+                        <input type="text" class="glass-input px-4 py-3 rounded-lg" placeholder="Your Name" required>
+                        <input type="email" class="glass-input px-4 py-3 rounded-lg" placeholder="Your Email" required>
+                        <textarea class="glass-input px-4 py-3 rounded-lg" placeholder="Your Message" rows="3" required></textarea>
+                        <button type="submit" class="gold-gradient font-bold py-2 px-6 rounded-lg shadow-gold hover:scale-105 transition-transform">Send</button>
+                    </form>
+                </div>
+            </section>
+
+            <!-- Error Display -->
+            <section id="errorDisplay" class="hidden glass-card p-6 rounded-2xl shadow-3d mt-8">
+                <div class="text-center gold-text">
+                    <p class="text-lg font-semibold">⚠️ Oops! Something went wrong.</p>
+                    <p id="errorMessage" class="text-sm mt-2">An unexpected error occurred.</p>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Footer -->
+    <footer class="text-center py-6 gold-text text-sm mt-auto bg-dark3 border-t border-gold">
+        <div class="container mx-auto flex flex-col md:flex-row items-center justify-between gap-2">
+            <p>&copy; {{ app_title }} {{ 2025 }}. All rights reserved.</p>
+            <p>Your daily spark, one quote at a time.</p>
+        </div>
+    </footer>
+
+    <script src="/static/js/app.js"></script>
+    <script>
+        // Navbar hamburger menu
+        const navToggle = document.getElementById('navToggle');
+        const mobileMenu = document.getElementById('mobileMenu');
+        navToggle && navToggle.addEventListener('click', function() {
+            navToggle.classList.toggle('active');
+            mobileMenu.classList.toggle('hidden');
+        });
+        // About modal
+        function toggleAboutModal(show) {
+            const modal = document.getElementById('aboutModal');
+            if (show) {
+                modal.classList.remove('hidden');
+            } else {
+                modal.classList.add('hidden');
+            }
+        }
+        document.getElementById('aboutBtn')?.addEventListener('click', () => toggleAboutModal(true));
+        document.getElementById('aboutBtnMobile')?.addEventListener('click', () => {
+            toggleAboutModal(true);
+            mobileMenu.classList.add('hidden');
+            navToggle.classList.remove('active');
+        });
+        document.getElementById('closeAbout')?.addEventListener('click', () => toggleAboutModal(false));
+        // Smooth scroll for Contact
+        document.querySelectorAll('a[href^="#contact-section"]').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                document.getElementById('contact-section').scrollIntoView({ behavior: 'smooth' });
+                if (mobileMenu) {
+                    mobileMenu.classList.add('hidden');
+                    navToggle.classList.remove('active');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
