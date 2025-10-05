@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TextCleanerAgent</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                fontFamily: {
+                    'sans': ['Montserrat', 'ui-sans-serif', 'system-ui'],
+                },
+                extend: {
+                    colors: {
+                        gold: '#FFD700',
+                        dark: '#18181b',
+                        dark2: '#23232b',
+                        dark3: '#1a1a1f',
+                    },
+                    boxShadow: {
+                        '3d': '0 8px 32px 0 rgba(31, 38, 135, 0.37), 0 1.5px 4px 0 #FFD70044',
+                        'gold': '0 2px 16px 0 #FFD70033',
+                    },
+                    animation: {
+                        'fade-in': 'fadeIn 0.5s ease-in-out',
+                        'slide-up': 'slideUp 0.5s ease-out',
+                        'pulse-slow': 'pulse 2s infinite',
+                    },
+                    keyframes: {
+                        fadeIn: {
+                            '0%': { opacity: '0' },
+                            '100%': { opacity: '1' }
+                        },
+                        slideUp: {
+                            '0%': { transform: 'translateY(20px)', opacity: '0' },
+                            '100%': { transform: 'translateY(0)', opacity: '1' }
+                        },
+                        pulse: {
+                            '0%, 100%': { opacity: '1' },
+                            '50%': { opacity: '0.5' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background: linear-gradient(135deg, #18181b 0%, #23232b 100%);
+            font-family: 'Montserrat', ui-sans-serif, system-ui, sans-serif;
+        }
+        .glass-card {
+            background: rgba(24, 24, 27, 0.95);
+            border-radius: 2rem;
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37), 0 1.5px 4px 0 #FFD70044;
+            border: 1.5px solid rgba(255, 215, 0, 0.12);
+        }
+        .glass-input, .glass-select, .glass-textarea {
+            background: rgba(36, 36, 40, 0.95);
+            border: 1.5px solid #FFD70055;
+            color: #fff;
+            font-weight: 600;
+            box-shadow: 0 2px 8px 0 #FFD70022;
+        }
+        .glass-input::placeholder, .glass-textarea::placeholder {
+            color: #FFD70099;
+        }
+        .glass-input:focus, .glass-select:focus, .glass-textarea:focus {
+            border-color: #FFD700;
+            outline: none;
+            box-shadow: 0 0 0 2px #FFD70055;
+        }
+        .gold-gradient {
+            background: linear-gradient(90deg, #FFD700 0%, #fffbe6 100%);
+            color: #18181b;
+        }
+        .gold-text {
+            color: #FFD700;
+        }
+        .gold-border {
+            border-color: #FFD700;
+        }
+        .shadow-3d {
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37), 0 1.5px 4px 0 #FFD70044;
+        }
+        .shadow-gold {
+            box-shadow: 0 2px 16px 0 #FFD70033;
+        }
+        .loading-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(24, 24, 27, 0.95);
+            z-index: 50;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+        }
+        .loading-overlay.hidden {
+            display: none;
+        }
+        .spinner {
+            border-top-color: #FFD700;
+            border-right-color: #fffbe6;
+            border-bottom-color: #FFD700;
+            border-left-color: #23232b;
+            animation: spin 1s ease-in-out infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #23232b;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #FFD70033;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #FFD70066;
+        }
+        /* Navbar hamburger animation */
+        .hamburger span {
+            display: block;
+            height: 3px;
+            width: 28px;
+            background: #FFD700;
+            margin: 6px 0;
+            border-radius: 2px;
+            transition: 0.4s;
+        }
+        .hamburger.active span:nth-child(1) {
+            transform: rotate(45deg) translate(5px, 5px);
+        }
+        .hamburger.active span:nth-child(2) {
+            opacity: 0;
+        }
+        .hamburger.active span:nth-child(3) {
+            transform: rotate(-45deg) translate(6px, -6px);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col font-sans antialiased text-white">
+    <!-- Navbar -->
+    <nav class="sticky top-0 z-40 bg-dark2 bg-opacity-95 border-b border-gold shadow-3d">
+        <div class="container mx-auto flex items-center justify-between py-3 px-4 md:px-8">
+            <div class="flex items-center gap-2">
+                <span class="text-2xl font-extrabold gold-text tracking-tight">TextCleanerAgent</span>
+            </div>
+            <div class="hidden md:flex gap-8 text-lg font-semibold">
+                <a href="#" class="hover:gold-text transition-colors duration-200">Home</a>
+                <button id="aboutBtn" class="hover:gold-text transition-colors duration-200 focus:outline-none">About</button>
+            </div>
+            <button id="navToggle" class="md:hidden hamburger focus:outline-none" aria-label="Open Menu">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </div>
+        <!-- Mobile Menu -->
+        <div id="mobileMenu" class="md:hidden hidden flex-col bg-dark2 border-t border-gold px-4 pb-4">
+            <a href="#" class="block py-2 text-lg font-semibold hover:gold-text">Home</a>
+            <button id="aboutBtnMobile" class="block py-2 text-lg font-semibold hover:gold-text w-full text-left">About</button>
+        </div>
+    </nav>
+
+    <!-- About Modal -->
+    <div id="aboutModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-70 hidden">
+        <div class="bg-dark3 rounded-2xl shadow-3d max-w-lg w-full p-8 border-2 border-gold relative animate-fade-in">
+            <button id="closeAbout" class="absolute top-3 right-3 text-gold hover:text-white text-2xl font-bold">&times;</button>
+            <h2 class="text-2xl font-extrabold gold-text mb-4 text-center">About 100DaysOfAI-Agents Challenge</h2>
+            <p class="text-gray-200 mb-2 text-center">The <span class="gold-text font-bold">100DaysOfAI-Agents</span> challenge is a journey to build 100 unique, creative, and useful AI-powered agents in 100 days. Each day brings a new project, new learning, and a new opportunity to push the boundaries of what AI can do for real-world problems and creative expression.</p>
+            <ul class="text-gray-400 text-sm mb-4 list-disc pl-6">
+                <li>Daily hands-on coding and design</li>
+                <li>Focus on practical, inspiring, and impactful AI agents</li>
+                <li>Open source, community-driven, and collaborative</li>
+                <li>Showcases the power of modern AI APIs and UI/UX</li>
+            </ul>
+            <div class="text-center">
+                <a href="https://github.com/muhammadsami987123/100DaysOfAI-Agents" target="_blank" class="gold-text underline font-semibold">View the Challenge on GitHub</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="loading-overlay hidden">
+        <div class="flex flex-col items-center">
+            <div class="spinner rounded-full h-16 w-16 border-4 mb-6"></div>
+            <div class="gold-text text-xl font-semibold animate-pulse-slow">Cleaning text...</div>
+        </div>
+    </div>
+
+    <!-- Main Content Area -->
+    <div class="container mx-auto px-4 py-8 flex-grow">
+        <header class="text-center py-8 animate-fade-in">
+            <h1 class="text-5xl md:text-6xl font-extrabold gold-text mb-4 drop-shadow-lg">
+                ✨ TextCleanerAgent
+            </h1>
+            <p class="text-xl text-gray-200 max-w-2xl mx-auto animate-slide-up">
+                Transform messy text into polished, grammatically correct, and well-formatted content with AI.
+            </p>
+        </header>
+
+        <main class="max-w-3xl mx-auto">
+            <!-- Text Cleaning Form -->
+            <section class="glass-card p-8 rounded-3xl shadow-3d mb-12 animate-slide-up">
+                <h2 class="text-3xl font-extrabold gold-text mb-6 text-center drop-shadow-lg">Clean Your Text</h2>
+                <form id="cleanForm" action="/clean" method="post" enctype="multipart/form-data" class="space-y-6">
+                    <div>
+                        <label for="text_input" class="block gold-text text-lg font-semibold mb-2">
+                            Enter Text (Optional)
+                        </label>
+                        <textarea id="text_input" name="text_input" class="glass-textarea w-full px-5 py-3 rounded-xl transition-all duration-300 focus:ring-2 focus:ring-gold" placeholder="Paste your messy text here..." rows="8"></textarea>
+                    </div>
+
+                    <div>
+                        <label for="file_input" class="block gold-text text-lg font-semibold mb-2">
+                            Upload File (.txt, .docx) (Optional)
+                        </label>
+                        <input type="file" id="file_input" name="file_input" accept=".txt,.docx" class="glass-input w-full px-5 py-3 rounded-xl transition-all duration-300 focus:ring-2 focus:ring-gold file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-gold file:text-dark hover:file:bg-amber-300">
+                    </div>
+
+                    <div>
+                        <label for="url_input" class="block gold-text text-lg font-semibold mb-2">
+                            Enter URL (Optional)
+                        </label>
+                        <input type="text" id="url_input" name="url_input" class="glass-input w-full px-5 py-3 rounded-xl transition-all duration-300 focus:ring-2 focus:ring-gold" placeholder="e.g., https://www.example.com/article">
+                    </div>
+
+                    <div class="flex items-center space-x-4">
+                        <label class="gold-text text-lg font-semibold">
+                            <input type="checkbox" name="summarize" class="h-5 w-5 text-gold focus:ring-gold border-gray-300 rounded-sm">
+                            Summarize Cleaned Text
+                        </label>
+                        <label class="gold-text text-lg font-semibold">
+                            <input type="checkbox" name="diff" class="h-5 w-5 text-gold focus:ring-gold border-gray-300 rounded-sm">
+                            Show Original/Cleaned Difference
+                        </label>
+                    </div>
+
+                    <button type="submit" id="cleanBtn" class="w-full gold-gradient hover:shadow-gold text-xl font-extrabold py-3 px-6 rounded-xl transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-gold flex items-center justify-center space-x-3 shadow-3d">
+                        <span id="btnText">Clean Text</span>
+                        <svg id="btnSpinner" class="hidden animate-spin h-5 w-5 gold-text" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                    </button>
+                </form>
+            </section>
+
+            <!-- Result Display Area -->
+            {% if cleaned_text %}
+                <section id="resultDisplay" class="glass-card p-8 rounded-3xl shadow-3d mb-12 animate-fade-in relative overflow-hidden">
+                    <h2 class="text-3xl font-extrabold gold-text mb-6 text-center drop-shadow-lg">Cleaned Result</h2>
+                    {% if original_text %}
+                        <div class="mb-6">
+                            <h3 class="text-xl font-bold gold-text mb-2">Original Text:</h3>
+                            <pre class="glass-card p-4 rounded-xl text-gray-200 text-sm max-w-full block" style="overflow-wrap: break-word; word-break: break-word;">{{ original_text }}</pre>
+                        </div>
+                    {% endif %}
+                    <div class="mb-6">
+                        <h3 class="text-xl font-bold gold-text mb-2">Cleaned Text:</h3>
+                        <pre class="glass-card p-4 rounded-xl text-gray-200 text-sm max-w-full block" style="overflow-wrap: break-word; word-break: break-word;">{{ cleaned_text }}</pre>
+                    </div>
+                    {% if 'Summary:' in cleaned_text %}
+                        <div>
+                            <h3 class="text-xl font-bold gold-text mb-2">Summary:</h3>
+                            <pre class="glass-card p-4 rounded-xl text-gray-200 text-sm">{{ cleaned_text.split('Summary:', 1)[1] | safe }}</pre>
+                        </div>
+                    {% endif %}
+                    <div class="flex flex-wrap justify-center gap-4 mt-8">
+                        <button id="copyCleanedBtn" class="action-button gold-text border border-gold hover:bg-gold hover:text-dark2 flex items-center space-x-2 px-4 py-2 rounded-lg transition-colors shadow-3d">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M8 3a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z"/><path d="M6 3a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2V5a2 2 0 00-2-2H6zm2 1.5a.5.5 0 01.5-.5h5a.5.5 0 010 1h-5a.5.5 0 01-.5-.5zM8 7a.5.5 0 01.5-.5h5a.5.5 0 010 1h-5A.5.5 0 018 7zm3 4a.5.5 0 01.5-.5h2a.5.5 0 010 1h-2a.5.5 0 01-.5-.5z"/></svg>
+                            <span>Copy Cleaned Text</span>
+                        </button>
+                    </div>
+                </section>
+            {% endif %}
+
+            <!-- Error Display -->
+            <section id="errorDisplay" class="hidden glass-card p-6 rounded-2xl shadow-3d mt-8">
+                <div class="text-center gold-text">
+                    <p class="text-lg font-semibold">⚠️ Oops! Something went wrong.</p>
+                    <p id="errorMessage" class="text-sm mt-2">An unexpected error occurred.</p>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Footer -->
+    <footer class="text-center py-6 gold-text text-sm mt-auto bg-dark3 border-t border-gold">
+        <div class="container mx-auto flex flex-col md:flex-row items-center justify-between gap-2">
+            <p>&copy; TextCleanerAgent 2025. All rights reserved.</p>
+            <p>Your text, polished by AI.</p>
+        </div>
+    </footer>
+
+    <script>
+        // Navbar hamburger menu
+        const navToggle = document.getElementById('navToggle');
+        const mobileMenu = document.getElementById('mobileMenu');
+        navToggle && navToggle.addEventListener('click', function() {
+            navToggle.classList.toggle('active');
+            mobileMenu.classList.toggle('hidden');
+        });
+        // About modal
+        function toggleAboutModal(show) {
+            const modal = document.getElementById('aboutModal');
+            if (show) {
+                modal.classList.remove('hidden');
+            } else {
+                modal.classList.add('hidden');
+            }
+        }
+        document.getElementById('aboutBtn')?.addEventListener('click', () => toggleAboutModal(true));
+        document.getElementById('aboutBtnMobile')?.addEventListener('click', () => {
+            toggleAboutModal(true);
+            mobileMenu.classList.add('hidden');
+            navToggle.classList.remove('active');
+        });
+        document.getElementById('closeAbout')?.addEventListener('click', () => toggleAboutModal(false));
+        // Loading overlay
+        const cleanForm = document.getElementById('cleanForm');
+        const loadingOverlay = document.getElementById('loadingOverlay');
+        const btnText = document.getElementById('btnText');
+        const btnSpinner = document.getElementById('btnSpinner');
+
+        cleanForm.addEventListener('submit', function(e) {
+            // Only prevent default if it's a file upload, otherwise let the form submit normally for PRG pattern
+            const fileInput = document.getElementById('file_input');
+            const textInput = document.getElementById('text_input');
+            const urlInput = document.getElementById('url_input');
+
+            // Only show loading if there's actual input
+            if (textInput.value || (fileInput.files && fileInput.files.length > 0) || urlInput.value) {
+                loadingOverlay.classList.remove('hidden');
+                btnText.textContent = 'Cleaning...';
+                btnSpinner.classList.remove('hidden');
+                cleanForm.querySelector('button[type="submit"]').setAttribute('disabled', 'true');
+            }
+            // Do not preventDefault here, let the form submit normally for PRG. Flask will handle the redirect.
+        });
+
+        // Copy to clipboard functionality
+        document.getElementById('copyCleanedBtn')?.addEventListener('click', async () => {
+            const cleanedTextElement = document.querySelector('#resultDisplay pre');
+            const copyButton = document.getElementById('copyCleanedBtn');
+
+            if (cleanedTextElement && copyButton) {
+                try {
+                    await navigator.clipboard.writeText(cleanedTextElement.textContent);
+                    const originalText = copyButton.innerHTML;
+                    copyButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg><span>Copied!</span>';
+                    copyButton.classList.add('gold-gradient', '!text-dark', 'hover:!text-dark');
+                    setTimeout(() => {
+                        copyButton.innerHTML = originalText;
+                        copyButton.classList.remove('gold-gradient', '!text-dark', 'hover:!text-dark');
+                    }, 2000);
+                } catch (err) {
+                    console.error('Failed to copy: ', err);
+                    alert('Failed to copy text.');
+                }
+            }
+        });
+    </script>
+</body>
+</html>
