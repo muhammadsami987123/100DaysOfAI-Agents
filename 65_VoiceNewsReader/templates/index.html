@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>VoiceNewsReader</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="min-h-screen bg-slate-950 text-white">
+    <header class="bg-gradient-to-r from-indigo-600 to-blue-500">
+        <div class="max-w-5xl mx-auto px-6 py-8">
+            <h1 class="text-3xl md:text-4xl font-bold">🗞️ VoiceNewsReader</h1>
+            <p class="text-white/90 mt-2">Listen to trending news with natural TTS. Filter by category, country, and keywords.</p>
+        </div>
+    </header>
+
+    <main class="max-w-5xl mx-auto p-6">
+        <form id="newsForm" class="grid gap-4 grid-cols-1 md:grid-cols-4 bg-white/5 p-5 rounded-xl border border-white/10 backdrop-blur">
+            <label class="flex flex-col gap-1 md:col-span-1">
+                <span class="text-sm text-white/80">Category</span>
+                <select id="category" class="text-black p-2 rounded">
+                    <option value="">Any</option>
+                    <option>business</option>
+                    <option>technology</option>
+                    <option>sports</option>
+                    <option>health</option>
+                    <option>science</option>
+                    <option>entertainment</option>
+                    <option>general</option>
+                </select>
+            </label>
+            <label class="flex flex-col gap-1 md:col-span-1">
+                <span class="text-sm text-white/80">Country</span>
+                <select id="country" class="text-black p-2 rounded">
+                    <option value="">Any</option>
+                    <option value="us">United States</option>
+                    <option value="gb">United Kingdom</option>
+                    <option value="pk">Pakistan</option>
+                    <option value="in">India</option>
+                    <option value="ca">Canada</option>
+                    <option value="au">Australia</option>
+                    <option value="de">Germany</option>
+                    <option value="fr">France</option>
+                    <option value="it">Italy</option>
+                    <option value="es">Spain</option>
+                    <option value="sa">Saudi Arabia</option>
+                    <option value="ae">United Arab Emirates</option>
+                </select>
+            </label>
+            <label class="flex flex-col gap-1 md:col-span-2">
+                <span class="text-sm text-white/80">Keywords</span>
+                <input id="q" placeholder="e.g., AI, markets, football" class="text-black p-2 rounded" />
+            </label>
+            <label class="flex flex-col gap-1 md:col-span-1">
+                <span class="text-sm text-white/80">Limit</span>
+                <input id="limit" type="number" value="5" min="1" max="10" class="text-black p-2 rounded" />
+            </label>
+            <label class="flex flex-col gap-1 md:col-span-1">
+                <span class="text-sm text-white/80">Date Range</span>
+                <select id="dateRange" class="text-black p-2 rounded">
+                    <option value="any">Any</option>
+                    <option value="day">Past day</option>
+                    <option value="week">Past week</option>
+                    <option value="month">Past month</option>
+                </select>
+            </label>
+            <label class="flex flex-col gap-1 md:col-span-1">
+                <span class="text-sm text-white/80">Language</span>
+                <select id="language" class="text-black p-2 rounded">
+                    <option value="en">English</option>
+                    <option value="ur">Urdu</option>
+                    <option value="de">German</option>
+                    <option value="fr">French</option>
+                    <option value="es">Spanish</option>
+                </select>
+            </label>
+            <label class="flex flex-col gap-1 md:col-span-1">
+                <span class="text-sm text-white/80">Voice Gender</span>
+                <select id="gender" class="text-black p-2 rounded">
+                    <option>female</option>
+                    <option>male</option>
+                </select>
+            </label>
+            <label class="flex flex-col gap-1 md:col-span-1">
+                <span class="text-sm text-white/80">Rate (wpm)</span>
+                <input id="rate" type="number" placeholder="150" class="text-black p-2 rounded" />
+            </label>
+            <label class="flex flex-col gap-1 md:col-span-1">
+                <span class="text-sm text-white/80">Pitch</span>
+                <input id="pitch" type="number" step="0.1" placeholder="1.0" class="text-black p-2 rounded" />
+            </label>
+            <div class="md:col-span-4 flex flex-wrap items-center gap-3 justify-between">
+                <label class="flex items-center gap-2"><input id="transcript" type="checkbox" checked /> <span class="text-white/80">Include transcript</span></label>
+                <div class="flex gap-3 items-center">
+                    <label class="flex items-center gap-2 text-white/80"><input id="plainView" type="checkbox" /> Plain View</label>
+                    <button class="bg-blue-600 hover:bg-blue-500 px-4 py-2 rounded-lg font-medium" type="submit">Read News</button>
+                    <button id="resetBtn" class="bg-white/10 hover:bg-white/20 px-4 py-2 rounded-lg" type="button">Reset</button>
+                </div>
+            </div>
+        </form>
+
+        <div id="errorBox" class="hidden mt-4 p-4 rounded-lg bg-red-600/20 border border-red-500/40 text-red-200"></div>
+
+        <section id="result" class="mt-6 hidden">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Player + Transcript -->
+                <div class="lg:col-span-1">
+                    <div class="bg-white/5 border border-white/10 p-4 rounded-xl">
+                        <h2 class="text-xl font-semibold mb-3">Now Playing</h2>
+                        <audio id="player" controls class="w-full rounded"></audio>
+                        <div id="download" class="mt-3 text-sm text-white/80"></div>
+                    </div>
+                    <div id="transcriptWrap" class="bg-white/5 border border-white/10 p-4 rounded-xl mt-4 hidden">
+                        <details open>
+                            <summary class="cursor-pointer select-none text-white/90">Transcript</summary>
+                            <pre id="transcriptBox" class="mt-2 whitespace-pre-wrap text-white/80"></pre>
+                        </details>
+                    </div>
+                </div>
+
+                <!-- Stories list -->
+                <div class="lg:col-span-2">
+                    <h2 class="text-xl font-semibold mb-3">Top Stories</h2>
+                    <div id="items" class="space-y-3"></div>
+                </div>
+            </div>
+        </section>
+    </main>
+    <script>
+    const form = document.getElementById('newsForm');
+    const result = document.getElementById('result');
+    const player = document.getElementById('player');
+    const items = document.getElementById('items');
+    const transcriptWrap = document.getElementById('transcriptWrap');
+    const transcriptBox = document.getElementById('transcriptBox');
+    const errorBox = document.getElementById('errorBox');
+    const downloadDiv = document.getElementById('download');
+    const resetBtn = document.getElementById('resetBtn');
+
+    function showError(msg) {
+        errorBox.textContent = msg || 'Something went wrong';
+        errorBox.classList.remove('hidden');
+        setTimeout(() => errorBox.classList.add('hidden'), 5000);
+    }
+
+    resetBtn.addEventListener('click', () => {
+        form.reset();
+        result.classList.add('hidden');
+        errorBox.classList.add('hidden');
+        items.innerHTML = '';
+        transcriptBox.textContent = '';
+        player.removeAttribute('src');
+    });
+
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        errorBox.classList.add('hidden');
+        // simple loading state on button
+        const submitBtn = form.querySelector('button[type="submit"]');
+        const prevText = submitBtn.textContent;
+        submitBtn.textContent = 'Loading...';
+        submitBtn.disabled = true;
+        const body = {
+            category: document.getElementById('category').value || null,
+            country: document.getElementById('country').value || null,
+            q: document.getElementById('q').value || null,
+            limit: Number(document.getElementById('limit').value || 5),
+            date_range: document.getElementById('dateRange').value || 'any',
+            language: document.getElementById('language').value || 'en',
+            voice_gender: document.getElementById('gender').value || 'female',
+            voice_rate: document.getElementById('rate').value ? Number(document.getElementById('rate').value) : null,
+            voice_pitch: document.getElementById('pitch').value ? Number(document.getElementById('pitch').value) : null,
+            transcript: document.getElementById('transcript').checked,
+        };
+        try {
+            const res = await fetch('/api/read', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(body)});
+            const data = await res.json();
+            if (!res.ok || !data.success) {
+                showError(data.error || 'Request failed');
+                return;
+            }
+
+            result.classList.remove('hidden');
+            player.src = data.audio_url;
+            player.load();
+            player.play().catch(() => {});
+
+            downloadDiv.innerHTML = `<a class="underline" href="${data.audio_url}" download>Download audio</a>`;
+
+            if (data.transcript) {
+                transcriptWrap.classList.remove('hidden');
+                transcriptBox.textContent = data.transcript || '';
+            } else {
+                transcriptWrap.classList.add('hidden');
+                transcriptBox.textContent = '';
+            }
+
+            items.innerHTML = '';
+            const plain = document.getElementById('plainView').checked;
+            (data.items || []).forEach((it) => {
+                const published = it.publishedAt ? new Date(it.publishedAt).toLocaleString() : '';
+                const div = document.createElement('div');
+                if (plain) {
+                    div.className = 'border-l-4 border-blue-400 pl-3';
+                    div.innerHTML = `
+                        <div class="font-semibold">${it.title || ''}</div>
+                        <div class="text-sm text-white/60">${it.source || ''} • ${published}</div>
+                        <div class="text-white/80">${it.description || ''}</div>
+                        <a class="underline text-blue-300" target="_blank" href="${it.url}">Open</a>
+                    `;
+                } else {
+                    div.className = 'bg-white/5 border border-white/10 p-4 rounded-xl hover:bg-white/10 transition';
+                    div.innerHTML = `
+                        <div class="flex items-start justify-between gap-3">
+                            <div class="font-semibold text-lg leading-snug">${it.title || ''}</div>
+                            <div class="text-xs text-white/60">${published}</div>
+                        </div>
+                        <div class="text-sm text-white/70 mt-1">${it.source || ''}</div>
+                        <div class="text-white/80 mt-2">${it.description || ''}</div>
+                        <div class="mt-3"><a class="underline text-blue-300 hover:text-blue-200" target="_blank" href="${it.url}">Open article</a></div>
+                    `;
+                }
+                items.appendChild(div);
+            });
+
+            result.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        } catch (err) {
+            showError('Network error. Please try again.');
+        } finally {
+            submitBtn.textContent = prevText;
+            submitBtn.disabled = false;
+        }
+    });
+    </script>
+</body>
+</html>
+
+
