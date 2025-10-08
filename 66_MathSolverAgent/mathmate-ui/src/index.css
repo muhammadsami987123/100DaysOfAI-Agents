@@ -1,0 +1,93 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
+All colors MUST be HSL.
+*/
+
+@layer base {
+  :root {
+    --background: 240 20% 98%;
+    --foreground: 240 10% 10%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 240 10% 10%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 240 10% 10%;
+
+    --primary: 250 70% 55%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 240 15% 95%;
+    --secondary-foreground: 240 10% 10%;
+
+    --muted: 240 15% 96%;
+    --muted-foreground: 240 5% 45%;
+
+    --accent: 190 95% 50%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 240 15% 90%;
+    --input: 240 15% 90%;
+    --ring: 250 70% 55%;
+
+    --radius: 1rem;
+
+    --chat-user-bg: 250 70% 55%;
+    --chat-bot-bg: 240 15% 96%;
+    --gradient-primary: linear-gradient(135deg, hsl(250, 70%, 55%) 0%, hsl(280, 70%, 60%) 100%);
+    --gradient-accent: linear-gradient(135deg, hsl(190, 95%, 50%) 0%, hsl(210, 95%, 55%) 100%);
+    --shadow-glow: 0 8px 32px hsla(250, 70%, 55%, 0.2);
+    --shadow-soft: 0 2px 8px hsla(240, 10%, 10%, 0.08);
+  }
+
+  .dark {
+    --background: 240 15% 8%;
+    --foreground: 240 10% 95%;
+
+    --card: 240 12% 12%;
+    --card-foreground: 240 10% 95%;
+
+    --popover: 240 12% 12%;
+    --popover-foreground: 240 10% 95%;
+
+    --primary: 250 70% 60%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 240 12% 15%;
+    --secondary-foreground: 240 10% 95%;
+
+    --muted: 240 12% 15%;
+    --muted-foreground: 240 5% 60%;
+
+    --accent: 190 95% 55%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 72% 50%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 240 12% 18%;
+    --input: 240 12% 18%;
+    --ring: 250 70% 60%;
+
+    --chat-user-bg: 250 70% 60%;
+    --chat-bot-bg: 240 12% 15%;
+    --shadow-glow: 0 8px 32px hsla(250, 70%, 60%, 0.3);
+    --shadow-soft: 0 2px 8px hsla(0, 0%, 0%, 0.3);
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+  }
+}
