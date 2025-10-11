@@ -225,7 +225,7 @@ token.json
 
 # Audio files (for voice agents)
 *.wav
-*.mp3
+# *.mp3
 *.m4a
 *.flac
 *.ogg
