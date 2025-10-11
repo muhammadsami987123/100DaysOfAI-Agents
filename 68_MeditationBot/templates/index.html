@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MeditationBot</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gradient-to-r from-teal-400 to-blue-500 flex items-center justify-center min-h-screen p-4">
+    <div class="bg-white bg-opacity-90 p-8 rounded-xl shadow-2xl max-w-lg w-full transform transition-all duration-300 hover:scale-105">
+        <h1 class="text-4xl font-extrabold text-center text-gray-900 mb-8 tracking-wide">MeditationBot</h1>
+        <div id="chat-output" class="mb-6 h-72 overflow-y-auto border border-gray-300 p-4 rounded-lg bg-gray-50 text-gray-800 text-lg leading-relaxed shadow-inner">
+            <p class="text-gray-700">Hello there. I am MeditationBot, your calm and supportive guide for short, focused meditation sessions. How may I assist you today?</p>
+        </div>
+
+        <div class="mb-4">
+            <label for="meditation-type" class="block text-gray-800 text-base font-semibold mb-2">Meditation Type:</label>
+            <select id="meditation-type" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-4 focus:ring-blue-300 transition duration-200 ease-in-out bg-white text-gray-700">
+                <option value="stress relief">Stress Relief</option>
+                <option value="relaxation">Relaxation</option>
+                <option value="focus">Focus</option>
+                <option value="sleep">Sleep</option>
+            </select>
+        </div>
+
+        <div class="mb-6">
+            <label for="meditation-duration" class="block text-gray-800 text-base font-semibold mb-2">Duration (minutes):</label>
+            <select id="meditation-duration" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-4 focus:ring-blue-300 transition duration-200 ease-in-out bg-white text-gray-700">
+                <option value="2">2 Minutes</option>
+                <option value="5">5 Minutes</option>
+                <option value="10">10 Minutes</option>
+            </select>
+        </div>
+
+        <div class="mb-6">
+            <label for="background-sound" class="block text-gray-800 text-base font-semibold mb-2">Background Sound:</label>
+            <select id="background-sound" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-4 focus:ring-blue-300 transition duration-200 ease-in-out bg-white text-gray-700">
+                {% for sound in background_sound_options %}
+                <option value="{{ sound.value }}">{{ sound.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <button id="send-button" class="w-full bg-gradient-to-r from-purple-500 to-indigo-600 text-white py-3 rounded-lg hover:from-purple-600 hover:to-indigo-700 transition duration-300 ease-in-out transform hover:scale-102 font-bold text-lg shadow-md">Start Meditation</button>
+
+        <div id="breathing-animation" class="mt-8 flex justify-center items-center">
+            <div class="breathing-circle bg-blue-300 opacity-75 rounded-full" style="width: 100px; height: 100px;"></div>
+        </div>
+
+        <audio id="background-audio" loop></audio>
+        <audio id="tts-audio"></audio>
+
+    </div>
+
+    <script>
+        document.getElementById('send-button').addEventListener('click', sendMessage);
+
+        const backgroundAudio = document.getElementById('background-audio');
+        const ttsAudio = document.getElementById('tts-audio');
+        const breathingAnimation = document.getElementById('breathing-animation');
+        const breathingCircle = breathingAnimation.querySelector('.breathing-circle');
+
+        async function sendMessage() {
+            const meditationType = document.getElementById('meditation-type').value;
+            const meditationDuration = document.getElementById('meditation-duration').value;
+            const backgroundSound = document.getElementById('background-sound').value;
+            const chatOutput = document.getElementById('chat-output');
+            
+            chatOutput.innerHTML += `<p class="text-right text-purple-700 font-medium my-1">You: I need a ${meditationDuration}-minute session for ${meditationType} with background sound: ${backgroundSound}.</p>`;
+
+            if (backgroundSound !== 'none') {
+                backgroundAudio.src = backgroundSound; // Use the full URL directly
+                backgroundAudio.play();
+            } else {
+                backgroundAudio.pause();
+                backgroundAudio.currentTime = 0;
+            }
+
+            // Start breathing animation
+            breathingAnimation.classList.add('active');
+
+            fetch('/start_session', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ meditation_type: meditationType, duration: parseInt(meditationDuration), background_sound: backgroundSound }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                playMeditationScript(data.script);
+                chatOutput.scrollTop = chatOutput.scrollHeight;
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                chatOutput.innerHTML += `<p class="text-red-500 font-bold my-1">Error: Could not start meditation session.</p>`;
+                backgroundAudio.pause();
+                backgroundAudio.currentTime = 0;
+                breathingAnimation.classList.remove('active');
+            });
+        }
+
+        function playMeditationScript(script) {
+            let i = 0;
+
+            function playNextLine() {
+                if (i < script.length) {
+                    const line = script[i];
+                    chatOutput.innerHTML += `<p class="text-gray-700 my-1">Bot: ${line.text}</p>`;
+                    chatOutput.scrollTop = chatOutput.scrollHeight;
+
+                    if (line.audio) {
+                        ttsAudio.src = `data:audio/mp3;base64,${line.audio}`;
+                        ttsAudio.play();
+                        ttsAudio.onended = () => {
+                            i++;
+                            // Introduce a small pause after TTS playback, if any
+                            setTimeout(playNextLine, 1000); // 1-second pause between lines
+                        };
+                    } else {
+                        // If no audio, still display the text and then pause
+                        i++;
+                        setTimeout(playNextLine, 3000); // Default pause if no audio
+                    }
+                } else {
+                    backgroundAudio.pause();
+                    backgroundAudio.currentTime = 0;
+                    breathingAnimation.classList.remove('active');
+                }
+            }
+            playNextLine();
+        }
+    </script>
+</body>
+</html>
