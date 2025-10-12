@@ -106,7 +106,7 @@ Build 100 useful, functional, and diverse AI agents in 100 days. Each agent will
 | 66  | MathSolverAgent        | Solve equations step-by-step                                    |
 | 67  | FoodRecipeBot          | Suggest recipes from ingredients                               |
 | 68  | MeditationBot          | Guide short meditation sessions                                 |
-| 69  | DailySummaryAgent      | Give daily summary based on tasks + news                        |
+| 69  | Daily_Summary_Agent      | Give daily summary based on tasks + news                        |
 | 70  | JarvisAutoClicker      | Auto clicker via Python + voice                                 |
 | 71  | TimerVoiceBot          | Set timer using voice command                                   |
 | 72  | AudioNoteAgent         | Save audio notes locally                                        |

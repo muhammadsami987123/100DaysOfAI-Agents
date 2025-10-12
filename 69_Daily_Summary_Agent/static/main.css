@@ -1,0 +1,47 @@
+/* Custom CSS for Dark Mode and general styling that Tailwind alone might not easily handle */
+
+/* Base styles for light mode, overridden by .dark for dark mode */
+body {
+    @apply font-sans;
+}
+
+.dark-mode-toggle i {
+    /* Default color for sun icon in light mode, moon icon in dark mode */
+    @apply text-gray-700 dark:text-gray-300;
+}
+
+.dark-mode-toggle:hover i {
+    @apply text-indigo-600 dark:text-indigo-400;
+}
+
+/* Tailwind purge will handle this, but for explicit clarity */
+.bg-gray-100.dark \:bg-gray-900 {}
+.text-gray-900.dark \:text-gray-100 {}
+.bg-white.dark \:bg-gray-800 {}
+.text-indigo-700.dark \:text-indigo-400 {}
+.text-gray-600.dark \:text-gray-400 {}
+.bg-gray-50.dark \:bg-gray-700 {}
+.text-gray-800.dark \:text-gray-100 {}
+.border-gray-300.dark \:border-gray-600 {}
+.bg-white.dark \:bg-gray-600 {}
+.text-gray-900.dark \:text-gray-100 {}
+.focus\:ring-indigo-500.dark \:focus\:ring-indigo-500 {}
+.focus\:border-indigo-500.dark \:focus\:border-indigo-500 {}
+.bg-red-100.dark \:bg-red-900 {}
+.text-red-700.dark \:text-red-300 {}
+.border-red-300.dark \:border-red-700 {}
+.text-indigo-700.dark \:text-indigo-300 {}
+.text-gray-700.dark \:text-gray-200 {}
+.border-gray-200.dark \:border-gray-600 {}
+.text-gray-500.dark \:text-gray-400 {}
+.border-gray-200.dark \:border-gray-700 {}
+
+/* Optional: Subtle animation for the summary output */
+#summaryOutput {
+    animation: fadeIn 0.5s ease-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}

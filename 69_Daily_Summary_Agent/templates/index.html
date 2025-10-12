@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daily Summary Agent</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}">
+</head>
+<body class="min-h-screen bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors duration-500 flex flex-col items-center py-10 px-6">
+
+    <div class="dark-mode-toggle fixed top-6 right-6 cursor-pointer text-2xl text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors duration-300" onclick="toggleDarkMode()">
+        <i class="fas fa-sun" id="themeIcon"></i>
+    </div>
+
+    <div class="max-w-6xl w-full bg-white dark:bg-gray-800 rounded-xl shadow-lg p-8 transition-colors duration-500">
+        <header class="text-center mb-10">
+            <h1 class="text-4xl md:text-5xl font-extrabold text-indigo-700 dark:text-indigo-400 leading-tight">
+                DailySummaryAgent
+            </h1>
+            <p class="text-lg text-gray-600 dark:text-gray-400 mt-2">Your personalized daily brief: tasks & top news.</p>
+        </header>
+
+        <main class="grid grid-cols-1 lg:grid-cols-3 gap-10">
+            <!-- Input / Control Panel - Left Sidebar -->
+            <section class="lg:col-span-1 bg-gray-50 dark:bg-gray-700 p-6 rounded-lg shadow-md">
+                <h2 class="text-2xl font-bold mb-6 text-gray-800 dark:text-gray-100">Get Your Summary</h2>
+                <form id="summaryForm" class="space-y-6">
+                    <div>
+                        <label for="completedTasks" class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Your Completed Tasks</label>
+                        <input type="text" id="completedTasks" class="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-600 text-gray-900 dark:text-gray-100 focus:ring-indigo-500 focus:border-indigo-500 shadow-sm" placeholder="e.g., Finish proposal, Reply emails">
+                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Separate multiple tasks with commas.</p>
+                    </div>
+                    <div>
+                        <label for="pendingTasks" class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Your Pending Tasks</label>
+                        <input type="text" id="pendingTasks" class="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-600 text-gray-900 dark:text-gray-100 focus:ring-indigo-500 focus:border-indigo-500 shadow-sm" placeholder="e.g., Team meeting, Write blog post">
+                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Separate multiple tasks with commas.</p>
+                    </div>
+                    <div>
+                        <label for="newsPreference" class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">News Preference (Optional)</label>
+                        <input type="text" id="newsPreference" value="General" class="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-600 text-gray-900 dark:text-gray-100 focus:ring-indigo-500 focus:border-indigo-500 shadow-sm" placeholder="e.g., Technology, Sports, Business">
+                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Specify a category for news headlines.</p>
+                    </div>
+                    <button type="submit" class="w-full bg-indigo-600 text-white p-3 rounded-md font-semibold hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-colors duration-300 shadow-md">
+                        <i class="fas fa-magic mr-2"></i> Generate Summary
+                    </button>
+                </form>
+                <div id="loadingSpinner" class="hidden mt-8 text-center text-indigo-600 dark:text-indigo-400">
+                    <i class="fas fa-spinner fa-spin text-4xl"></i>
+                    <p class="mt-3 text-lg font-medium">Generating your daily brief...</p>
+                </div>
+                <div id="errorBox" class="hidden mt-6 p-4 rounded-md bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-300 border border-red-300 dark:border-red-700 text-center font-medium"></div>
+            </section>
+
+            <!-- Output Display - Right Main Content -->
+            <section class="lg:col-span-2 bg-gray-50 dark:bg-gray-700 p-6 rounded-lg shadow-md flex flex-col">
+                <h2 class="text-2xl font-bold mb-6 text-gray-800 dark:text-gray-100 text-center">Your Daily Brief</h2>
+
+                <div id="summaryOutput" class="space-y-6 flex-grow hidden">
+                    <div class="bg-white dark:bg-gray-600 p-5 rounded-lg shadow-sm border border-gray-200 dark:border-gray-600">
+                        <h3 class="text-xl font-semibold text-indigo-700 dark:text-indigo-300 mb-3 flex items-center">
+                            <i class="fas fa-clipboard-list mr-3"></i> Your Daily Tasks Summary
+                        </h3>
+                        <p class="text-gray-700 dark:text-gray-200 leading-relaxed" id="tasksContent"></p>
+                    </div>
+
+                    <div class="bg-white dark:bg-gray-600 p-5 rounded-lg shadow-sm border border-gray-200 dark:border-gray-600">
+                        <h3 class="text-xl font-semibold text-indigo-700 dark:text-indigo-300 mb-3 flex items-center">
+                            <i class="fas fa-newspaper mr-3"></i> Today’s Top News
+                        </h3>
+                        <p class="text-gray-700 dark:text-gray-200 leading-relaxed" id="newsContent"></p>
+                    </div>
+
+                    <!-- Optional: Motivation/Tips for the Next Day -->
+                    <div class="bg-white dark:bg-gray-600 p-5 rounded-lg shadow-sm border border-gray-200 dark:border-gray-600" id="motivationSection" style="display: none;">
+                        <h3 class="text-xl font-semibold text-indigo-700 dark:text-indigo-300 mb-3 flex items-center">
+                            <i class="fas fa-lightbulb mr-3"></i> Motivation & Tips
+                        </h3>
+                        <p class="text-gray-700 dark:text-gray-200 leading-relaxed" id="motivationContent">Stay focused! Break down large tasks into smaller, manageable steps. Prioritize your most important tasks for tomorrow morning.</p>
+                    </div>
+
+                    <button id="playAudio" class="mt-6 w-full bg-green-600 text-white p-3 rounded-md font-semibold hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-colors duration-300 shadow-md hidden">
+                        <i class="fas fa-volume-up mr-2"></i> Play Audio Summary
+                    </button>
+                    <audio id="audioPlayer" src="" class="hidden"></audio>
+                </div>
+                 <div id="initialMessage" class="text-center text-gray-500 dark:text-gray-400 mt-20 flex-grow flex flex-col items-center justify-center space-y-4">
+                    <img src="https://via.placeholder.com/150" alt="Daily Summary Icon" class="mx-auto rounded-lg shadow-md mb-4">
+                    <p class="text-lg"><i class="fas fa-hand-pointer mr-2"></i> Enter your tasks and news preference to get started!</p>
+                    <div class="text-left w-full max-w-md bg-gray-100 dark:bg-gray-700 p-4 rounded-lg border border-gray-200 dark:border-gray-600 mt-4">
+                        <p class="font-semibold text-gray-800 dark:text-gray-100 mb-2">Output Example:</p>
+                        <pre class="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap">
+Your Daily Tasks Summary:
+- ✔ Finished: Proposal sent, Emails replied
+- 🕓 Pending: Blog writing, Team sync at 4 PM
+
+Today’s Top News:
+- AI chip startup raises $300M
+- Google announces Gemini Pro 1.5 update
+- Major tech outage hits Europe
+                        </pre>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <footer class="text-center mt-10 pt-6 border-t border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400">
+            <p>&copy; 2025 DailySummaryAgent. Built for #100DaysOfAI-Agents.</p>
+        </footer>
+    </div>
+
+    <script>
+        // Dark mode toggle logic
+        function toggleDarkMode() {
+            const body = document.body;
+            body.classList.toggle('dark');
+            const isDarkMode = body.classList.contains('dark');
+            localStorage.setItem('theme', isDarkMode ? 'dark' : 'light');
+            updateDarkModeIcon(isDarkMode);
+        }
+
+        function updateDarkModeIcon(isDarkMode) {
+            const icon = document.getElementById('themeIcon');
+            if (isDarkMode) {
+                icon.classList.remove('fa-sun');
+                icon.classList.add('fa-moon');
+            } else {
+                icon.classList.remove('fa-moon');
+                icon.classList.add('fa-sun');
+            }
+        }
+
+        // Apply theme on load
+        document.addEventListener('DOMContentLoaded', () => {
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            if (savedTheme === 'dark') {
+                document.body.classList.add('dark');
+                updateDarkModeIcon(true);
+            } else {
+                updateDarkModeIcon(false);
+            }
+        });
+
+        document.getElementById('summaryForm').addEventListener('submit', async function(event) {
+            event.preventDefault();
+
+            const completedTasks = document.getElementById('completedTasks').value.split(',').map(task => task.trim()).filter(task => task !== '');
+            const pendingTasks = document.getElementById('pendingTasks').value.split(',').map(task => task.trim()).filter(task => task !== '');
+            const newsPreference = document.getElementById('newsPreference').value;
+            const loadingSpinner = document.getElementById('loadingSpinner');
+            const summaryOutput = document.getElementById('summaryOutput');
+            const errorBox = document.getElementById('errorBox');
+            const playAudioButton = document.getElementById('playAudio');
+            const audioPlayer = document.getElementById('audioPlayer');
+            const initialMessage = document.getElementById('initialMessage');
+
+            // Clear previous output and errors
+            summaryOutput.classList.add('hidden');
+            errorBox.classList.add('hidden');
+            initialMessage.classList.add('hidden');
+            loadingSpinner.classList.remove('hidden');
+            playAudioButton.classList.add('hidden');
+            audioPlayer.removeAttribute('src');
+
+            try {
+                const response = await fetch('/summarize', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        tasks: {
+                            completed: completedTasks,
+                            pending: pendingTasks
+                        },
+                        news_preference: newsPreference
+                    }),
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    errorBox.innerText = data.error || 'An unknown error occurred.';
+                    errorBox.classList.remove('hidden');
+                    return;
+                }
+
+                document.getElementById('tasksContent').innerText = data.daily_tasks_summary;
+                document.getElementById('newsContent').innerText = data.todays_top_news;
+                summaryOutput.classList.remove('hidden');
+                initialMessage.classList.add('hidden'); // Hide initial message on successful summary
+
+                if (data.audio_path) {
+                    audioPlayer.src = data.audio_path;
+                    playAudioButton.classList.remove('hidden');
+                }
+
+            } catch (error) {
+                console.error('Fetch error:', error);
+                errorBox.innerText = 'Network error. Please try again.';
+                errorBox.classList.remove('hidden');
+            } finally {
+                loadingSpinner.classList.add('hidden');
+            }
+        });
+
+        document.getElementById('playAudio').addEventListener('click', function() {
+            const audioPlayer = document.getElementById('audioPlayer');
+            audioPlayer.play();
+        });
+    </script>
+</body>
+</html>
