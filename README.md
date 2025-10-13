@@ -107,8 +107,8 @@ Build 100 useful, functional, and diverse AI agents in 100 days. Each agent will
 | 67  | FoodRecipeBot          | Suggest recipes from ingredients                               |
 | 68  | MeditationBot          | Guide short meditation sessions                                 |
 | 69  | Daily_Summary_Agent      | Give daily summary based on tasks + news                        |
-| 70  | JarvisAutoClicker      | Auto clicker via Python + voice                                 |
-| 71  | TimerVoiceBot          | Set timer using voice command                                   |
+| 70  | WebsiteInsightBot      | Analyze and summarize website content using GPT. Extracts main topics, keywords, tone, and sentiment to help users understand any webpage instantly.                                 |
+| 71  | IdeaGeneratorBot          | Generate creative ideas for startups, apps, or content. Accepts any topic or niche and provides structured, ranked ideas with GPT-based reasoning.                                   |
 | 72  | AudioNoteAgent         | Save audio notes locally                                        |
 | 73  | NetworkScannerBot      | Scan devices on local network                                   |
 | 74  | TimezoneConverter      | Convert time zones with GPT                                     |
