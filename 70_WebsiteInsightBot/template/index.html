@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>WebsiteInsightBot</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <script>
+    let dark = false;
+    let theme = 'blue';
+    function toggleDark() {
+      dark = !dark;
+      document.body.classList.toggle('bg-gray-900', dark);
+      document.body.classList.toggle('text-gray-100', dark);
+      document.body.classList.toggle('bg-gray-100', !dark);
+      document.body.classList.toggle('text-gray-900', !dark);
+      document.querySelectorAll('.card').forEach(card => {
+        card.classList.toggle('bg-gray-800', dark);
+        card.classList.toggle('bg-white', !dark);
+        card.classList.toggle('shadow-xl', dark);
+      });
+    }
+    function setTheme(newTheme) {
+      const bgMap = {blue:'bg-gradient-to-tr from-blue-100 to-blue-300', green:'bg-gradient-to-tr from-green-100 to-green-300', pink:'bg-gradient-to-tr from-pink-100 to-pink-300'};
+      document.body.classList.remove('theme-blue','theme-green','theme-pink');
+      document.body.classList.add('theme-' + newTheme);
+      document.getElementById('bgLayer').className = (dark? '':'') + ' fixed inset-0 -z-10 ' + (bgMap[newTheme]||bgMap.blue) + '';
+      theme = newTheme;
+    }
+    function showAbout() {document.getElementById('aboutmodal').classList.remove('hidden');}
+    function hideAbout() {document.getElementById('aboutmodal').classList.add('hidden');}
+    document.addEventListener('DOMContentLoaded',()=>{
+      document.title = 'WebsiteInsightBot 💡 AI';
+      setTheme('blue');
+    });
+    function animateTitle(text) {
+      let i = 0;
+      function step() {
+        document.title = text.substr(0, i) + (i%2?'_':'|');
+        if (i++ <= text.length) setTimeout(step, 60);
+        else document.title=text;
+      } step();
+    }
+    function copyText(elemId, btnId) {
+      const elem = document.getElementById(elemId);
+      if (!elem) return;
+      navigator.clipboard.writeText(elem.innerText||elem.textContent);
+      const btn = document.getElementById(btnId);
+      btn.innerHTML = '✔️';
+      setTimeout(()=>{btn.innerHTML='📋';}, 1200);
+    }
+    function showSpinner(msg) {
+      document.getElementById('results').innerHTML = `
+      <div id="loadingOverlay" class="fixed inset-0 bg-black bg-opacity-30 flex flex-col items-center justify-center z-20">
+        <svg class="h-14 w-14 mb-3 spinner" viewBox="0 0 50 50"><circle class="path" cx="25" cy="25" r="20" fill="none" stroke-width="6"/></svg>
+        <div class="text-lg text-blue-900 font-semibold animate-pulse">${msg||'Analyzing...'}</div>
+        <div class="text-xs text-gray-400 text-center mt-1">Tip: Switch theme or try long-form summary!</div>
+      </div>`;
+    }
+    function skeletonLoader() {
+      return `<div class="card animate-pulse bg-white/50 dark:bg-gray-800/40 rounded-lg p-6 mb-6 shadow-xl transition-all">
+        <div class="h-6 w-24 bg-gray-300 rounded mb-5"></div>
+        <div class="h-4 bg-gray-200 w-72 rounded mb-3"></div>
+        <div class="h-4 bg-gray-200 w-64 rounded mb-2"></div>
+        <div class="h-8 w-1/2 bg-gray-300 rounded my-6"></div>
+        <div class="h-4 bg-gray-200 w-40 rounded mb-1"></div>
+        <div class="h-4 bg-gray-200 w-32 rounded mb-2"></div>
+      </div>`;
+    }
+    function friendlyTime() {
+      const now = new Date();
+      return now.toLocaleString();
+    }
+    async function analyzeSite() {
+      const url = document.getElementById('urlinput').value.trim();
+      const longForm = document.getElementById('longform').checked;
+      const results = document.getElementById('results');
+      if (!/^https?:\/\//.test(url)) {
+        results.innerHTML = '<div class="text-red-600 card p-4 mb-4">Please enter a valid http/https URL.</div>';
+        return;
+      }
+      animateTitle('Analyzing website...');
+      showSpinner('Analyzing the website...');
+      results.innerHTML += skeletonLoader();
+      try {
+        const resp = await fetch('/analyze', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ url, long_form: longForm })
+        });
+        const data = await resp.json();
+        document.getElementById('loadingOverlay').remove();
+        if (data.error) {
+          results.innerHTML = `<div class="text-red-700 card p-4 mb-4">${data.error}</div>`;
+          animateTitle('WebsiteInsightBot — Error');
+        } else {
+          animateTitle(`WebsiteInsightBot for ${data.site_title || ''}`);
+          results.innerHTML = `
+            <div class="card animated-in bg-white dark:bg-gray-800 rounded-lg p-6 mb-6 shadow-2xl transition-all">
+              <div class="flex items-center mb-4">
+                <img src="${data.site_favicon || 'https://www.google.com/s2/favicons?domain_url=' + encodeURIComponent(document.getElementById('urlinput').value)}" onerror="this.style.display='none'" alt="Favicon" class="h-8 w-8 mr-3 shadow rounded bg-gray-100"/>
+                <div class="text-xl font-extrabold flex-1">${data.site_title || 'Website'}</div>
+                <span class="ml-4 px-3 py-1 text-xs bg-indigo-100 dark:bg-indigo-700 text-indigo-700 dark:text-indigo-200 rounded-full font-semibold flex items-center cursor-pointer group" title="Gemini LLM model used">
+                  ⚡ Gemini <span class="ml-1 underline decoration-dotted cursor-help group-hover:decoration-solid" title="Google's latest multi-modal LLM API">${data.model ? data.model.replace("gemini-","Gemini ").replace("-flash"," Flash") : "2.0 Flash"}</span>
+                </span>
+              </div>
+              <div class="h-px w-full bg-gradient-to-r from-blue-100 via-gray-300 to-blue-100 my-6"></div>
+              <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+                <div class="flex-1">
+                  <div class="flex items-center mb-2"><span class="mr-2">📄</span><h2 class="font-bold">Website Summary</h2><button id="copySummary" aria-label="Copy summary" onclick="copyText('summaryText','copySummary')" class="ml-2 text-xs px-2 py-1 bg-gray-200 rounded hover:bg-green-200 transition">📋</button></div>
+                  <p id="summaryText" class="mb-2 leading-relaxed">${data.summary || '<span class=\'text-gray-400\'>No summary available.</span>'}</p>
+                </div>
+                <div class="flex-1">
+                  <div class="flex items-center mb-2"><span class="mr-2">🔑</span><h2 class="font-bold">Top Keywords</h2><button id="copyKeywords" aria-label="Copy keywords" onclick="copyText('keywordsText','copyKeywords')" class="ml-2 text-xs px-2 py-1 bg-gray-200 rounded hover:bg-green-200 transition">📋</button></div>
+                  <ul id="keywordsText" class="list-disc pl-5 text-blue-600 dark:text-blue-300 mb-2">
+                    ${(data.keywords||'').split(/,|\n/).filter(k=>k.trim().length).map(k=>`<li>${k.trim()}</li>`).join('')}
+                  </ul>
+                </div>
+              </div>
+              <div class="h-px w-full bg-gradient-to-r from-blue-100 via-gray-300 to-blue-100 my-6"></div>
+              <div class="flex items-center mb-3">
+                <div class="flex items-center"><span class="mr-2">💡</span>
+                  <span class="font-bold">Sentiment:</span>
+                </div>
+                <span class="inline-block ml-2 px-3 py-1 rounded-full bg-gray-200 dark:bg-gray-600 font-medium">${data.sentiment || 'N/A'}</span>
+              </div>
+              <div class="text-xs text-gray-500 mt-2 flex items-center"><svg xmlns='http://www.w3.org/2000/svg' class='h-4 w-4 mr-1 inline' fill='none' viewBox='0 0 24 24' stroke='currentColor'><path stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M8 7V3m8 4V3m-9 9h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z'/></svg>Analysis at ${friendlyTime()}</div>
+            </div>
+          `;
+        }
+      } catch (e) {
+        document.getElementById('loadingOverlay').remove();
+        results.innerHTML = `<div class='text-red-700 card p-4 mb-4'>Analysis failed: ${e.message}</div>`;
+        animateTitle('WebsiteInsightBot — Error');
+      }
+    }
+    window.onload = function() {
+      document.getElementById('urlinput').addEventListener('keypress', function(e){if(e.key==='Enter'){analyzeSite();}});
+    }
+  </script>
+  <style>
+    body.bg-gray-900{transition:background 0.2s}
+    .card{transition:background 0.25s, box-shadow 0.2s;backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px)}
+    .animated-in{animation:fadeinmove 0.8s;}
+    @keyframes fadeinmove{0%{opacity:0;transform:translateY(30px)}100%{opacity:1;transform:translateY(0)}}
+    .dark .text-blue-600{color:#60a5fa!important}
+    .focus-ring:focus{box-shadow:0 0 0 3px #a5b4fc}
+    #aboutmodal .modal-bg{background:rgba(0,0,0,0.45);top:0;left:0;width:100vw;height:100vh;position:fixed;z-index:30}
+    .spinner{animation: spin 1.1s linear infinite;stroke: #2563eb40;}
+    .spinner .path{stroke: #6366f1;stroke-linecap: round;animation: dash 2.1s ease-in-out infinite;}
+    @keyframes spin {100% {transform: rotate(360deg)}}
+    @keyframes dash {0%{stroke-dasharray:1,200;stroke-dashoffset:0}50%{stroke-dasharray:90,150;stroke-dashoffset:-35}100%{stroke-dasharray:90,150;stroke-dashoffset:-124}}
+    #bgLayer{pointer-events:none;z-index:-10;position:fixed;inset:0!important;}
+    .theme-green #bgLayer{background-image:linear-gradient(120deg,#d1fae5,#bef264)!important;}
+    .theme-pink #bgLayer{background-image:linear-gradient(120deg,#fce7f3,#fda4af)!important;}
+    .theme-blue #bgLayer{background-image:linear-gradient(120deg,#bfdbfe,#ddd6fe)!important;}
+    .card ul li{margin-bottom:0.3rem}
+  </style>
+</head>
+<body class="bg-gray-100 text-gray-900 min-h-screen flex flex-col">
+  <div id="bgLayer" style="pointer-events:none;z-index:-10;position:fixed;inset:0;"></div>
+  <main class="flex-grow flex items-center justify-center min-h-screen">
+    <div class="bg-white dark:bg-gray-800/90 p-8 rounded-xl shadow-2xl max-w-2xl w-full mt-6">
+      <div class="flex justify-between items-center mb-6 gap-3 flex-wrap">
+        <div class="flex items-center gap-2 flex-wrap mb-2 min-w-0">
+          <h1 class="text-3xl font-extrabold text-blue-900 dark:text-blue-300 tracking-tight break-all">WebsiteInsightBot</h1>
+          <span class="ml-2 px-2 py-1 text-xs bg-indigo-100 text-indigo-700 dark:bg-indigo-700 dark:text-indigo-100 rounded font-bold">Modern Edition</span>
+        </div>
+        <div class="flex gap-2 flex-wrap items-center">
+          <button onclick="toggleDark()" class="px-3 py-1 bg-gray-200 dark:bg-gray-700 rounded text-gray-700 dark:text-gray-100 hover:bg-blue-100 dark:hover:bg-blue-900 transition" title="Toggle dark/light mode">🌙/🌞</button>
+          <select onchange="setTheme(this.value)" class="px-2 py-1 rounded bg-gray-100 border text-xs text-blue-900 focus:ring focus:ring-blue-100">
+            <option value="blue">Blue Theme</option>
+            <option value="green">Green Theme</option>
+            <option value="pink">Pink Theme</option>
+          </select>
+          <button onclick="showAbout()" class="px-3 py-1 bg-blue-100 text-blue-800 rounded font-bold hover:bg-blue-200 transition flex items-center" title="About / Tips">ℹ️</button>
+        </div>
+      </div>
+      <div class="flex mb-4 flex-wrap gap-1">
+        <input id="urlinput" type="url" placeholder="Enter website URL..." class="flex-grow border px-3 py-2 rounded-l focus:outline-none focus:ring focus:ring-blue-200 focus:border-blue-400 focus-ring font-medium focus-ring transition-all min-w-0" aria-label="Website URL" />
+        <button onclick="analyzeSite()" class="bg-blue-600 text-white px-5 rounded-r focus-ring font-medium hover:bg-blue-700 transition-all active:scale-95">Generate Insights</button>
+      </div>
+      <div class="mb-3 flex items-center gap-3">
+        <input type="checkbox" id="longform" class="mr-2 align-middle" />
+        <label for="longform" class="text-sm select-none">Long-form summary (more detail)
+        </label>
+      </div>
+      <div id="results" class="mt-7"></div>
+    </div>
+  </main>
+  <footer class="p-4 text-center text-xs text-gray-400 bg-gray-50 border-t mt-9">
+    <span>© 2025 WebsiteInsightBot &mdash; Day 70 of 100 Days of AI Agents</span>
+    <span class="mx-3">|</span>
+    <span class="font-bold text-indigo-600 dark:text-indigo-300" title="Gemini API by Google">Built with ❤️ by Muhammad Sami Asghar Mughal</span>
+    <span class="mx-2">|</span>
+    <a href="https://github.com/muhammadsami987123/100DaysOfAI-Agents" aria-label="GitHub Project" class="text-gray-400 hover:text-blue-700 mx-1">🐱</a>
+    <a href="mailto:sami.developer.official@gmail.com" aria-label="Email the author" class="text-gray-400 hover:text-blue-700 mx-1">✉️</a>
+    <a href="https://twitter.com/muhammadsami987" aria-label="Follow on Twitter/X" class="text-gray-400 hover:text-pink-600 mx-1">🐦</a>
+  </footer>
+  <div id="aboutmodal" class="hidden">
+    <div class="modal-bg flex items-center justify-center">
+      <div class="bg-white dark:bg-gray-900 p-8 rounded-xl shadow-xl z-40 max-w-lg relative">
+        <button class="absolute top-2 right-2 text-lg" onclick="hideAbout()">❌</button>
+        <h2 class="text-xl font-bold mb-2">About WebsiteInsightBot</h2>
+        <p class="mb-2 text-gray-700 dark:text-gray-200">WebsiteInsightBot analyzes any webpage, extracting a clear summary, top SEO keywords, and overall sentiment at the click of a button. Built for learning, productivity, and content marketing.</p>
+        <ul class="mb-2 pl-5 text-xs list-disc text-gray-500 dark:text-gray-300">
+          <li>Try <kbd>short</kbd> vs <kbd>long-form</kbd> summaries</li>
+          <li>Change page theme — blue, green or pink!</li>
+          <li>Copy results to clipboard for instant use</li>
+          <li>Your API key, browser, and connection safety guaranteed</li>
+          <li>Dark mode for late-night research!</li>
+        </ul>
+        <span class="text-blue-600">Open source. Powered by Google Gemini LLMs.</span>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
