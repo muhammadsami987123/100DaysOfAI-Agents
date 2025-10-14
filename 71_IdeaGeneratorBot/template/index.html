@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IdeaGeneratorBot</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      .fade-in { animation: fadeIn .6s cubic-bezier(.39,.575,.565,1.000) both; }
+      @keyframes fadeIn { 0% {opacity:0; transform: translateY(18px);} 100% {opacity:1; transform: none;} }
+    </style>
+</head>
+<body class="bg-gradient-to-tr from-blue-50 to-blue-100 min-h-screen">
+    <div class="max-w-2xl mx-auto py-10 px-4">
+        <h1 class="text-3xl font-bold text-center mb-6 flex items-center justify-center gap-2">
+          <span>💡</span> IdeaGeneratorBot
+        </h1>
+        <form id="idea-form" class="flex flex-col md:flex-row gap-2 mb-6 items-center justify-center" autocomplete="off">
+            <input id="topic" name="topic" type="text" placeholder="Enter a topic or niche..." required class="flex-1 rounded-lg px-4 py-2 border border-blue-200 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-200 transition" />
+            <div class="flex items-center gap-1">
+              <label for="num-ideas" class="text-sm text-gray-700 whitespace-nowrap mr-1">How many?</label>
+              <input id="num-ideas" name="num_ideas" type="number" min="3" max="7" value="5" class="w-14 px-2 py-1 border border-blue-100 rounded focus:border-blue-400 transition text-center" />
+            </div>
+            <button type="submit" class="bg-blue-500 hover:bg-blue-600 focus:bg-blue-700 transition text-white font-semibold px-6 py-2 rounded-lg shadow focus:outline-none">Generate Ideas</button>
+        </form>
+        <div id="summary" class="mb-4 flex items-center justify-end"></div>
+        <div id="result" class="grid gap-6"></div>
+    </div>
+    <script>
+      const form = document.getElementById('idea-form');
+      const result = document.getElementById('result');
+      const summary = document.getElementById('summary');
+
+      async function copyToClipboard(text, btnId) {
+        try {
+          await navigator.clipboard.writeText(text);
+          const btn = document.getElementById(btnId);
+          const prev = btn.innerHTML;
+          btn.innerHTML = '✅ Copied!';
+          btn.classList.remove('bg-blue-100');
+          btn.classList.add('bg-green-100', 'text-green-700');
+          setTimeout(() => {
+            btn.innerHTML = prev;
+            btn.classList.remove('bg-green-100', 'text-green-700');
+            btn.classList.add('bg-blue-100');
+          }, 1000);
+        } catch (e) { alert('Failed to copy!'); }
+      }
+
+      form.onsubmit = async (e) => {
+        e.preventDefault();
+        result.innerHTML = '<div class="text-blue-400 animate-pulse">Generating ideas...</div>';
+        summary.innerHTML = '';
+        const fd = new FormData(form);
+        const numIdeas = document.getElementById('num-ideas').value || 5;
+        const resp = await fetch('/generate-ideas', { 
+          method: 'POST', 
+          body: fd, 
+        });
+        if (!resp.ok) { result.innerHTML = '<div class="text-red-500">Failed to generate ideas.</div>'; return; }
+        const data = await resp.json();
+        if (!data.ideas || !data.ideas.length) {
+          result.innerHTML = '<div class="text-gray-400">No ideas found.</div>';
+          summary.innerHTML = '';
+          return;
+        }
+        summary.innerHTML = `<span class='bg-blue-100 text-blue-900 font-semibold px-4 py-1 rounded-full text-sm shadow-sm animate-fadein'>${data.ideas.length} ideas generated</span>`;
+        result.innerHTML = data.ideas.map((idea, idx) => {
+          const ideaText = `Idea ${idx+1}: ${idea.title}\nDescription: ${idea.description}\nWhy It Works: ${idea.why}\nAudience: ${idea.audience}\nRank: ${idea.rank}`;
+          const copyId = `copy-btn-${idx}`;
+          return `
+          <div class="bg-white rounded-xl shadow-xl px-6 py-5 border hover:scale-[1.02] hover:shadow-2xl transition duration-200 fade-in mb-2 relative group overflow-hidden">
+            <div class="flex items-start justify-between mb-1 gap-2">
+              <span class="text-xl font-bold text-blue-700 drop-shadow-sm">${idea.title}</span>
+              <span class="flex gap-2 items-center">
+                <button id="${copyId}" title="Copy this idea" onclick="copyToClipboard(\`${ideaText.replace(/`/g, '\`')}\`, '${copyId}')" type="button" class="copy-btn bg-blue-100 text-blue-900 hover:bg-blue-200 transition px-2 py-1 rounded shadow-sm text-xs font-semibold border border-blue-300 ml-1 focus:outline-none active:scale-95">📋 Copy</button>
+                <span class="px-3 py-1 text-xs rounded-full font-semibold ${badgeColor(idea.rank)} shadow-sm border border-opacity-40 border-black/5 cursor-help" title="Rank: Creativity & Practicality">${emojiFor(idea.rank)} ${idea.rank}</span>
+              </span>
+            </div>
+            <div class="divide-y divide-blue-50">
+              <p class="pb-3 text-gray-900"><span class="font-semibold text-gray-800">Description:</span> ${idea.description}</p>
+              <p class="py-3"><span class="font-semibold text-blue-600">Why It Works:</span> <span class="text-gray-700">${idea.why}</span></p>
+              <p class="pt-3"><span class="font-semibold text-violet-600">Audience:</span> <span class="text-blue-900">${idea.audience}</span></p>
+            </div>
+          </div>
+        `;
+        }).join('');
+      };
+      function badgeColor(rank) {
+        if (!rank) return 'bg-gray-200 text-gray-700';
+        if (rank.toLowerCase() === 'high') return 'bg-green-100 text-green-700 border-green-400';
+        if (rank.toLowerCase() === 'medium') return 'bg-yellow-100 text-yellow-700 border-yellow-400';
+        return 'bg-gray-100 text-gray-700 border-gray-300';
+      }
+      function emojiFor(rank) {
+        if (!rank) return '⚪';
+        let val = rank.toLowerCase();
+        if(val === 'high') return '🌟';
+        if(val === 'medium') return '✨';
+        if(val === 'low') return '💡';
+        return '🟦';
+      }
+    </script>
+</body>
+</html>
