@@ -1,0 +1,9 @@
+# Requirements for WebsiteInsightBot (Gemini 2.0 Flash)
+# For Gemini integration, set GEMINI_API_KEY env var
+requests
+beautifulsoup4
+langdetect
+fastapi
+uvicorn
+python-dotenv
+fastapi[all]

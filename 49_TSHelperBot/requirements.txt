@@ -1,0 +1,5 @@
+openai
+rich
+python-dotenv
+pyperclip
+distro

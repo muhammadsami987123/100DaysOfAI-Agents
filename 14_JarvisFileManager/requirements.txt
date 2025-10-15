@@ -1,0 +1,5 @@
+rich>=13.7.1
+speechrecognition>=3.10.0
+pyttsx3>=2.90
+langdetect>=1.0.9
+

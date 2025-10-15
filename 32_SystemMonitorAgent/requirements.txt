@@ -1,0 +1,4 @@
+psutil>=5.9.0
+colorama>=0.4.6
+openai==0.28.1
+rich>=13.0.0

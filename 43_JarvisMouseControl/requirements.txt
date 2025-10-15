@@ -1,0 +1,32 @@
+# JarvisMouseControl - Voice-Controlled Mouse Automation Agent
+# Core dependencies for voice recognition, mouse control, and AI processing
+
+# OpenAI API for natural language processing
+openai>=1.0.0
+
+# Speech recognition and text-to-speech
+SpeechRecognition>=3.10.0
+pyttsx3>=2.90
+
+# Mouse automation and control
+pyautogui>=0.9.54
+
+# Environment variable management
+python-dotenv>=1.0.0
+
+# Data validation and type hints
+typing-extensions>=4.8.0
+
+# JSON handling and file operations
+# (built-in modules: json, pathlib, threading, time, signal)
+
+# Optional: Enhanced CLI experience
+colorama>=0.4.6
+rich>=13.0.0
+
+# Optional: Audio processing (if needed for advanced features)
+# pyaudio>=0.2.11  # Uncomment if you need advanced audio processing
+
+# Development and testing (optional)
+# pytest>=7.0.0
+# pytest-asyncio>=0.21.0

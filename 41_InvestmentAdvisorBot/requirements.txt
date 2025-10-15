@@ -1,0 +1,6 @@
+openai>=1.0.0
+python-dotenv
+colorama
+rich
+openai>=1.0.0
+colorama

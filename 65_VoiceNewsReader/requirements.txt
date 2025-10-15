@@ -1,0 +1,10 @@
+fastapi
+uvicorn
+python-dotenv
+requests
+aiofiles
+jinja2
+google-generativeai
+gtts
+pyttsx3
+

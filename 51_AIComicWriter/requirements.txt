@@ -1,0 +1,7 @@
+click
+transformers
+torch
+rich
+pyperclip
+openai
+python-dotenv

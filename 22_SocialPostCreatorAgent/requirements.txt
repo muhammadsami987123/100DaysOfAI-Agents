@@ -1,0 +1,10 @@
+rich>=13.7.0
+apscheduler>=3.10.4
+pendulum>=3.0.0
+openai>=1.30.0
+requests>=2.31.0
+selenium>=4.21.0
+python-dotenv>=1.0.1
+flask>=2.3.0
+pyperclip>=1.8.2
+

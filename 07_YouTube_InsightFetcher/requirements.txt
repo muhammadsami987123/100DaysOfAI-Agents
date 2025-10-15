@@ -1,0 +1,6 @@
+youtube-transcript-api
+openai
+pyperclip
+colorama
+python-dotenv
+langdetect

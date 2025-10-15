@@ -1,0 +1,9 @@
+google-generativeai
+fastapi
+uvicorn
+jinja2
+python-dotenv
+requests
+beautifulsoup4
+python-docx
+pypdf2

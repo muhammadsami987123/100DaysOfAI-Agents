@@ -1,0 +1,5 @@
+python-dotenv
+pypdf
+python-docx
+google-generativeai
+rich

@@ -1,0 +1,5 @@
+click
+python-dotenv
+fastapi
+uvicorn
+jinja2

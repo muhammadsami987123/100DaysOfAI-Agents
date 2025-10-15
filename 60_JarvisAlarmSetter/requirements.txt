@@ -1,0 +1,8 @@
+Flask
+SpeechRecognition
+gTTS
+pyttsx3
+APScheduler
+nltk
+spacy
+python-dotenv

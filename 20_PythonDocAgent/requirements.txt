@@ -1,0 +1,9 @@
+openai>=1.35.0
+python-dotenv>=1.0.1
+requests>=2.32.3
+beautifulsoup4>=4.12.3
+rich>=13.7.1
+pyperclip>=1.8.2
+# Optional voice dependencies
+SpeechRecognition>=3.10.3
+pyttsx3>=2.90

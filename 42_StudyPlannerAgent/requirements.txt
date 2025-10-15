@@ -1,0 +1,40 @@
+# StudyPlannerAgent - AI-Powered Study Planning Tool
+# Core dependencies for study plan generation and web interface
+
+# OpenAI API for AI-powered study plan generation
+openai>=1.0.0
+
+# Web framework and server
+fastapi>=0.104.0
+uvicorn>=0.24.0
+jinja2>=3.1.0
+python-multipart>=0.0.6
+
+# Data validation and serialization
+pydantic>=2.0.0
+
+# File handling and utilities
+aiofiles>=23.2.1
+python-dotenv>=1.0.0
+
+# PDF generation (optional, for PDF export)
+reportlab>=4.0.0
+
+# Terminal interface enhancements
+colorama>=0.4.6
+rich>=13.0.0
+
+# Date and time utilities
+python-dateutil>=2.8.0
+
+# HTTP client for API requests
+httpx>=0.25.0
+
+# JSON handling
+orjson>=3.9.0
+
+# Environment variable management
+python-decouple>=3.8
+
+# Type checking and development
+typing-extensions>=4.8.0

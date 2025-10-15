@@ -1,0 +1,6 @@
+Flask
+requests
+qrcode
+Pillow
+pyperclip
+python-dotenv

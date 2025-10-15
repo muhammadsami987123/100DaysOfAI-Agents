@@ -1,0 +1,114 @@
+🤖 VoiceNoteAgent - Day 6 of #100DaysOfAI-Agents
+🎙️  Voice Note Taking Agent
+--------------------------------------------------
+📝 No existing voice notes found
+
+🤖 VoiceNoteAgent - Help
+--------------------------------------------------
+Available Commands:
+  record, r, new     Record a new voice note
+  list, l, show      List all voice notes
+  play <id>          Play a note using TTS
+  show <id>          Display full note content
+  search <term>      Search notes by content
+  delete <id>        Delete a note
+  stats              Show statistics
+  help, h, ?         Show this help
+  quit, q, exit      Exit the application
+--------------------------------------------------
+
+🎙️  VoiceNoteAgent> record
+⏱️  Enter recording duration in seconds (default 10): 15
+🎤 Calibrating microphone for ambient noise...
+Please remain quiet for a few seconds...
+✅ Microphone calibrated successfully!
+🎤 Recording... Speak now! (Press Ctrl+C to stop early)
+Recording for 15 seconds...
+✅ Recording completed!
+🔄 Transcribing audio...
+✅ Transcription successful!
+✅ Transcription: Remember to review the AI Agents repo before Sunday
+📝 Enter a title for this note (or press Enter for auto-title): AI Review Reminder
+✅ Note saved successfully!
+📝 Note ID: 1
+📁 TXT file: voice_notes/note_1_20240115_143022.txt
+
+🎙️  VoiceNoteAgent> list
+📝 Voice Notes (1 of 1):
+--------------------------------------------------------------------------------
+[1] AI Review Reminder
+   📅 2024-01-15 14:30:22 | 📊 8 words
+   📝 Remember to review the AI Agents repo before Sunday
+
+🎙️  VoiceNoteAgent> play 1
+🔊 Playing note #1: AI Review Reminder
+🔊 Speaking: Remember to review the AI Agents repo before Sunday...
+✅ Speech playback completed!
+
+🎙️  VoiceNoteAgent> search AI
+🔍 Found 1 matching notes:
+--------------------------------------------------------------------------------
+[1] AI Review Reminder
+   📅 2024-01-15 14:30:22 | 📊 8 words
+   📝 Remember to review the AI Agents repo before Sunday
+
+🎙️  VoiceNoteAgent> show 1
+📝 Note #1: AI Review Reminder
+📅 Date: 2024-01-15 14:30:22
+📊 Length: 8 words
+🏷️  Tags: None
+--------------------------------------------------
+Remember to review the AI Agents repo before Sunday
+--------------------------------------------------
+
+🎙️  VoiceNoteAgent> stats
+📊 Voice Notes Statistics:
+   📝 Total Notes: 1
+   📊 Total Words: 8
+   📈 Average Words per Note: 8.0
+   📅 Notes by Date:
+      2024-01-15: 1 notes
+
+🎙️  VoiceNoteAgent> record
+⏱️  Enter recording duration in seconds (default 10): 10
+🎤 Recording... Speak now! (Press Ctrl+C to stop early)
+Recording for 10 seconds...
+✅ Recording completed!
+🔄 Transcribing audio...
+✅ Transcription successful!
+✅ Transcription: Buy groceries: milk, bread, eggs, and vegetables
+📝 Enter a title for this note (or press Enter for auto-title): Shopping List
+✅ Note saved successfully!
+📝 Note ID: 2
+📁 TXT file: voice_notes/note_2_20240115_143045.txt
+
+🎙️  VoiceNoteAgent> list
+📝 Voice Notes (2 of 2):
+--------------------------------------------------------------------------------
+[1] AI Review Reminder
+   📅 2024-01-15 14:30:22 | 📊 8 words
+   📝 Remember to review the AI Agents repo before Sunday
+
+[2] Shopping List
+   📅 2024-01-15 14:30:45 | 📊 8 words
+   📝 Buy groceries: milk, bread, eggs, and vegetables
+
+🎙️  VoiceNoteAgent> search groceries
+🔍 Found 1 matching notes:
+--------------------------------------------------------------------------------
+[2] Shopping List
+   📅 2024-01-15 14:30:45 | 📊 8 words
+   📝 Buy groceries: milk, bread, eggs, and vegetables
+
+🎙️  VoiceNoteAgent> delete 2
+✅ Note #2 deleted successfully!
+
+🎙️  VoiceNoteAgent> list
+📝 Voice Notes (1 of 1):
+--------------------------------------------------------------------------------
+[1] AI Review Reminder
+   📅 2024-01-15 14:30:22 | 📊 8 words
+   📝 Remember to review the AI Agents repo before Sunday
+
+🎙️  VoiceNoteAgent> quit
+👋 Goodbye! 

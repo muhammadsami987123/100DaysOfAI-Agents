@@ -1,0 +1,5 @@
+This is a placeholder for a sad mood music file.
+In a real setup, this would be an MP3 file like:
+"Gary Jules - Mad World.mp3"
+
+The system will categorize this as "sad" mood music.

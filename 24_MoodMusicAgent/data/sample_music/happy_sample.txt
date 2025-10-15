@@ -1,0 +1,5 @@
+This is a placeholder for a happy mood music file.
+In a real setup, this would be an MP3 file like:
+"Pharrell Williams - Happy.mp3"
+
+The system will categorize this as "happy" mood music.

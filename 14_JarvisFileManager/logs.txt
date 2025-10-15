@@ -1,0 +1,14 @@
+2025-08-14 17:38:57,613 | INFO | JarvisFileManager started
+2025-08-14 17:39:03,591 | INFO | Folder created at C:\Users\Dell\Desktop\New Folder 20250814_173903
+2025-08-14 17:39:19,587 | INFO | Folder created at C:\Users\Dell\Desktop\New Folder 20250814_173919
+2025-08-14 17:39:35,990 | INFO | Folder created at C:\Users\Dell\Desktop\app
+2025-08-14 17:39:50,223 | INFO | File created at C:\Users\Dell\Desktop\app.py
+2025-08-14 17:40:01,812 | ERROR | Could not understand the command.
+2025-08-14 17:40:26,252 | INFO | JarvisFileManager started
+2025-08-14 17:40:33,695 | INFO | Folder created at C:\Users\Dell\Desktop\app
+2025-08-14 17:40:45,840 | INFO | File created at C:\Users\Dell\Desktop\you made a file page.py
+2025-08-14 17:41:00,618 | INFO | File created at C:\Users\Dell\Desktop\you made a file app.css
+2025-08-14 17:41:16,133 | INFO | Folder created at C:\Users\Dell\Desktop\New Folder 20250814_174116
+2025-08-14 17:41:33,099 | INFO | Folder created at C:\Users\Dell\Downloads\New Folder 20250814_174133
+2025-08-14 17:41:50,584 | ERROR | Sorry, I couldn't detect the action (create/open/delete/show).
+2025-08-14 17:42:01,020 | INFO | Folder created at C:\Users\Dell\Downloads\app

@@ -1,0 +1,11 @@
+speechrecognition>=3.10.0
+pyaudio
+pyttsx3>=2.90
+rapidfuzz>=3.5.2
+python-dotenv>=1.0.1
+colorama>=0.4.6
+openai>=1.37.0
+
+# Optional: enable local Whisper STT (requires ffmpeg)
+# openai-whisper>=20231117
+

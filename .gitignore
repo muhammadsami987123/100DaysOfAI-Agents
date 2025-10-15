@@ -255,7 +255,7 @@ screenshots/
 *.pdf
 *.docx
 *.doc
-*.txt
+# *.txt
 *.rtf
 documents/
 uploads/

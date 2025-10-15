@@ -1,0 +1,10 @@
+SpeechRecognition
+PyAudio
+pyscreenshot
+opencv-python
+requests
+pydub
+pygame
+openai
+python-dotenv
+pypiwin32

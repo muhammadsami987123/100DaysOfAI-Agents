@@ -1,0 +1,7 @@
+python-dotenv>=1.0.1
+pynput>=1.7.6
+pyperclip>=1.8.2
+language-tool-python>=2.7.1
+openai>=1.40.0
+win10toast>=0.9
+
