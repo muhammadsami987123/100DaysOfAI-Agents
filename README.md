@@ -109,7 +109,7 @@ Build 100 useful, functional, and diverse AI agents in 100 days. Each agent will
 | 69  | Daily_Summary_Agent      | Give daily summary based on tasks + news                        |
 | 70  | WebsiteInsightBot      | Analyze and summarize website content using GPT. Extracts main topics, keywords, tone, and sentiment to help users understand any webpage instantly.                                 |
 | 71  | IdeaGeneratorBot          | Generate creative ideas for startups, apps, or content. Accepts any topic or niche and provides structured, ranked ideas with GPT-based reasoning.                                   |
-| 72  | AudioNoteAgent         | Save audio notes locally                                        |
+| 72  | PromptImproverAgent      | This agent takes rough or unclear prompts and transforms them into clear, structured, and high-quality prompts suitable for GPT, Gemini, Claude, or other LLMs.                                        |
 | 73  | NetworkScannerBot      | Scan devices on local network                                   |
 | 74  | TimezoneConverter      | Convert time zones with GPT                                     |
 | 75  | ArticleRewriter        | Rewrite any content in new tone                                 |
