@@ -110,7 +110,7 @@ Build 100 useful, functional, and diverse AI agents in 100 days. Each agent will
 | 70  | WebsiteInsightBot      | Analyze and summarize website content using GPT. Extracts main topics, keywords, tone, and sentiment to help users understand any webpage instantly.                                 |
 | 71  | IdeaGeneratorBot          | Generate creative ideas for startups, apps, or content. Accepts any topic or niche and provides structured, ranked ideas with GPT-based reasoning.                                   |
 | 72  | PromptImproverAgent      | This agent takes rough or unclear prompts and transforms them into clear, structured, and high-quality prompts suitable for GPT, Gemini, Claude, or other LLMs.                                        |
-| 73  | NetworkScannerBot      | Scan devices on local network                                   |
+| 73  | PodcastIdeaBot        | Gives structured episode ideas based on a topic + guest style.                                   |
 | 74  | TimezoneConverter      | Convert time zones with GPT                                     |
 | 75  | ArticleRewriter        | Rewrite any content in new tone                                 |
 | 76  | TerminalHelperAI       | Help you learn terminal commands                                |

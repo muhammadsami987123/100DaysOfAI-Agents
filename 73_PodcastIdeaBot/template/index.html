@@ -1,0 +1,439 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>PodcastIdeaBot · Day 74</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --accent: #14b8a6;
+    }
+
+    body {
+      background: linear-gradient(120deg, #e0f7fa 0%, #f0fdfa 100%);
+      font-family: 'Montserrat', ui-sans-serif, system-ui, sans-serif;
+    }
+
+    .nav {
+      background: color-mix(in srgb, var(--accent) 85%, white);
+    }
+
+    .glass {
+      background: rgba(255, 255, 255, .88);
+      backdrop-filter: blur(12px);
+      border: 1.5px solid rgba(20, 184, 166, .22);
+      box-shadow: 0 8px 32px 0 rgba(20, 184, 166, .12), 0 1.5px 4px 0 rgba(20, 184, 166, .35);
+    }
+
+    .btn {
+      transition: transform .08s ease, background .2s ease;
+    }
+
+    .btn:active {
+      transform: scale(.98);
+    }
+
+    .card {
+      transition: transform .15s ease, box-shadow .2s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 14px 36px rgba(20, 184, 166, .18);
+    }
+
+    .fade-in {
+      animation: fadeIn .45s ease both;
+    }
+
+    @keyframes fadeIn {
+      0% {
+        opacity: 0;
+        transform: translateY(16px);
+      }
+
+      100% {
+        opacity: 1;
+        transform: none;
+      }
+    }
+
+    /* --- FIXED + MODERNIZED RESULT SECTION --- */
+    .modern-results {
+      display: grid;
+      gap: 2rem;
+      grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+      justify-items: stretch;
+      align-items: start;
+      margin-top: 2rem;
+    }
+
+    .modern-results > .glass.card {
+      width: 100%;
+      max-width: none;
+      margin: 0;
+      box-shadow: 0 6px 20px rgba(20, 184, 166, .12), 0 1px 3px rgba(20, 184, 166, .15);
+      opacity: 0;
+      animation: fadeInUp 0.35s ease forwards;
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @media (max-width: 500px) {
+      .modern-results {
+        gap: 1.5rem;
+      }
+    }
+  </style>
+</head>
+
+<body class="text-gray-900 min-h-screen flex flex-col">
+  <!-- Navbar -->
+  <header class="nav text-white shadow">
+    <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
+      <div class="flex items-center gap-2">
+        <span class="text-2xl">🎧</span>
+        <span class="text-xl font-extrabold">PodcastIdeaBot</span>
+        <span class="ml-2 text-xs px-2 py-0.5 rounded-full bg-white/20 border border-white/30">Day 73</span>
+      </div>
+      <a href="https://github.com/muhammadsami987123/100DaysOfAI-Agents" target="_blank"
+        class="text-sm hover:underline">#100DaysOfAI-Agents</a>
+    </div>
+  </header>
+
+  <!-- Main Section -->
+  <main class="flex-1">
+    <section class="max-w-6xl mx-auto px-4 pt-8 pb-4">
+      <div class="mb-6 fade-in">
+        <h1 class="text-4xl md:text-5xl font-extrabold text-teal-700 drop-shadow">Plan Podcast Episodes Faster</h1>
+        <p class="text-gray-700 mt-2">Turn any topic into a recording-ready episode with title, outline, guest,
+          takeaways, audience, and a creative twist.</p>
+      </div>
+
+      <!-- Input Form -->
+      <form id="ideaForm" class="glass rounded-3xl p-6 mb-6 fade-in" autocomplete="off">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div class="md:col-span-2">
+            <label class="block text-sm font-medium mb-1" for="topic">Topic</label>
+            <input id="topic" name="topic" type="text" required placeholder="e.g., AI in Healthcare"
+              class="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-teal-500 font-medium">
+          </div>
+          <div>
+            <label class="block text-sm font-medium mb-1" for="guest_type">Guest Type (optional)</label>
+            <input id="guest_type" name="guest_type" type="text"
+              placeholder="e.g., Doctor or HealthTech Entrepreneur"
+              class="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-teal-500 font-medium">
+          </div>
+          <div>
+            <label class="block text-sm font-medium mb-1" for="count"># of Ideas</label>
+            <select id="count" name="count"
+              class="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-teal-500">
+              <option value="1">1</option>
+              <option value="2">2</option>
+              <option value="3">3</option>
+              <option value="4">4</option>
+              <option value="5">5</option>
+            </select>
+          </div>
+        </div>
+        <div class="mt-4 flex flex-wrap items-center gap-3">
+          <button type="submit"
+            class="btn inline-flex items-center gap-2 bg-teal-600 text-white px-5 py-2 rounded-xl hover:bg-teal-700">
+            <span id="btnText">Generate</span>
+            <svg id="btnSpin" class="hidden animate-spin h-5 w-5" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor"
+                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+            </svg>
+          </button>
+          <!-- Script btn -->
+          <button id="genScriptBtn" type="button" class="btn inline-flex items-center gap-2 bg-amber-500/90 text-white px-5 py-2 rounded-xl hover:bg-amber-600">
+            <span id="btnScriptText">Generate Script</span>
+            <svg id="btnScriptSpin" class="hidden animate-spin h-5 w-5" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>
+          </button>
+          <span id="badge"
+            class="ml-3 hidden text-xs px-3 py-1 rounded-full bg-teal-100 text-teal-800 font-semibold align-middle">0
+            ideas</span>
+        </div>
+        <p id="errorMsg" class="mt-4 text-red-600 hidden"></p>
+      </form>
+      <!-- Script result area (injected) -->
+      <div id="topScriptPanel" class="max-w-3xl mx-auto fade-in mb-7" style="display:none"></div>
+    </section>
+
+    <!-- Results Section -->
+    <section class="bg-white/50 border-t mt-10">
+      <div class="max-w-6xl mx-auto px-4 py-8">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
+          <button id="copyAll" type="button"
+            class="hidden text-xs px-3 py-1 rounded bg-teal-100 text-teal-800 hover:bg-teal-200">📋 Copy All</button>
+        </div>
+        <div id="results" class="modern-results"></div>
+      </div>
+    </section>
+
+    <div id="toast"
+      class="fixed bottom-5 right-5 hidden bg-teal-600 text-white px-4 py-2 rounded shadow-lg">Copied!</div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="text-xs text-gray-500 py-4 text-center">
+    © 2025 PodcastIdeaBot • Day 73 of 100DaysOfAI-Agents
+  </footer>
+
+  <!-- JavaScript -->
+  <script>
+    const form = document.getElementById('ideaForm');
+    const results = document.getElementById('results');
+    const errorMsg = document.getElementById('errorMsg');
+    const badge = document.getElementById('badge');
+    const copyAllBtn = document.getElementById('copyAll');
+    const btnText = document.getElementById('btnText');
+    const btnSpin = document.getElementById('btnSpin');
+    const toast = document.getElementById('toast');
+    const genScriptBtn = document.getElementById('genScriptBtn');
+    const btnScriptText = document.getElementById('btnScriptText');
+    const btnScriptSpin = document.getElementById('btnScriptSpin');
+    const topScriptPanel = document.getElementById('topScriptPanel');
+    let lastIdeas = [];
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      errorMsg.classList.add('hidden');
+      results.innerHTML = '<div class="text-teal-600 animate-pulse text-center py-10">Generating ideas...</div>';
+      btnText.textContent = 'Generating...';
+      btnSpin.classList.remove('hidden');
+      const topic = document.getElementById('topic').value.trim();
+      const guest_type = document.getElementById('guest_type').value.trim();
+      const count = document.getElementById('count').value;
+
+      try {
+        const resp = await fetch('/generate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ topic, guest_type, count })
+        });
+
+        const data = await resp.json();
+        if (!resp.ok || data.error) throw new Error(data.error || 'Failed to generate');
+        const ideas = data.ideas || [];
+        results.innerHTML = ideas.map(renderIdea).join('');
+        lastIdeas = ideas;
+
+        if (ideas.length) {
+          badge.textContent = `${ideas.length} idea${ideas.length > 1 ? 's' : ''}`;
+          badge.classList.remove('hidden');
+          copyAllBtn.classList.remove('hidden');
+        }
+      } catch (err) {
+        results.innerHTML = '';
+        errorMsg.textContent = 'Error: ' + (err.message || 'Could not generate ideas.');
+        errorMsg.classList.remove('hidden');
+      } finally {
+        btnText.textContent = 'Generate';
+        btnSpin.classList.add('hidden');
+      }
+    });
+
+    function renderIdea(idea, idx) {
+      const outline = (idea.outline || []).map(i => `<li>${i}</li>`).join('');
+      const takeaways = (idea.takeaways || []).map(i => `<li>${i}</li>`).join('');
+      const asText = buildCopyText(idea);
+      const encoded = encodeURIComponent(asText);
+      const copyId = `copy-${Math.random().toString(36).slice(2, 8)}`;
+      const outlineId = `ol-${Math.random().toString(36).slice(2, 8)}`;
+      const scriptPanelId = `script-panel-${Math.random().toString(36).slice(2, 10)}`;
+      const scriptBtnId = `script-btn-${Math.random().toString(36).slice(2, 10)}`;
+      // Generate Script Button: not disabled
+      return `
+        <div class="glass rounded-3xl shadow p-6 sm:p-7 xl:p-8 card">
+          <div class="flex items-start justify-between gap-3">
+            <div class="min-w-0">
+              <div class="flex items-center gap-2">
+                <span class="text-lg">🎙</span>
+                <h2 class="text-xl font-extrabold tracking-tight truncate">${escapeHtml(idea.title || '')}</h2>
+              </div>
+              <div class="mt-1 text-xs text-gray-500">Guest:
+                <span class="font-semibold text-gray-700">${escapeHtml(idea.guest_type || '')}</span>
+              </div>
+            </div>
+            <div class="flex flex-col items-end gap-2 flex-shrink-0">
+              <button type="button"
+                class="text-xs px-2 py-1 rounded bg-teal-100 text-teal-800 hover:bg-teal-200"
+                data-copy="${encoded}" onclick="copyIdeaEncoded(this,'${copyId}')">📋 Copy</button>
+              <button type="button"
+                class="text-xs px-2 py-1 rounded bg-gray-100 hover:bg-gray-200"
+                onclick="toggleOutline('${outlineId}', this)">▾ Outline</button>
+              <button id="${scriptBtnId}" type="button" class="text-xs px-2 py-1 rounded bg-amber-100 text-amber-900 hover:bg-amber-200 mt-1" onclick="generateScriptForCard('${scriptPanelId}','${scriptBtnId}',${idx})">📝 Generate Script</button>
+            </div>
+          </div>
+          <div class="h-px w-full bg-gradient-to-r from-teal-50 via-gray-200 to-teal-50 my-4"></div>
+          <div class="mb-4">
+            <div class="flex items-center gap-2 mb-1"><span>🧩</span>
+              <h3 class="text-base font-bold">Episode Outline</h3></div>
+            <ul id="${outlineId}" class="list-disc pl-5 mt-1 space-y-1 leading-relaxed">${outline}</ul>
+          </div>
+          <div class="mb-4">
+            <div class="flex items-center gap-2 mb-1"><span>🔑</span>
+              <h3 class="text-base font-bold">Key Takeaways</h3></div>
+            <ul class="list-disc pl-5 mt-1 space-y-1 leading-relaxed">${takeaways}</ul>
+          </div>
+          <div class="mb-4">
+            <div class="flex items-center gap-2 mb-1"><span>🎯</span>
+              <h3 class="text-base font-bold">Target Audience</h3></div>
+            <p class="mt-1 leading-relaxed">${escapeHtml(idea.audience || '')}</p>
+          </div>
+          <div class="flex items-start justify-between mt-2">
+            <div class="min-w-0">
+              <div class="flex items-center gap-2 mb-1"><span>🧠</span>
+                <h3 class="text-base font-bold">Unique Twist</h3></div>
+              <p class="leading-relaxed">${escapeHtml(idea.twist || '')}</p>
+            </div>
+            <button id="${copyId}" type="button"
+              class="ml-3 h-8 self-start text-xs px-3 py-1 rounded bg-teal-100 text-teal-800 hover:bg-teal-200"
+              data-copy="${encoded}" onclick="copyIdeaEncoded(this,'${copyId}')">📋 Copy</button>
+          </div>
+          <div id="${scriptPanelId}" class="mt-7 hidden"></div>
+        </div>`;
+    }
+
+    function escapeHtml(text) {
+      return String(text || '').replace(/[&<>"']/g, s => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        "\"": "&quot;",
+        "'": "&#039;"
+      }[s]));
+    }
+
+    function buildCopyText(idea) {
+      const lines = [];
+      lines.push(`Title: ${idea.title || ''}`);
+      lines.push('Outline:');
+      (idea.outline || []).forEach((s, i) => lines.push(`${i + 1}. ${s}`));
+      lines.push(`Guest: ${idea.guest_type || ''}`);
+      lines.push('Takeaways:');
+      (idea.takeaways || []).forEach((s) => lines.push(`- ${s}`));
+      lines.push(`Audience: ${idea.audience || ''}`);
+      lines.push(`Twist: ${idea.twist || ''}`);
+      return lines.join('\n');
+    }
+
+    async function copyIdeaEncoded(el, btnId) {
+      const text = decodeURIComponent(el.getAttribute('data-copy') || '');
+      try { await navigator.clipboard.writeText(text); } catch (e) { return; }
+      const btn = document.getElementById(btnId);
+      const prev = btn.textContent; btn.textContent = '✅ Copied';
+      toast.classList.remove('hidden');
+      setTimeout(() => { toast.classList.add('hidden'); btn.textContent = prev; }, 900);
+    }
+
+    function toggleOutline(id, btn) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      if (el.classList.contains('hidden')) {
+        el.classList.remove('hidden');
+        btn.textContent = '▾ Outline';
+      } else {
+        el.classList.add('hidden');
+        btn.textContent = '▸ Outline';
+      }
+    }
+
+    copyAllBtn.addEventListener('click', async () => {
+      if (!lastIdeas.length) return;
+      const text = lastIdeas.map(i => buildCopyText(i)).join('\n\n---\n\n');
+      try { await navigator.clipboard.writeText(text); } catch (e) { return; }
+      toast.classList.remove('hidden');
+      setTimeout(() => toast.classList.add('hidden'), 900);
+    });
+
+    async function generateScriptForCard(scriptPanelId, scriptBtnId, ideaIdx) {
+      const panel = document.getElementById(scriptPanelId);
+      const btn = document.getElementById(scriptBtnId);
+      if (!panel || !btn) return;
+      // If visible, just toggle close
+      if (!panel.classList.contains('hidden')) {
+        panel.classList.add('hidden');
+        btn.textContent = '📝 Generate Script';
+        btn.classList.remove('bg-amber-200', 'text-green-900');
+        btn.classList.add('bg-amber-100', 'text-amber-900');
+        return;
+      }
+      // Otherwise, fetch and show loader
+      panel.innerHTML = '<div class="text-teal-700 flex items-center gap-2 animate-pulse"><svg class="animate-spin h-5 w-5" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg><span>Generating script...</span></div>';
+      panel.classList.remove('hidden');
+      btn.textContent = 'Loading...';
+      btn.classList.remove('bg-amber-100', 'text-amber-900');
+      btn.classList.add('bg-amber-200', 'text-green-900');
+      try {
+        const idea = lastIdeas[ideaIdx];
+        const resp = await fetch('/generate_script', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ idea })
+        });
+        const data = await resp.json();
+        if (!resp.ok || data.error) throw new Error(data.error || 'Failed to fetch script');
+        // Display script nicely
+        const scriptHtml = `<div class='rounded-xl bg-amber-50 border border-amber-200 px-5 py-5 mt-2 whitespace-pre-wrap font-mono text-[15px] leading-relaxed shadow-inner script-content'><span class='block font-semibold mb-2 text-amber-700'>🎬 Podcast Script:</span>${escapeHtml(data.script||'')}
+<button type='button' onclick='this.parentElement.classList.add("hidden");document.getElementById("${scriptBtnId}").textContent="📝 Generate Script";document.getElementById("${scriptBtnId}").classList.remove("bg-amber-200","text-green-900");document.getElementById("${scriptBtnId}").classList.add("bg-amber-100","text-amber-900");' class='mt-4 text-xs px-3 py-1 rounded bg-amber-100 hover:bg-amber-200 text-amber-900'>Hide Script</button></div>`;
+        panel.innerHTML = scriptHtml;
+        btn.textContent = 'Hide Script';
+        btn.classList.add('bg-amber-200', 'text-green-900');
+        btn.classList.remove('bg-amber-100', 'text-amber-900');
+      } catch (err) {
+        panel.innerHTML = `<div class='text-red-600 font-semibold text-center mt-3'>${escapeHtml(err.message||'Script generation failed.')}</div>`;
+        btn.textContent = 'Try Again';
+        btn.classList.add('bg-red-100', 'text-red-700');
+      }
+    }
+
+    genScriptBtn.addEventListener('click', async (e) => {
+      // Gather input fields
+      const topic = document.getElementById('topic').value.trim();
+      const guest_type = document.getElementById('guest_type').value.trim();
+      if (!topic) {
+        errorMsg.textContent = 'Topic is required for script generation.';
+        errorMsg.classList.remove('hidden');
+        return;
+      }
+      errorMsg.classList.add('hidden');
+      genScriptBtn.disabled = true;
+      form.querySelector('button[type="submit"]').disabled = true;
+      btnScriptText.textContent = 'Generating...';
+      btnScriptSpin.classList.remove('hidden');
+      topScriptPanel.style.display = 'block';
+      topScriptPanel.innerHTML = `<div class='bg-amber-50 border border-amber-200 px-6 py-5 rounded-xl text-amber-800 text-center animate-pulse flex flex-col gap-2 items-center'><svg class='animate-spin h-6 w-6' fill='none' viewBox='0 0 24 24'><circle class='opacity-25' cx='12' cy='12' r='10' stroke='currentColor' stroke-width='4'></circle><path class='opacity-75' fill='currentColor' d='M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z'></path></svg>Generating script for <span class='font-semibold'>"${escapeHtml(topic)}"</span> ...</div>`;
+      try {
+        // Construct a minimal idea dict with topic/guest_type
+        const idea = { title: topic, guest_type };
+        const resp = await fetch('/generate_script', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ idea }) });
+        const data = await resp.json();
+        if (!resp.ok || data.error) throw new Error(data.error || 'Script generation failed.');
+        topScriptPanel.innerHTML = `<div class='rounded-xl bg-amber-50 border border-amber-200 px-8 py-7 shadow-lg'><div class='flex items-center justify-between mb-2 pr-2'><span class='font-semibold text-amber-800 text-lg'><span class='align-middle'>🎬</span> Script for "${escapeHtml(topic)}"</span><button onclick='document.getElementById("topScriptPanel").style.display="none"' class='text-xs px-3 py-1 rounded bg-amber-100 hover:bg-amber-200 text-amber-900 ml-3'>Close</button></div><div class='font-mono text-base whitespace-pre-wrap text-amber-900' style='line-height:1.7'>${escapeHtml(data.script||'')}</div></div>`;
+      } catch (err) {
+        topScriptPanel.innerHTML = `<div class='text-red-600 font-semibold text-center bg-amber-50 border border-amber-200 rounded-xl px-6 py-5'>${escapeHtml(err.message||'Script generation failed.')}</div>`;
+      } finally {
+        genScriptBtn.disabled = false;
+        form.querySelector('button[type="submit"]').disabled = false;
+        btnScriptText.textContent = 'Generate Script';
+        btnScriptSpin.classList.add('hidden');
+      }
+    });
+  </script>
+</body>
+</html>
