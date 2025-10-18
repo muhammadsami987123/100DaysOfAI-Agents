@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ArticleRewriter - AI-Powered Content Rewriting</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        'sans': ['Inter', 'ui-sans-serif', 'system-ui'],
+                    },
+                    colors: {
+                        'primary': {
+                            50: '#eff6ff',
+                            100: '#dbeafe',
+                            200: '#bfdbfe',
+                            300: '#93c5fd',
+                            400: '#60a5fa',
+                            500: '#3b82f6',
+                            600: '#2563eb',
+                            700: '#1d4ed8',
+                            800: '#1e40af',
+                            900: '#1e3a8a',
+                        },
+                        'gray': {
+                            50: '#f9fafb',
+                            100: '#f3f4f6',
+                            200: '#e5e7eb',
+                            300: '#d1d5db',
+                            400: '#9ca3af',
+                            500: '#6b7280',
+                            600: '#4b5563',
+                            700: '#374151',
+                            800: '#1f2937',
+                            900: '#111827',
+                        }
+                    },
+                    animation: {
+                        'fade-in': 'fadeIn 0.6s ease-out',
+                        'slide-up': 'slideUp 0.6s ease-out',
+                        'slide-down': 'slideDown 0.3s ease-out',
+                        'scale-in': 'scaleIn 0.3s ease-out',
+                        'pulse-slow': 'pulse 3s infinite',
+                        'bounce-subtle': 'bounceSubtle 2s infinite',
+                        'shimmer': 'shimmer 2s infinite',
+                    },
+                    keyframes: {
+                        fadeIn: {
+                            '0%': { opacity: '0', transform: 'translateY(10px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' }
+                        },
+                        slideUp: {
+                            '0%': { opacity: '0', transform: 'translateY(30px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' }
+                        },
+                        slideDown: {
+                            '0%': { opacity: '0', transform: 'translateY(-10px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' }
+                        },
+                        scaleIn: {
+                            '0%': { opacity: '0', transform: 'scale(0.95)' },
+                            '100%': { opacity: '1', transform: 'scale(1)' }
+                        },
+                        bounceSubtle: {
+                            '0%, 100%': { transform: 'translateY(0)' },
+                            '50%': { transform: 'translateY(-5px)' }
+                        },
+                        shimmer: {
+                            '0%': { backgroundPosition: '-200% 0' },
+                            '100%': { backgroundPosition: '200% 0' }
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            background-attachment: fixed;
+        }
+        
+        .glass-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+        
+        .gradient-text {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+        
+        .btn-primary::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+        
+        .btn-primary:hover::before {
+            left: 100%;
+        }
+        
+        .input-focus {
+            transition: all 0.3s ease;
+        }
+        
+        .input-focus:focus {
+            transform: translateY(-1px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.15);
+        }
+        
+        .card-hover {
+            transition: all 0.3s ease;
+        }
+        
+        .card-hover:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        }
+        
+        .loading-shimmer {
+            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+            background-size: 200% 100%;
+            animation: shimmer 2s infinite;
+        }
+        
+        .modal-backdrop {
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(5px);
+        }
+        
+        .tone-option {
+            transition: all 0.2s ease;
+        }
+        
+        .tone-option:hover {
+            background-color: #f3f4f6;
+            transform: translateX(4px);
+        }
+        
+        .tone-option.selected {
+            background-color: #3b82f6;
+            color: white;
+        }
+        
+        .fade-in-delay-1 { animation-delay: 0.1s; }
+        .fade-in-delay-2 { animation-delay: 0.2s; }
+        .fade-in-delay-3 { animation-delay: 0.3s; }
+        .fade-in-delay-4 { animation-delay: 0.4s; }
+        .fade-in-delay-5 { animation-delay: 0.5s; }
+    </style>
+</head>
+<body class="min-h-screen">
+    <!-- Welcome Modal -->
+    <div id="welcomeModal" class="fixed inset-0 z-50 modal-backdrop flex items-center justify-center p-4">
+        <div class="glass-card rounded-2xl p-8 max-w-md w-full mx-4 animate-scale-in">
+            <div class="text-center">
+                <div class="w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-4 animate-bounce-subtle">
+                    <i class="fas fa-magic text-white text-2xl"></i>
+                </div>
+                <h2 class="text-2xl font-bold text-gray-800 mb-2">Welcome to ArticleRewriter!</h2>
+                <p class="text-gray-600 mb-6">Transform your content with AI-powered tone and style rewriting. Choose from 7 different writing styles and 6 languages.</p>
+                <div class="space-y-3 text-sm text-gray-500">
+                    <div class="flex items-center justify-center space-x-2">
+                        <i class="fas fa-check-circle text-green-500"></i>
+                        <span>7 Writing Tones Available</span>
+                    </div>
+                    <div class="flex items-center justify-center space-x-2">
+                        <i class="fas fa-check-circle text-green-500"></i>
+                        <span>6 Language Support</span>
+                    </div>
+                    <div class="flex items-center justify-center space-x-2">
+                        <i class="fas fa-check-circle text-green-500"></i>
+                        <span>Multiple Variations</span>
+                    </div>
+                </div>
+                <button id="closeWelcome" class="btn-primary text-white px-6 py-3 rounded-lg font-semibold mt-6 w-full">
+                    Get Started
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Header -->
+    <header class="bg-white/10 backdrop-blur-md py-6 shadow-lg">
+        <div class="container mx-auto px-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-4">
+                    <div class="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
+                        <i class="fas fa-edit text-white text-xl"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-3xl font-bold text-white">ArticleRewriter</h1>
+                        <p class="text-blue-100 text-sm font-medium">AI-Powered Content Transformation</p>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <div class="hidden md:flex items-center space-x-2 bg-white/20 rounded-full px-4 py-2">
+                        <div class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+                        <span class="text-white/90 text-sm font-medium">AI Ready</span>
+                    </div>
+                    <button id="chatbotBtn" class="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white px-4 py-2 rounded-lg transition-all duration-200 flex items-center space-x-2 shadow-lg hover:shadow-xl transform hover:-translate-y-1">
+                        <i class="fas fa-robot text-sm"></i>
+                        <span class="text-sm font-medium">Chat</span>
+                    </button>
+                    <button id="aboutBtn" class="text-white/80 hover:text-white transition-colors">
+                        <i class="fas fa-info-circle text-lg"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 py-8">
+        <!-- Input Section -->
+        <div class="max-w-5xl mx-auto mb-8">
+            <div class="glass-card rounded-3xl p-8 shadow-2xl animate-fade-in">
+                <div class="text-center mb-8">
+                    <h2 class="text-4xl font-bold gradient-text mb-4">
+                        <i class="fas fa-magic mr-3"></i>Rewrite Your Content
+                    </h2>
+                    <p class="text-gray-600 text-lg">Transform your text with AI-powered tone and style adaptation</p>
+                </div>
+                
+                <form id="rewriteForm" class="space-y-8">
+                    <!-- Content Input -->
+                    <div class="animate-fade-in fade-in-delay-1">
+                        <label for="content" class="block text-gray-700 font-semibold mb-4 text-lg">
+                            <i class="fas fa-file-text mr-2 text-blue-500"></i>Original Content
+                        </label>
+                        <div class="relative">
+                            <textarea 
+                                id="content" 
+                                name="content"
+                                rows="8"
+                                placeholder="Paste your article, blog post, or any text content here..."
+                                class="input-focus w-full px-6 py-4 rounded-2xl border-2 border-gray-200 bg-white text-gray-700 placeholder-gray-400 focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition-all duration-300 text-base resize-none shadow-sm"
+                                required
+                            ></textarea>
+                            <div class="absolute bottom-3 right-3 flex space-x-4 text-sm text-gray-500">
+                                <span>Words: <span id="wordCount" class="font-semibold text-blue-600">0</span></span>
+                                <span>Characters: <span id="charCount" class="font-semibold text-blue-600">0</span></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Options Row -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 animate-fade-in fade-in-delay-2">
+                        <!-- Tone Selection -->
+                        <div>
+                            <label for="tone" class="block text-gray-700 font-semibold mb-4 text-lg">
+                                <i class="fas fa-palette mr-2 text-purple-500"></i>Writing Tone
+                            </label>
+                            <div class="relative">
+                                <select 
+                                    id="tone" 
+                                    name="tone"
+                                    class="input-focus w-full px-4 py-3 rounded-xl border-2 border-gray-200 bg-white text-gray-700 focus:outline-none focus:border-purple-500 focus:ring-4 focus:ring-purple-100 transition-all duration-300 text-base appearance-none cursor-pointer"
+                                >
+                                    {% for key, tone in tones.items() %}
+                                    <option value="{{ key }}" class="text-gray-700 bg-white">{{ tone.name }}</option>
+                                    {% endfor %}
+                                </select>
+                                <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                                    <i class="fas fa-chevron-down text-gray-400"></i>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Language Selection -->
+                        <div>
+                            <label for="language" class="block text-gray-700 font-semibold mb-4 text-lg">
+                                <i class="fas fa-globe mr-2 text-green-500"></i>Target Language
+                            </label>
+                            <div class="relative">
+                                <select 
+                                    id="language" 
+                                    name="language"
+                                    class="input-focus w-full px-4 py-3 rounded-xl border-2 border-gray-200 bg-white text-gray-700 focus:outline-none focus:border-green-500 focus:ring-4 focus:ring-green-100 transition-all duration-300 text-base appearance-none cursor-pointer"
+                                >
+                                    {% for key, lang in languages.items() %}
+                                    <option value="{{ key }}" class="text-gray-700 bg-white">{{ lang.name }}</option>
+                                    {% endfor %}
+                                </select>
+                                <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                                    <i class="fas fa-chevron-down text-gray-400"></i>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Options -->
+                        <div>
+                            <label class="block text-gray-700 font-semibold mb-4 text-lg">
+                                <i class="fas fa-cog mr-2 text-orange-500"></i>Options
+                            </label>
+                            <div class="space-y-4">
+                                <label class="flex items-center space-x-3 cursor-pointer group">
+                                    <div class="relative">
+                                        <input 
+                                            type="checkbox" 
+                                            id="generateVariations" 
+                                            name="generateVariations"
+                                            checked
+                                            class="w-5 h-5 text-blue-600 bg-white border-2 border-gray-300 rounded focus:ring-blue-500 focus:ring-2"
+                                        >
+                                    </div>
+                                    <span class="text-gray-700 group-hover:text-blue-600 transition-colors">Generate Variations</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <div class="text-center animate-fade-in fade-in-delay-3">
+                        <button 
+                            type="submit" 
+                            id="rewriteBtn"
+                            class="btn-primary text-white font-bold py-4 px-12 rounded-2xl shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300 text-lg relative overflow-hidden group"
+                        >
+                            <i class="fas fa-magic mr-2 group-hover:animate-spin"></i>
+                            <span id="btnText">Rewrite Content</span>
+                            <div id="loadingSpinner" class="hidden ml-2">
+                                <i class="fas fa-spinner fa-spin"></i>
+                            </div>
+                        </button>
+                        <p class="text-gray-500 text-sm mt-3">AI-powered content transformation in seconds</p>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Examples Section -->
+        <div class="max-w-5xl mx-auto mb-8 animate-fade-in fade-in-delay-4">
+            <div class="text-center mb-8">
+                <h3 class="text-3xl font-bold text-white mb-4">Try These Examples</h3>
+                <p class="text-blue-100 text-lg">Get inspired with these popular rewriting scenarios</p>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="glass-card rounded-2xl p-6 card-hover cursor-pointer" onclick="loadExample('casual-to-formal')">
+                    <div class="text-center">
+                        <div class="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <i class="fas fa-graduation-cap text-white text-xl"></i>
+                        </div>
+                        <h4 class="text-xl font-bold text-gray-800 mb-2">Casual to Formal</h4>
+                        <p class="text-gray-600 text-sm">Transform casual conversation into formal writing</p>
+                    </div>
+                </div>
+                <div class="glass-card rounded-2xl p-6 card-hover cursor-pointer" onclick="loadExample('professional-to-witty')">
+                    <div class="text-center">
+                        <div class="w-12 h-12 bg-gradient-to-r from-purple-500 to-pink-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <i class="fas fa-smile text-white text-xl"></i>
+                        </div>
+                        <h4 class="text-xl font-bold text-gray-800 mb-2">Professional to Witty</h4>
+                        <p class="text-gray-600 text-sm">Add personality to business content</p>
+                    </div>
+                </div>
+                <div class="glass-card rounded-2xl p-6 card-hover cursor-pointer" onclick="loadExample('technical-to-simplified')">
+                    <div class="text-center">
+                        <div class="w-12 h-12 bg-gradient-to-r from-green-500 to-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <i class="fas fa-lightbulb text-white text-xl"></i>
+                        </div>
+                        <h4 class="text-xl font-bold text-gray-800 mb-2">Technical to Simplified</h4>
+                        <p class="text-gray-600 text-sm">Make complex content accessible to everyone</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Results Section -->
+        <div id="resultsSection" class="max-w-6xl mx-auto hidden">
+            <!-- Main Rewrite -->
+            <div class="glass-card rounded-3xl p-8 shadow-2xl mb-8 animate-slide-up">
+                <div class="flex items-center justify-between mb-6">
+                    <h3 class="text-3xl font-bold gradient-text">
+                        <i class="fas fa-file-alt mr-3"></i>Rewritten Content
+                    </h3>
+                    <div class="flex space-x-3">
+                        <button id="copyMain" class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-xl transition-all duration-200 flex items-center space-x-2 shadow-lg hover:shadow-xl transform hover:-translate-y-1">
+                            <i class="fas fa-copy"></i>
+                            <span>Copy</span>
+                        </button>
+                        <button id="downloadMain" class="bg-green-500 hover:bg-green-600 text-white px-6 py-3 rounded-xl transition-all duration-200 flex items-center space-x-2 shadow-lg hover:shadow-xl transform hover:-translate-y-1">
+                            <i class="fas fa-download"></i>
+                            <span>Download</span>
+                        </button>
+                    </div>
+                </div>
+                <div id="mainRewrite" class="bg-gray-50 rounded-2xl p-8 text-gray-700 leading-relaxed whitespace-pre-wrap border border-gray-200 shadow-inner"></div>
+            </div>
+
+            <!-- Variations -->
+            <div id="variationsSection" class="hidden">
+                <h3 class="text-3xl font-bold text-white mb-8 text-center">
+                    <i class="fas fa-copy mr-3"></i>Variations
+                </h3>
+                <div id="variationsContainer" class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <!-- Variations will be populated here -->
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- About Modal -->
+    <div id="aboutModal" class="fixed inset-0 z-50 modal-backdrop flex items-center justify-center p-4 hidden">
+        <div class="glass-card rounded-2xl p-8 max-w-2xl w-full mx-4 animate-scale-in">
+            <div class="text-center">
+                <div class="w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-info-circle text-white text-2xl"></i>
+                </div>
+                <h2 class="text-3xl font-bold text-gray-800 mb-4">About ArticleRewriter</h2>
+                <div class="text-left space-y-4 text-gray-600">
+                    <p>ArticleRewriter is an AI-powered tool that transforms your content into different writing styles and tones while preserving the original meaning and key information.</p>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
+                        <div>
+                            <h3 class="font-semibold text-gray-800 mb-2">Features:</h3>
+                            <ul class="space-y-1 text-sm">
+                                <li>• 7 Writing Tones</li>
+                                <li>• 6 Language Support</li>
+                                <li>• Multiple Variations</li>
+                                <li>• Copy & Download</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h3 class="font-semibold text-gray-800 mb-2">AI Models:</h3>
+                            <ul class="space-y-1 text-sm">
+                                <li>• Gemini 2.0 Flash</li>
+                                <li>• OpenAI GPT-4o-mini</li>
+                                <li>• Automatic Fallback</li>
+                                <li>• Fast Processing</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <button id="closeAbout" class="btn-primary text-white px-6 py-3 rounded-lg font-semibold mt-6">
+                    Got it!
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-white/10 backdrop-blur-md py-8 mt-12">
+        <div class="container mx-auto px-4 text-center">
+            <div class="flex items-center justify-center space-x-4 mb-4">
+                <div class="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-edit text-white text-sm"></i>
+                </div>
+                <span class="text-white font-semibold text-lg">ArticleRewriter</span>
+            </div>
+            <p class="text-white/80 text-sm">
+                &copy; 2025 ArticleRewriter | Day 75 of #100DaysOfAI-Agents | 
+                <a href="https://github.com/muhammadsami987123/100DaysOfAI-Agents" target="_blank" class="hover:text-white transition-colors underline">GitHub</a>
+            </p>
+        </div>
+    </footer>
+
+    <!-- Toast Notifications -->
+    <div id="toast" class="fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg transform translate-x-full transition-transform duration-300 z-50">
+        <i class="fas fa-check-circle mr-2"></i>
+        <span id="toastMessage">Success!</span>
+    </div>
+
+    <script src="/static/js/app.js"></script>
+</body>
+</html>
