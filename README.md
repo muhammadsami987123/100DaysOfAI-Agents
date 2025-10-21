@@ -115,7 +115,7 @@ Build 100 useful, functional, and diverse AI agents in 100 days. Each agent will
 | 75  | ArticleRewriter        | Rewrite any content in new tone                                 |
 | 76  | TerminalHelperAI       | Help you learn terminal commands                                |
 | 77  | GPTConfigGenerator     | Generate config files (e.g., JSON, YAML)                        |
-| 78  | ChatGPTDesktopApp      | Wrap agent in desktop GUI                                       |
+| 78  | DesktopAgentWrapper      | Wrap agent in desktop GUI                                       |
 | 79  | GPTNotepad             | Smart notepad with auto summaries                               |
 | 80  | DailyMotivationAgent   | Daily quote + message with TTS                                  |
 | 81  | CSVAnalyzerBot         | Analyze CSVs via natural language                               |
