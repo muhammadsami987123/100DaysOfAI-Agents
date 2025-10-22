@@ -1,0 +1,9 @@
+fastapi
+uvicorn
+openai
+python-dotenv
+google-generativeai
+bs4
+requests
+python-docx
+PyPDF2

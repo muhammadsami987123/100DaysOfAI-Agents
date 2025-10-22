@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GPTNotepad</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;800&display=swap" rel="stylesheet">
+    <link href="../frontend/styles.css" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                fontFamily: {
+                    'sans': ['Montserrat', 'ui-sans-serif', 'system-ui'],
+                },
+                extend: {
+                    colors: {
+                        gold: '#FFD700',
+                        dark: '#18181b',
+                        dark2: '#23232b',
+                        dark3: '#0a0a0a', /* Deeper black for some elements */
+                    },
+                    boxShadow: {
+                        '3d': '0 8px 32px 0 rgba(31, 38, 135, 0.37), 0 1.5px 4px 0 #FFD70044',
+                        'gold': '0 2px 16px 0 #FFD70033',
+                    },
+                    animation: {
+                        'fade-in': 'fadeIn 0.5s ease-in-out',
+                        'slide-up': 'slideUp 0.5s ease-out',
+                        'pulse-slow': 'pulse 2s infinite',
+                    },
+                    keyframes: {
+                        fadeIn: {
+                            '0%': { opacity: '0' },
+                            '100%': { opacity: '1' }
+                        },
+                        slideUp: {
+                            '0%': { transform: 'translateY(20px)', opacity: '0' },
+                            '100%': { transform: 'translateY(0)', opacity: '1' }
+                        },
+                        pulse: {
+                            '0%, 100%': { opacity: '1' },
+                            '50%': { opacity: '0.5' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background: linear-gradient(135deg, #0a0a0a 0%, #18181b 100%);
+            font-family: 'Montserrat', ui-sans-serif, system-ui, sans-serif;
+        }
+        .glass-card {
+            background: rgba(10, 10, 10, 0.7);
+            border-radius: 1.5rem;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.6), 0 1px 2px 0 #FFD70044;
+            border: 1px solid rgba(255, 215, 0, 0.1);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+        }
+        .glass-input, .glass-select, textarea {
+            background: rgba(24, 24, 27, 0.8);
+            border: 1px solid rgba(255, 215, 0, 0.2);
+            color: #f8fafc;
+            font-weight: 500;
+            box-shadow: 0 1px 4px 0 rgba(255, 215, 0, 0.1);
+            transition: all 0.2s ease-in-out;
+        }
+        .glass-input::placeholder, textarea::placeholder {
+            color: #FFD70077;
+        }
+        .glass-input:focus, .glass-select:focus, textarea:focus {
+            border-color: #FFD700;
+            outline: none;
+            box-shadow: 0 0 0 2px #FFD70055;
+            background: rgba(24, 24, 27, 0.95);
+        }
+        .gold-gradient { background: linear-gradient(90deg, #FFD700 0%, #fffbe6 100%); color: #18181b; }
+        .gold-text { color: #FFD700; }
+        .gold-border { border-color: #FFD700; }
+        .shadow-3d { box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37), 0 1.5px 4px 0 #FFD70044; }
+        .shadow-gold { box-shadow: 0 2px 16px 0 #FFD70033; }
+        .loader-spinner { border-top-color: #FFD700; border-right-color: #fffbe6; border-bottom-color: #FFD700; border-left-color: #23232b; animation: spin 1s ease-in-out infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #23232b; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb { background: #FFD70033; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #FFD70066; }
+        /* Custom dark mode overrides */
+        .dark .bg-gradient-to-tr { background: linear-gradient(135deg, #0a0a0a 0%, #18181b 100%); }
+        .dark .bg-white\/5 { background: rgba(10, 10, 10, 0.7); }
+        .dark .dark\:bg-black\/20 { background: rgba(0, 0, 0, 0.4); }
+        .dark .dark\:bg-gray-900\/40 { background: rgba(10, 10, 10, 0.7); }
+        .dark .dark\:text-blue-500 { color: #FFD700; /* Gold for titles in dark mode */ }
+        .dark .dark\:text-blue-400 { color: #FFD700; /* Gold for subtitles in dark mode */ }
+        .dark .dark\:bg-gray-800 { background-color: #1a1a1a; }
+        .dark .dark\:bg-gray-700 { background-color: #23232b; }
+        .dark .dark\:text-blue-200 { color: #fffbe6; }
+        .dark .dark\:text-blue-100 { color: #e2e8f0; }
+        .dark .dark\:text-gray-100 { color: #f8fafc; }
+        .dark .dark\:text-gray-400 { color: #a0aec0; }
+        .dark .dark\:bg-gray-800\/90 { background-color: rgba(10, 10, 10, 0.7); }
+        .dark .dark\:text-blue-300\/60 { color: rgba(255, 215, 0, 0.6); }
+        .dark .tab-btn.active { background: rgba(10, 10, 10, 0.7); }
+        .dark #notes-output { background-color: #1a1a1a; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col font-sans antialiased text-white bg-gradient-to-tr from-gray-900 to-black">
+  <!-- Topbar -->
+  <header class="bg-white/5 shadow-md pb-2 pt-4 sticky top-0 z-10">
+    <div class="max-w-5xl mx-auto px-4 flex justify-between items-center">
+      <h1 class="text-2xl font-bold text-blue-300 flex items-center gap-2 gold-text">💡 GPTNotepad</h1>
+      <button id="theme-toggle" class="rounded p-2 bg-blue-700 text-blue-100 gold-text gold-border hover:bg-gold hover:text-dark2">🌙</button>
+    </div>
+  </header>
+
+  <!-- Main Two-Pane Layout -->
+  <main class="flex-1 max-w-5xl mx-auto w-full py-8 px-3 lg:px-8">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-7 w-full">
+      <!-- Left: Summary Panel -->
+      <section id="summary-pane" class="glass-card p-6 flex flex-col fade-in min-h-[410px] ">
+        <div class="flex justify-between items-center mb-3">
+          <h2 class="text-lg font-bold text-blue-300 flex items-center gap-1 gold-text">Summary</h2>
+          <span id="summary-cnt" class="hidden badge"></span>
+          <div class="flex gap-2">
+            <button id="copy-summary" class="btn-action gold-text gold-border hover:bg-gold hover:text-dark2" title="Copy Summary">📋</button>
+            <button id="download-summary" class="btn-action gold-text gold-border hover:bg-gold hover:text-dark2" title="Download Summary">⬇️</button>
+          </div>
+        </div>
+        <ul id="summary-output" class="list-disc list-inside text-blue-100 space-y-1 text-base flex-1 min-h-[60px] text-gray-300">
+          <li class="text-gray-400 italic">No summary yet...</li>
+        </ul>
+      </section>
+      <!-- Right: Notes/Input Panel -->
+      <section id="notes-pane" class="glass-card p-6 flex flex-col fade-in">
+        <!-- Input Mode Switch Tabs -->
+        <div class="mb-2 flex gap-2 items-center">
+          <button class="tab-btn active gold-text gold-border" id="tab-manual">✍️ Manual</button>
+          <button class="tab-btn gold-text gold-border" id="tab-file">📄 File</button>
+          <button class="tab-btn gold-text gold-border" id="tab-url">🌐 URL</button>
+        </div>
+        <!-- Input Panels -->
+        <div id="input-manual" class="input-mode">
+          <textarea id="notes-input" rows="10" placeholder="Type or paste your notes here..." class="glass-input w-full p-3 rounded-lg resize-y"></textarea>
+        </div>
+        <div id="input-file" class="input-mode hidden flex flex-col gap-2">
+          <input type="file" id="file-input" accept=".txt,.pdf,.docx" class="glass-input px-2 py-2 rounded">
+          <div id="file-feedback" class="text-xs text-gray-400 pl-1"></div>
+        </div>
+        <div id="input-url" class="input-mode hidden flex flex-col gap-1">
+          <input type="text" id="url-input" placeholder="Paste a public webpage URL..." class="glass-input w-full p-2 rounded">
+        </div>
+        <!-- Loader -->
+        <div id="loader" class="hidden flex gap-2 items-center py-3 text-blue-300 gold-text"><div class="animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-blue-200 loader-spinner"></div>Processing...</div>
+        <!-- Extracted Notes & Actions -->
+        <div class="mt-3 flex-1 flex flex-col">
+          <div class="flex justify-between items-center mb-1">
+            <span class="text-base font-bold text-blue-300 gold-text">Notes</span>
+            <div class="flex gap-2">
+              <button id="copy-notes" class="btn-action gold-text gold-border hover:bg-gold hover:text-dark2" title="Copy Notes">📋</button>
+              <button id="download-notes" class="btn-action gold-text gold-border hover:bg-gold hover:text-dark2" title="Download Notes">⬇️</button>
+            </div>
+          </div>
+          <textarea readonly id="notes-output" rows="8" class="glass-input w-full resize-y p-2 rounded min-h-[70px]">No notes yet...</textarea>
+        </div>
+        <!-- Summarize Button -->
+        <button id="summarize-btn" class="mt-6 py-2 px-7 gold-gradient text-lg font-bold rounded shadow-gold hover:shadow-3d active:scale-95 transition disabled:opacity-60">Summarize</button>
+      </section>
+    </div>
+    <!-- Toast notifications -->
+    <div id="toast" class="fixed right-4 bottom-8 z-40 bg-blue-600 text-white rounded shadow-lg py-2 px-5 opacity-0 pointer-events-none"></div>
+  </main>
+  <footer class="bg-white/5 mt-9 py-4 text-center text-xs text-blue-100 border-t shadow gold-text gold-border">&copy; 2025 GPTNotepad. All rights reserved.</footer>
+  <script>
+    // Tab/input mode logic
+    const tabManual = document.getElementById('tab-manual');
+    const tabFile = document.getElementById('tab-file');
+    const tabUrl = document.getElementById('tab-url');
+    const inputManual = document.getElementById('input-manual');
+    const inputFile = document.getElementById('input-file');
+    const inputUrl = document.getElementById('input-url');
+    const notesInput = document.getElementById('notes-input');
+    const fileInput = document.getElementById('file-input');
+    const urlInput = document.getElementById('url-input');
+    const fileFeedback = document.getElementById('file-feedback');
+
+    function switchTab(mode) {
+      [tabManual,tabFile,tabUrl].forEach(tab => tab.classList.remove('active', 'gold-gradient', 'text-dark2', 'hover:bg-gold', 'hover:text-dark2'));
+      [tabManual,tabFile,tabUrl].forEach(tab => tab.classList.add('gold-text', 'gold-border', 'hover:bg-gold', 'hover:text-dark2'));
+      [inputManual,inputFile,inputUrl].forEach(div => div.classList.add('hidden'));
+
+      if(mode==='manual'){
+        tabManual.classList.add('active', 'gold-gradient', 'text-dark2');
+        tabManual.classList.remove('gold-text', 'gold-border');
+        inputManual.classList.remove('hidden');
+      }
+      if(mode==='file'){
+        tabFile.classList.add('active', 'gold-gradient', 'text-dark2');
+        tabFile.classList.remove('gold-text', 'gold-border');
+        inputFile.classList.remove('hidden');
+      }
+      if(mode==='url'){
+        tabUrl.classList.add('active', 'gold-gradient', 'text-dark2');
+        tabUrl.classList.remove('gold-text', 'gold-border');
+        inputUrl.classList.remove('hidden');
+      }
+    }
+    tabManual.onclick=()=>switchTab('manual');
+    tabFile.onclick=()=>switchTab('file');
+    tabUrl.onclick=()=>switchTab('url');
+    switchTab('manual');
+
+    // Theme
+    const themeToggle=document.getElementById('theme-toggle');
+    let isDark=window.matchMedia('(prefers-color-scheme:dark)').matches;
+    document.body.classList.toggle('dark',isDark); // Apply initial dark mode based on system
+    themeToggle.textContent=isDark?'☀️':'🌙';
+
+    themeToggle.onclick=()=>{isDark=!isDark;document.body.classList.toggle('dark',isDark);themeToggle.textContent=isDark?'☀️':'🌙';};
+
+    // Summarize logic
+    const summarizeBtn=document.getElementById('summarize-btn');
+    const loader=document.getElementById('loader');
+    const summaryOutput=document.getElementById('summary-output');
+    const summaryCnt=document.getElementById('summary-cnt');
+    const notesOutput=document.getElementById('notes-output');
+    let lastSummary='',lastNotes='';
+
+    function showToast(msg,type='info'){const t=document.getElementById('toast');t.textContent=msg;t.style.opacity=1;t.classList.remove('pointer-events-none');t.classList.add(type==='error'?'bg-red-600':'bg-blue-600');setTimeout(()=>{t.style.opacity=0;t.classList.add('pointer-events-none');},1800);}
+
+    function showLoader(state){loader.classList.toggle('hidden',!state);summarizeBtn.disabled=!!state;}
+
+    // Extraction preview for file/url (optional, show to user before summarize)
+    fileInput.onchange=function(){
+      fileFeedback.textContent = fileInput.files.length ? fileInput.files[0].name : '';
+    };
+
+    summarizeBtn.onclick=async()=>{
+      showLoader(true);
+      let form=new FormData();
+      let inputMode = tabManual.classList.contains('active')?'manual':tabFile.classList.contains('active')?'file':'url';
+      if(inputMode==='file'&&fileInput.files.length){form.append('file',fileInput.files[0]);}
+      if(inputMode==='url'&&urlInput.value.trim()){form.append('url',urlInput.value.trim());}
+      if(inputMode==='manual'){form.append('note',notesInput.value.trim());}
+      summaryOutput.innerHTML='<li class="text-gold">Generating summary...</li>';
+      notesOutput.value='Extracting and summarizing...';
+      try{
+        const resp=await fetch('/summarize',{
+          method:'POST',body:form
+        });
+        const data=await resp.json();
+        if(resp.ok&&data.summary){
+          summaryOutput.innerHTML='';
+          (data.summary.length?data.summary:["No summary found"]).forEach(pt=>{const li=document.createElement('li');li.textContent=pt;summaryOutput.appendChild(li);});
+          summaryCnt.textContent = data.summary.length+' bullets';
+          summaryCnt.classList.remove('hidden');
+          notesOutput.value=data.notes||'';
+          lastSummary=(data.summary.join('\n'));
+          lastNotes=data.notes||'';
+          showToast('Summarization successful!','info');
+        }else{
+          summaryOutput.innerHTML='<li class="text-red-400">No summary generated.</li>';
+          notesOutput.value='';
+          showToast(data.detail||'Summarization failed','error');
+        }
+      }catch(e){
+        summaryOutput.innerHTML='<li class="text-red-400">Network error.</li>';
+        notesOutput.value='';
+        showToast('Network error!','error');
+      }finally{showLoader(false);}
+    };
+    // Copy/Download logic for summary and notes
+    document.getElementById('copy-summary').onclick=()=>{navigator.clipboard.writeText(lastSummary||summaryOutput.innerText);showToast('Summary copied!');};
+    document.getElementById('download-summary').onclick=()=>{const b=new Blob([lastSummary||summaryOutput.innerText],{type:'text/plain'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='summary.txt';a.click();};
+    document.getElementById('copy-notes').onclick=()=>{navigator.clipboard.writeText(lastNotes||notesOutput.value);showToast('Notes copied!');};
+    document.getElementById('download-notes').onclick=()=>{const b=new Blob([lastNotes||notesOutput.value],{type:'text/plain'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='notes.txt';a.click();};
+  </script>
+</body>
+</html>
