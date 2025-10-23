@@ -1,0 +1,267 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Tailwind CSS configuration */
+@layer base {
+    :root {
+        --color-gold: #FFD700;
+        --color-dark: #18181b;
+        --color-dark2: #23232b;
+        --color-dark3: #1a1a1f;
+    }
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family: 'Montserrat', sans-serif;
+    background: linear-gradient(135deg, var(--color-dark) 0%, var(--color-dark2) 100%);
+}
+
+/* Custom scrollbar for better aesthetics */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--color-dark2); /* Darker track */
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: rgba(var(--color-gold), 0.2); /* Goldish thumb */
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: rgba(var(--color-gold), 0.4); /* Darker goldish on hover */
+}
+
+/* Glassmorphism card */
+.glass-card {
+    background: rgba(var(--color-dark), 0.95);
+    border-radius: 2rem;
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37), 0 1.5px 4px 0 rgba(var(--color-gold), 0.27);
+    border: 1.5px solid rgba(var(--color-gold), 0.12);
+}
+
+/* Glassmorphism inputs/selects */
+.glass-input, .glass-select {
+    background: rgba(var(--color-dark2), 0.95);
+    border: 1.5px solid rgba(var(--color-gold), 0.33);
+    color: #fff;
+    font-weight: 600;
+    box-shadow: 0 2px 8px 0 rgba(var(--color-gold), 0.13);
+}
+
+.glass-input::placeholder {
+    color: rgba(var(--color-gold), 0.6);
+}
+
+.glass-input:focus, .glass-select:focus {
+    border-color: var(--color-gold);
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(var(--color-gold), 0.33);
+}
+
+/* Gold gradient for buttons */
+.gold-gradient {
+    background: linear-gradient(90deg, var(--color-gold) 0%, #fffbe6 100%);
+    color: var(--color-dark);
+}
+
+/* Gold text color */
+.gold-text {
+    color: var(--color-gold);
+}
+
+/* Gold border color */
+.gold-border {
+    border-color: var(--color-gold);
+}
+
+/* Custom shadows */
+.shadow-3d {
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37), 0 1.5px 4px 0 rgba(var(--color-gold), 0.27);
+}
+
+.shadow-gold {
+    box-shadow: 0 2px 16px 0 rgba(var(--color-gold), 0.2);
+}
+
+/* Loading spinner animation */
+.spinner {
+    animation: spin 1s ease-in-out infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Pulse animation for loading text */
+.animate-pulse-slow {
+    animation: pulse-slow 2s infinite;
+}
+
+@keyframes pulse-slow {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}
+
+/* Fade-in animation */
+.animate-fade-in {
+    animation: fadeIn 0.5s ease-in-out;
+}
+
+@keyframes fadeIn {
+    0% { opacity: 0; }
+    100% { opacity: 1; }
+}
+
+/* Slide-up animation */
+.animate-slide-up {
+    animation: slideUp 0.5s ease-out;
+}
+
+@keyframes slideUp {
+    0% { transform: translateY(20px); opacity: 0; }
+    100% { transform: translateY(0); opacity: 1; }
+}
+
+/* Animation delay utility */
+.animation-delay-100 {
+    animation-delay: 0.1s;
+}
+
+/* Navbar Styling */
+nav {
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
+
+nav a,
+nav button {
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    text-decoration: none;
+}
+
+/* Welcome and About Popup Styling */
+#welcome-popup,
+#about-popup {
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+}
+
+#about-content h1,
+#about-content h2,
+#about-content h3 {
+    color: var(--color-gold);
+    font-weight: 800;
+    margin-top: 1.5em;
+    margin-bottom: 0.5em;
+}
+
+#about-content h1 {
+    font-size: 2.5rem;
+}
+
+#about-content h2 {
+    font-size: 2rem;
+}
+
+#about-content h3 {
+    font-size: 1.5rem;
+}
+
+#about-content p {
+    color: #cbd5e1; /* gray-300 */
+    margin-bottom: 1em;
+    line-height: 1.6;
+}
+
+#about-content ul {
+    list-style-type: disc;
+    margin-left: 1.5em;
+    color: #a0aec0; /* gray-400 */
+    margin-bottom: 1em;
+}
+
+#about-content strong {
+    color: var(--color-gold);
+}
+
+#about-content a {
+    color: #63b3ed; /* blue-400 */
+    text-decoration: underline;
+}
+
+#about-content code {
+    background-color: rgba(var(--color-gold), 0.1);
+    color: var(--color-gold);
+    padding: 0.2em 0.4em;
+    border-radius: 0.3em;
+    font-family: 'Fira Code', monospace;
+}
+
+#about-content pre {
+    background-color: var(--color-dark3);
+    border: 1px solid rgba(var(--color-gold), 0.2);
+    border-radius: 0.5rem;
+    padding: 1em;
+    overflow-x: auto;
+    margin-bottom: 1em;
+}
+
+#about-content table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 1em;
+}
+
+#about-content th,
+#about-content td {
+    border: 1px solid rgba(var(--color-gold), 0.2);
+    padding: 0.8em;
+    text-align: left;
+}
+
+#about-content th {
+    background-color: rgba(var(--color-gold), 0.1);
+    color: var(--color-gold);
+}
+
+#about-content blockquote {
+    border-left: 4px solid var(--color-gold);
+    padding-left: 1em;
+    margin-left: 0;
+    font-style: italic;
+    color: #a0aec0; /* gray-400 */
+}
+
+/* Ensure the Prose component renders markdown nicely */
+.prose {
+    color: #e2e8f0; /* gray-200 */
+}
+
+.prose h1,
+.prose h2,
+.prose h3,
+.prose h4,
+.prose h5,
+.prose h6 {
+    color: inherit;
+}
+
+.prose strong {
+    color: inherit;
+}
+
+.prose a {
+    color: inherit;
+}
+

@@ -1,0 +1,6 @@
+fastapi
+uvicorn
+dotenv
+openai
+google-generativeai
+gTTS
