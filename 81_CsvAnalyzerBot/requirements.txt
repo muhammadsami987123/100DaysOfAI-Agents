@@ -1,0 +1,11 @@
+fastapi
+uvicorn[standard]
+pandas
+openpyxl
+google-generativeai
+openai
+python-dotenv
+matplotlib
+plotly
+scikit-learn # Added for potential future ML integrations/data preprocessing
+tabulate # Added for pandas.DataFrame.to_markdown() functionality

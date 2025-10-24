@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CSVAnalyzerBot - AI-Powered Data Analysis</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        html {
+            min-height: 100%;
+            height: auto;
+            scroll-behavior: smooth;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #e0f2f7 0%, #c2e9fb 100%);
+            min-height: 100vh;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+        }
+        html, body {
+            scrollbar-width: thin;
+            scrollbar-color: #38bdf8 #e0f2f7;
+        }
+        ::-webkit-scrollbar {
+            width: 10px;
+            background: #e0f2f7;
+            border-radius: 8px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(120deg, #38bdf8 30%, #14b8a6 100%);
+            border-radius: 8px;
+            min-height: 40px;
+            border: 2px solid #e0f2f7;
+        }
+        ::-webkit-scrollbar-track {
+            background: #e0f2f7;
+            border-radius: 8px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(120deg, #14b8a6, #2563eb);
+        }
+        ::selection {
+            background: #99f6e4;
+        }
+        .chat-container {
+            display: flex;
+            flex-direction: column;
+            background-color: #f7fafc;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+        }
+        .message-bubble {
+            max-width: 70%;
+            padding: 12px 18px;
+            border-radius: 20px;
+            margin-bottom: 15px;
+            word-wrap: break-word;
+            line-height: 1.5;
+            position: relative;
+        }
+        .user-message {
+            background-color: #3b82f6;
+            color: white;
+            align-self: flex-end;
+            border-bottom-right-radius: 5px;
+            margin-left: auto;
+        }
+        .bot-message {
+            background-color: #e2e8f0;
+            color: #2d3748;
+            align-self: flex-start;
+            border-bottom-left-radius: 5px;
+            margin-right: auto;
+        }
+        .bot-message.loading .fa-spinner {
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        .chart-display {
+            background-color: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 10px;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        .chart-placeholder {
+            color: #64748b;
+            font-style: italic;
+            text-align: center;
+            padding: 20px;
+        }
+        .llm-toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 44px;
+            height: 24px;
+        }
+        .llm-toggle-switch input { opacity: 0; width: 0; height: 0; }
+        .llm-toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: #cbd5e0;
+            transition: .4s;
+            border-radius: 24px;
+        }
+        .llm-toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 16px;
+            width: 16px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        input:checked + .llm-toggle-slider { background-color: #f6ad55; }
+        input:checked + .llm-toggle-slider:before { transform: translateX(20px); }
+        /* Data Summary no scroll, natural flow */
+        #dataSummary {
+            overflow-y: visible !important;
+            max-height: none !important;
+        }
+        #dataSummary.overflow-y-auto,
+        #dataSummary[class*="overflow-y-"] {
+            overflow-y: visible !important;
+        }
+        /* Chat box never has vertical scroll, content flows naturally */
+        #chatBox {
+            overflow-y: visible !important;
+            max-height: none !important;
+        }
+        aside.flex.flex-col.min-h-0 {
+            min-height: 0;
+        }
+        /* Place footer at page bottom when content is small, otherwise below last content naturally */
+        footer {
+            margin-top: auto;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen flex flex-col">
+    <!-- Header -->
+    <nav class="bg-gradient-to-r from-teal-500 to-teal-700 p-4 shadow-lg flex items-center justify-between">
+        <div class="flex items-center space-x-3">
+            <i class="fas fa-robot text-white text-3xl"></i>
+            <h1 class="text-3xl font-extrabold text-white tracking-tight">CSVAnalyzerBot</h1>
+        </div>
+        <div class="flex items-center space-x-4">
+            <span id="llm-display-text" class="text-white font-semibold text-lg">LLM: Gemini</span>
+            <label class="llm-toggle-switch">
+                <input type="checkbox" id="llmToggle">
+                <span class="llm-toggle-slider"></span>
+            </label>
+            <span class="text-white font-semibold text-lg">OpenAI</span>
+        </div>
+    </nav>
+
+    <div class="flex flex-col md:flex-row w-full flex-1 px-0 py-0">
+        <!-- Left Panel: File Upload & Summary -->
+        <aside class="w-full md:w-1/3 bg-white p-6 shadow-xl flex flex-col border-r border-gray-200">
+            <div class="mb-6">
+                <h2 class="text-2xl font-bold text-teal-800 mb-4"><i class="fas fa-upload mr-2"></i>Upload CSV</h2>
+                <input type="file" id="csvFile" accept=".csv" class="hidden" onchange="updateFileName()">
+                <label for="csvFile" class="cursor-pointer bg-teal-100 text-teal-800 border border-teal-300 rounded-lg py-3 px-4 flex items-center justify-center space-x-2 hover:bg-teal-200 transition-colors mb-4">
+                    <i class="fas fa-file-csv text-xl"></i>
+                    <span id="fileNameDisplay" class="font-medium">Choose File</span>
+                </label>
+                <button id="uploadBtn" class="w-full bg-teal-600 text-white p-3 rounded-lg flex items-center justify-center space-x-2 hover:bg-teal-700 transition-colors shadow-md">
+                    <i class="fas fa-cloud-upload-alt"></i>
+                    <span id="uploadBtnText">Upload & Analyze</span>
+                </button>
+                <div id="uploadStatus" class="mt-4 text-sm text-center">
+                    <p class="text-gray-600">Status: <span id="fileStatus" class="text-red-500 font-semibold">No file uploaded</span></p>
+                    <p class="text-gray-600">Filename: <span id="uploadedFileName" class="font-medium">N/A</span></p>
+                    <p class="text-gray-600">File ID: <span id="uploadedFileId" class="font-medium">N/A</span></p>
+                </div>
+            </div>
+            <hr class="border-gray-200 my-6">
+            <div class="flex flex-col">
+                <h3 class="text-2xl font-bold text-teal-800 mb-4"><i class="fas fa-chart-bar mr-2"></i>Data Summary</h3>
+                <div id="dataSummary" class="bg-gray-50 p-4 rounded-lg border border-gray-200 text-gray-700 text-sm leading-relaxed mb-4">
+                    <p class="text-gray-500 italic">Upload a CSV to see basic statistics and column info here.</p>
+                </div>
+                <button id="downloadSummaryBtn" class="w-full bg-blue-600 text-white p-3 rounded-lg flex items-center justify-center space-x-2 hover:bg-blue-700 transition-colors shadow-md mt-auto hidden">
+                    <i class="fas fa-download"></i>
+                    <span>Download Full Summary</span>
+                </button>
+            </div>
+        </aside>
+        <!-- Main Chat Area, chat and input naturally flow, input area always at bottom of content -->
+        <main class="flex-1 bg-gray-50 flex flex-col">
+            <div id="chatAreaStack" class="flex flex-col flex-1">
+                <div id="chatBox" class="p-6 flex flex-col">
+                    <!-- Initial Bot Message -->
+                    <div class="message-bubble bot-message">
+                        Hello! 👋 I'm CSVAnalyzerBot. Upload a CSV file on the left, and then ask me anything about your data in plain English. I can provide insights, summaries, and even chart suggestions!
+                    </div>
+                </div>
+                <!-- Chat Input, always rendered directly below chat responses due to stack order -->
+                <div id="chatInputArea" class="bg-white p-4 border-t border-gray-200 flex items-center shadow-inner">
+                    <input type="text" id="userQuestion" placeholder="Ask a question about your CSV data, e.g., 'Show average salary by department'..." class="flex-1 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 text-gray-700">
+                    <button id="sendBtn" class="ml-3 bg-teal-600 text-white p-3 rounded-lg hover:bg-teal-700 transition-colors flex items-center justify-center shadow-md">
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Toast Notifications -->
+    <div id="toast" class="fixed bottom-5 right-5 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg transform translate-x-full transition-transform duration-300 flex items-center space-x-2 z-50">
+        <i class="fas fa-check-circle"></i>
+        <span id="toastMessage"></span>
+    </div>
+
+    <script>
+        const csvFile = document.getElementById('csvFile');
+        const fileNameDisplay = document.getElementById('fileNameDisplay');
+        const uploadBtn = document.getElementById('uploadBtn');
+        const uploadBtnText = document.getElementById('uploadBtnText');
+        const fileStatus = document.getElementById('fileStatus');
+        const uploadedFileName = document.getElementById('uploadedFileName');
+        const uploadedFileId = document.getElementById('uploadedFileId');
+        const dataSummary = document.getElementById('dataSummary');
+        const chatBox = document.getElementById('chatBox');
+        const userQuestion = document.getElementById('userQuestion');
+        const sendBtn = document.getElementById('sendBtn');
+        const downloadSummaryBtn = document.getElementById('downloadSummaryBtn');
+        const llmToggle = document.getElementById('llmToggle');
+        const llmDisplayText = document.getElementById('llm-display-text');
+        const toast = document.getElementById('toast');
+        const toastMessage = document.getElementById('toastMessage');
+
+        let currentFileId = null;
+        let currentLLM = 'Gemini'; // Default LLM
+
+        function showToast(message, type = 'success') {
+            toastMessage.textContent = message;
+            toast.classList.remove('bg-green-500', 'bg-red-500', 'bg-blue-500');
+            if (type === 'success') toast.classList.add('bg-green-500');
+            else if (type === 'error') toast.classList.add('bg-red-500');
+            else if (type === 'info') toast.classList.add('bg-blue-500');
+
+            toast.classList.remove('translate-x-full');
+            setTimeout(() => {
+                toast.classList.add('translate-x-full');
+            }, 3000);
+        }
+
+        function updateFileName() {
+            if (csvFile.files.length > 0) {
+                fileNameDisplay.textContent = csvFile.files[0].name;
+            } else {
+                fileNameDisplay.textContent = 'Choose File';
+            }
+        }
+
+        llmToggle.addEventListener('change', () => {
+            currentLLM = llmToggle.checked ? 'OpenAI' : 'Gemini';
+            llmDisplayText.innerHTML = `LLM: <span class="font-semibold">${currentLLM}</span>`;
+            showToast(`Switched LLM to ${currentLLM}`, 'info');
+        });
+
+        uploadBtn.addEventListener('click', async () => {
+            const file = csvFile.files[0];
+            if (!file) {
+                showToast('Please select a CSV file to upload.', 'error');
+                return;
+            }
+
+            fileStatus.textContent = 'Uploading...';
+            uploadBtnText.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Uploading...';
+            uploadBtn.disabled = true;
+            const formData = new FormData();
+            formData.append('file', file);
+
+            try {
+                const response = await fetch('/uploadfile/', {
+                    method: 'POST',
+                    body: formData,
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.detail || 'File upload failed.');
+                }
+
+                const data = await response.json();
+                fileStatus.textContent = 'Uploaded & Processed';
+                fileStatus.classList.remove('text-red-500');
+                fileStatus.classList.add('text-green-600');
+                uploadedFileName.textContent = data.filename;
+                uploadedFileId.textContent = data.file_id;
+                currentFileId = data.file_id;
+
+                await fetchAndDisplayDataSummary(data.file_id);
+                downloadSummaryBtn.classList.remove('hidden');
+
+                addMessageToChat('bot', `File "${data.filename}" uploaded successfully! How can I help you analyze it?`);
+                showToast('CSV uploaded and processed!', 'success');
+
+            } catch (error) {
+                fileStatus.textContent = `Error: ${error.message}`;
+                fileStatus.classList.remove('text-green-600');
+                fileStatus.classList.add('text-red-500');
+                showToast(`Upload error: ${error.message}`, 'error');
+                console.error('Upload error:', error);
+            } finally {
+                uploadBtnText.innerHTML = '<i class="fas fa-cloud-upload-alt"></i> Upload & Analyze';
+                uploadBtn.disabled = false;
+            }
+        });
+
+        sendBtn.addEventListener('click', sendMessage);
+        userQuestion.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+
+        function scrollToInput() {
+            // Ensures the chat input stays visible at the bottom after new content.
+            // Slight timeout ensures DOM update first.
+            setTimeout(() => {
+                const input = document.getElementById('chatInputArea');
+                if (input) input.scrollIntoView({behavior: "smooth", block: "nearest"});
+            }, 50);
+        }
+
+        async function sendMessage() {
+            const question = userQuestion.value.trim();
+            if (!question) return;
+
+            addMessageToChat('user', question);
+            userQuestion.value = '';
+
+            if (!currentFileId) {
+                addMessageToChat('bot', 'Please upload a CSV file first before asking questions.', 'error');
+                return;
+            }
+
+            const loadingMessage = addMessageToChat('bot', 'Analyzing your data... <i class="fas fa-spinner fa-spin"></i>', 'loading');
+
+            try {
+                const response = await fetch('/analyze/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ question: question, file_id: currentFileId, llm_choice: currentLLM.toLowerCase() }),
+                });
+
+                if (loadingMessage && loadingMessage.parentNode) {
+                    loadingMessage.parentNode.removeChild(loadingMessage);
+                }
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.message || 'Analysis failed.');
+                }
+
+                const data = await response.json();
+                displayBotResponse(data);
+
+            } catch (error) {
+                if (loadingMessage && loadingMessage.parentNode) {
+                    loadingMessage.parentNode.removeChild(loadingMessage);
+                }
+                addMessageToChat('bot', `Error: ${error.message}`, 'error');
+                showToast(`Analysis error: ${error.message}`, 'error');
+                console.error('Analysis error:', error);
+            }
+        }
+
+        function addMessageToChat(sender, message, type = 'text') {
+            const bubble = document.createElement('div');
+            bubble.classList.add('message-bubble', sender === 'user' ? 'user-message' : 'bot-message');
+            
+            if (type === 'loading') {
+                bubble.innerHTML = message;
+            } else if (type === 'error') {
+                 bubble.innerHTML = `<i class="fas fa-exclamation-circle mr-2"></i> ${message}`;
+                 bubble.style.backgroundColor = '#fef2f2';
+                 bubble.style.color = '#b91c1c';
+            } else {
+                bubble.textContent = message;
+            }
+            
+            chatBox.appendChild(bubble);
+            scrollToInput();
+            return bubble;
+        }
+
+        function displayBotResponse(data) {
+            addMessageToChat('bot', data.response);
+
+            if (data.chart_suggestion && data.chart_url) {
+                const chartDiv = document.createElement('div');
+                chartDiv.classList.add('message-bubble', 'bot-message', 'chart-display');
+                chartDiv.innerHTML = `
+                    <p class="font-semibold mb-2 text-teal-700"><i class="fas fa-chart-line mr-2"></i>Suggested Visualization:</p>
+                    <iframe src="${data.chart_url}" class="w-full h-96 border-0 rounded-md shadow-sm" style="background: white;" title="${data.chart_suggestion.type} chart"></iframe>
+                    <p class="text-sm text-gray-600 mt-2">Chart Type: ${data.chart_suggestion.type}</p>
+                    <p class="text-sm text-gray-600">X-axis: ${data.chart_suggestion.x}</p>
+                    <p class="text-sm text-gray-600">Y-axis: ${data.chart_suggestion.y}</p>
+                    ${data.chart_suggestion.color ? `<p class="text-sm text-gray-600">Color/Group by: ${data.chart_suggestion.color}</p>` : ''}
+                    <p class="mt-3 text-sm text-gray-500 italic">Note: This interactive chart is generated based on the AI's suggestion. For complex data, verify and refine.</p>
+                `;
+                chatBox.appendChild(chartDiv);
+                scrollToInput();
+            } else if (data.chart_suggestion) {
+                const chartDiv = document.createElement('div');
+                chartDiv.classList.add('message-bubble', 'bot-message', 'chart-display');
+                chartDiv.innerHTML = `
+                    <p class="font-semibold mb-2 text-teal-700"><i class="fas fa-chart-line mr-2"></i>Suggested Visualization:</p>
+                    <div class="chart-placeholder">
+                        <i class="fas fa-chart-pie text-4xl mb-3 text-gray-400"></i><br>
+                        Chart Type: ${data.chart_suggestion.type}<br>
+                        X-axis: ${data.chart_suggestion.x}<br>
+                        Y-axis: ${data.chart_suggestion.y}<br>
+                        ${data.chart_suggestion.color ? `Color/Group by: ${data.chart_suggestion.color}<br>` : ''}
+                        <p class="mt-3 text-sm text-gray-500 italic">Chart generation failed or is not available for this type. Ensure valid columns and data types.</p>
+                    </div>
+                `;
+                chatBox.appendChild(chartDiv);
+                scrollToInput();
+            }
+        }
+
+        async function fetchAndDisplayDataSummary(fileId) {
+            dataSummary.innerHTML = `<p class="text-gray-500 italic"><i class="fas fa-spinner fa-spin mr-2"></i>Fetching data summary...</p>`;
+            try {
+                const response = await fetch(`/data-summary/${fileId}`);
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.detail || 'Failed to fetch data summary.');
+                }
+                const data = await response.json();
+
+                let summaryHtml = `<p class="font-bold mb-2">Filename: <span class="text-teal-700">${data.filename}</span></p>`;
+                summaryHtml += `<p class="font-bold mt-4 text-teal-700">Columns:</p><ul class="list-disc pl-5 list-inside text-gray-700">`;
+                data.columns.forEach(col => {
+                    summaryHtml += `<li><span class="font-medium">${col}</span></li>`;
+                });
+                summaryHtml += `</ul>`;
+
+                summaryHtml += `<p class="font-bold mt-4 text-teal-700">Summary Statistics:</p><div class="overflow-x-auto mt-2"><table class="min-w-full divide-y divide-gray-200 text-gray-800 text-xs">`;
+                
+                const statsKeys = Object.keys(Object.values(data.describe)[0] || {});
+                summaryHtml += `<thead><tr><th class="px-2 py-1 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Statistic</th>`;
+                data.columns.forEach(col => {
+                    summaryHtml += `<th class="px-2 py-1 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">${col}</th>`;
+                });
+                summaryHtml += `</tr></thead><tbody class="bg-white divide-y divide-gray-200">`;
+
+                statsKeys.forEach(statKey => {
+                    summaryHtml += `<tr><td class="px-2 py-1 whitespace-nowrap font-medium text-gray-900">${statKey}</td>`;
+                    data.columns.forEach(col => {
+                        const value = data.describe[col] ? data.describe[col][statKey] : 'N/A';
+                        summaryHtml += `<td class="px-2 py-1 whitespace-nowrap text-gray-700">${typeof value === 'number' ? value.toFixed(2) : value}</td>`;
+                    });
+                    summaryHtml += `</tr>`;
+                });
+                summaryHtml += `</tbody></table></div>`;
+
+                dataSummary.innerHTML = summaryHtml;
+
+            } catch (error) {
+                dataSummary.innerHTML = `<p class="text-red-500">Failed to load data summary: ${error.message}</p>`;
+            }
+        }
+
+        downloadSummaryBtn.addEventListener('click', async () => {
+            if (!currentFileId) {
+                showToast('No file uploaded to download a summary for.', 'error');
+                return;
+            }
+            try {
+                const response = await fetch(`/download-summary/?file_id=${currentFileId}`);
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.message || 'Failed to download summary.');
+                }
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.style.display = 'none';
+                a.href = url;
+                a.download = `summary_${currentFileId.replace('.csv', '')}.txt`;
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                showToast('Full summary downloaded successfully!', 'success');
+            } catch (error) {
+                showToast(`Error downloading summary: ${error.message}`, 'error');
+                console.error('Download summary error:', error);
+            }
+        });
+
+    </script>
+
+    <!-- Footer at the very end - stays after all content (will stick at bottom if screen is taller than content) -->
+    <footer class="bg-gray-800 text-white p-4 text-center text-sm shadow-inner w-full mt-0">
+        &copy; 2025 CSVAnalyzerBot | Powered by AI | <a href="https://github.com/muhammadsami987123/100DaysOfAI-Agents" target="_blank" class="text-teal-400 hover:underline">#100DaysOfAI-Agents</a>
+    </footer>
+</body>
+</html>
