@@ -3,7 +3,6 @@ import os
 from typing import Dict, Any, Optional
 import pandas as pd
 import io
-import re # Added for regex-like extraction
 
 from backend.config import Config
 
@@ -124,25 +123,21 @@ class CSVAnalyzerAgent:
             parsed_output = json.loads(cleaned_output)
             response_text = parsed_output.get("response", "I could not generate a clear natural language response from the AI.")
             chart_suggestion = parsed_output.get("chart_suggestion", None)
-            
-            # Final check to ensure response_text doesn't contain any JSON artifacts
-            if isinstance(response_text, str) and response_text.startswith('{') and '"response":' in response_text:
-                try:
-                    temp_parsed_res = json.loads(response_text)
-                    response_text = temp_parsed_res.get("response", "I could not generate a clear natural language response.")
-                except json.JSONDecodeError:
-                    pass # Keep original response_text if it's not valid JSON
-
-            return {"response": response_text.strip(), "chart_suggestion": chart_suggestion}
+            return {"response": response_text, "chart_suggestion": chart_suggestion}
         except json.JSONDecodeError:
-            # If JSON decoding fails completely, try to extract response from a raw string
+            # If JSON decoding fails, attempt to extract a natural language part as a last resort
             response_text = cleaned_output # Default to full output
             if '"response":' in cleaned_output:
                 try:
-                    # More robust regex-like extraction for malformed JSON strings
-                    match = re.search(r'"response":\s*"([^"]*)"', cleaned_output)
-                    if match:
-                        response_text = match.group(1)
+                    # Attempt to find and extract the response string if it's within a malformed JSON-like string
+                    start_idx = cleaned_output.find('"response":')
+                    if start_idx != -1:
+                        # Find the start of the actual string value for 'response'
+                        start_val_idx = cleaned_output.find('"', start_idx + len('"response":'))
+                        if start_val_idx != -1:
+                            end_val_idx = cleaned_output.find('"', start_val_idx + 1)
+                            if end_val_idx != -1:
+                                response_text = cleaned_output[start_val_idx + 1:end_val_idx]
                 except Exception:
                     pass
 
