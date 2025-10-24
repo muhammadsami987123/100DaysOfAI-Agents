@@ -248,7 +248,7 @@ videos/
 *.bmp
 *.tiff
 *.webp
-images/
+
 screenshots/
 
 # Documents (for document processing agents)
@@ -257,8 +257,7 @@ screenshots/
 *.doc
 # *.txt
 *.rtf
-documents/
-uploads/
+
 
 # Database files
 *.db
