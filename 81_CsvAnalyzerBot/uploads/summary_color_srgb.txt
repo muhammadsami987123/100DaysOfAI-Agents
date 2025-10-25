@@ -1,0 +1,34 @@
+Data Summary for color_srgb.csv
+
+Columns:
+Name, HEX, RGB
+
+DataFrame Info:
+<class 'pandas.core.frame.DataFrame'>
+RangeIndex: 16 entries, 0 to 15
+Data columns (total 3 columns):
+ #   Column  Non-Null Count  Dtype 
+---  ------  --------------  ----- 
+ 0   Name    16 non-null     object
+ 1   HEX     16 non-null     object
+ 2   RGB     16 non-null     object
+dtypes: object(3)
+memory usage: 516.0+ bytes
+
+
+Summary Statistics:
+  Name:
+    count: 16
+    unique: 16
+    top: White
+    freq: 1
+  HEX:
+    count: 16
+    unique: 16
+    top: #FFFFFF
+    freq: 1
+  RGB:
+    count: 16
+    unique: 16
+    top: rgb(100,100,100)
+    freq: 1
