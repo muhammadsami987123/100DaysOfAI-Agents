@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BookSummaryBot - Summarize Book Chapters</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap">
+    <link rel="stylesheet" href="/static/main.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        .gradient-bg { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        .glass-effect { backdrop-filter: blur(16px); background: rgba(255, 255, 255, 0.1); }
+        .hover-lift { transition: all 0.3s ease; }
+        .hover-lift:hover { transform: translateY(-2px); box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+        .fade-in { animation: fadeIn 0.6s ease-out; }
+        .slide-up { animation: slideUp 0.6s ease-out; }
+        .pulse-slow { animation: pulse 3s infinite; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        .text-gradient { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .btn-glow { box-shadow: 0 0 20px rgba(102, 126, 234, 0.4); }
+        .btn-glow:hover { box-shadow: 0 0 30px rgba(102, 126, 234, 0.6); }
+    </style>
+</head>
+<body class="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 text-gray-900 dark:text-gray-100">
+    <!-- Animated Background -->
+    <div class="fixed inset-0 overflow-hidden pointer-events-none">
+        <div class="absolute -top-40 -right-40 w-80 h-80 bg-purple-300 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse-slow"></div>
+        <div class="absolute -bottom-40 -left-40 w-80 h-80 bg-blue-300 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse-slow" style="animation-delay: 2s;"></div>
+        <div class="absolute top-40 left-1/2 w-80 h-80 bg-indigo-300 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse-slow" style="animation-delay: 4s;"></div>
+    </div>
+
+    <header class="relative z-10 bg-white/80 dark:bg-gray-800/80 backdrop-blur-md shadow-lg border-b border-gray-200/20 dark:border-gray-700/20 p-4 flex justify-between items-center">
+        <div class="flex items-center space-x-3">
+            <div class="w-10 h-10 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center">
+                <i class="fas fa-book text-white text-lg"></i>
+            </div>
+            <h1 class="text-3xl font-bold text-gradient">BookSummaryBot</h1>
+        </div>
+        <div class="flex items-center space-x-4">
+            <button id="themeToggle" class="p-3 rounded-xl bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 transition-all duration-300 hover-lift">
+                <i class="fas fa-moon text-gray-700 dark:text-gray-300 text-lg"></i>
+            </button>
+            <div class="hidden md:flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-400">
+                <i class="fas fa-robot text-indigo-500"></i>
+                <span>AI-Powered</span>
+            </div>
+        </div>
+    </header>
+
+    <main class="relative z-10 flex-grow container mx-auto p-4 flex flex-col lg:flex-row gap-6 max-w-7xl">
+        <!-- Input Section -->
+        <section class="lg:w-1/2 bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm shadow-xl rounded-2xl p-8 flex flex-col space-y-6 hover-lift">
+            <div class="flex items-center space-x-3 mb-4">
+                <div class="w-8 h-8 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-edit text-white text-sm"></i>
+                </div>
+                <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100">Summarize a Book Chapter</h2>
+            </div>
+            <form id="summaryForm" action="/summarize" method="post" enctype="multipart/form-data" class="flex flex-col space-y-6">
+                <!-- Text Input Section -->
+                <div class="space-y-2">
+                    <label for="chapter_text" class="flex items-center text-sm font-semibold text-gray-700 dark:text-gray-300">
+                        <i class="fas fa-keyboard mr-2 text-indigo-500"></i>
+                        Paste Chapter Text:
+                    </label>
+                    <div class="relative">
+                        <textarea id="chapter_text" name="chapter_text" rows="8" 
+                            class="w-full rounded-xl border-2 border-gray-200 dark:border-gray-600 shadow-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 dark:focus:ring-indigo-800 bg-gray-50 dark:bg-gray-700 text-gray-800 dark:text-gray-100 p-4 transition-all duration-300 resize-none"
+                            placeholder="Paste your book chapter text here..."></textarea>
+                        <div class="absolute bottom-3 right-3 text-xs text-gray-400">
+                            <span id="charCount">0</span> characters
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Divider -->
+                <div class="relative">
+                    <div class="absolute inset-0 flex items-center">
+                        <div class="w-full border-t border-gray-200 dark:border-gray-600"></div>
+                    </div>
+                    <div class="relative flex justify-center text-sm">
+                        <span class="px-4 bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400 font-medium">OR</span>
+                    </div>
+                </div>
+
+                <!-- File Upload Section -->
+                <div class="space-y-2">
+                    <label class="flex items-center text-sm font-semibold text-gray-700 dark:text-gray-300">
+                        <i class="fas fa-upload mr-2 text-green-500"></i>
+                        Upload File:
+                    </label>
+                    <div class="relative">
+                        <input type="file" id="file_upload" name="file" accept=".txt,.pdf" 
+                            class="hidden" onchange="handleFileSelect(this)">
+                        <label for="file_upload" class="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl cursor-pointer bg-gray-50 dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors duration-300">
+                            <div class="flex flex-col items-center justify-center pt-5 pb-6">
+                                <i class="fas fa-cloud-upload-alt text-3xl text-gray-400 mb-2"></i>
+                                <p class="mb-2 text-sm text-gray-500 dark:text-gray-400">
+                                    <span class="font-semibold">Click to upload</span> or drag and drop
+                                </p>
+                                <p class="text-xs text-gray-500 dark:text-gray-400">PDF, TXT files only</p>
+                            </div>
+                        </label>
+                        <div id="fileInfo" class="hidden mt-2 p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                            <div class="flex items-center">
+                                <i class="fas fa-file text-green-500 mr-2"></i>
+                                <span id="fileName" class="text-sm text-green-700 dark:text-green-300"></span>
+                                <button type="button" onclick="clearFile()" class="ml-auto text-red-500 hover:text-red-700">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- URL Input Section -->
+                <div class="space-y-2">
+                    <label for="chapter_url" class="flex items-center text-sm font-semibold text-gray-700 dark:text-gray-300">
+                        <i class="fas fa-link mr-2 text-blue-500"></i>
+                        Or provide a URL:
+                    </label>
+                    <div class="relative">
+                        <input type="url" id="chapter_url" name="chapter_url" 
+                            placeholder="https://example.com/chapter" 
+                            class="w-full rounded-xl border-2 border-gray-200 dark:border-gray-600 shadow-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 dark:focus:ring-indigo-800 bg-gray-50 dark:bg-gray-700 text-gray-800 dark:text-gray-100 p-4 transition-all duration-300">
+                        <div class="absolute inset-y-0 right-0 flex items-center pr-3">
+                            <i class="fas fa-globe text-gray-400"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- LLM Selection -->
+                <div class="space-y-2">
+                    <label class="flex items-center text-sm font-semibold text-gray-700 dark:text-gray-300">
+                        <i class="fas fa-robot mr-2 text-purple-500"></i>
+                        Choose AI Model:
+                    </label>
+                    <div class="grid grid-cols-2 gap-3">
+                        <label class="relative cursor-pointer">
+                            <input type="radio" name="llm_choice" value="gemini" 
+                                {% if selected_llm == "gemini" %}checked{% endif %} 
+                                class="sr-only peer">
+                            <div class="p-4 rounded-xl border-2 border-gray-200 dark:border-gray-600 peer-checked:border-indigo-500 peer-checked:bg-indigo-50 dark:peer-checked:bg-indigo-900/20 transition-all duration-300">
+                                <div class="flex items-center space-x-3">
+                                    <i class="fas fa-gem text-indigo-500"></i>
+                                    <div>
+                                        <div class="font-semibold text-sm">Gemini 2.0</div>
+                                        <div class="text-xs text-gray-500">Fast & Free</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </label>
+                        <label class="relative cursor-pointer">
+                            <input type="radio" name="llm_choice" value="openai" 
+                                {% if selected_llm == "openai" %}checked{% endif %} 
+                                class="sr-only peer">
+                            <div class="p-4 rounded-xl border-2 border-gray-200 dark:border-gray-600 peer-checked:border-indigo-500 peer-checked:bg-indigo-50 dark:peer-checked:bg-indigo-900/20 transition-all duration-300">
+                                <div class="flex items-center space-x-3">
+                                    <i class="fas fa-brain text-purple-500"></i>
+                                    <div>
+                                        <div class="font-semibold text-sm">GPT-4</div>
+                                        <div class="text-xs text-gray-500">Premium</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Submit Button -->
+                <button type="submit" class="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-semibold py-4 px-6 rounded-xl transition-all duration-300 flex items-center justify-center space-x-3 btn-glow hover-lift">
+                    <i class="fas fa-magic text-lg"></i>
+                    <span>Generate Summary</span>
+                    <i class="fas fa-arrow-right"></i>
+                </button>
+            </form>
+            
+            <div id="loadingSpinner" class="hidden text-center py-12">
+                <div class="inline-flex flex-col items-center space-y-4">
+                    <div class="relative">
+                        <div class="w-16 h-16 border-4 border-indigo-200 dark:border-indigo-800 rounded-full animate-spin"></div>
+                        <div class="absolute top-0 left-0 w-16 h-16 border-4 border-transparent border-t-indigo-600 dark:border-t-indigo-400 rounded-full animate-spin"></div>
+                    </div>
+                    <div class="text-center">
+                        <p class="text-lg font-semibold text-gray-700 dark:text-gray-300">Generating Summary</p>
+                        <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">AI is analyzing your content...</p>
+                    </div>
+                    <div class="flex space-x-1">
+                        <div class="w-2 h-2 bg-indigo-500 rounded-full animate-bounce"></div>
+                        <div class="w-2 h-2 bg-indigo-500 rounded-full animate-bounce" style="animation-delay: 0.1s;"></div>
+                        <div class="w-2 h-2 bg-indigo-500 rounded-full animate-bounce" style="animation-delay: 0.2s;"></div>
+                    </div>
+                </div>
+            </div>
+
+            {% if error_message %}
+            <div id="errorMessage" class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 px-6 py-4 rounded-xl flex items-center space-x-3" role="alert">
+                <i class="fas fa-exclamation-triangle text-red-500"></i>
+                <div>
+                    <strong class="font-semibold">Error!</strong>
+                    <span class="block sm:inline">{{ error_message }}</span>
+                </div>
+            </div>
+            {% endif %}
+        </section>
+
+        <!-- Output Section -->
+        <section class="lg:w-1/2 bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm shadow-xl rounded-2xl p-8 flex flex-col space-y-6 hover-lift">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                    <div class="w-8 h-8 bg-gradient-to-r from-green-500 to-emerald-600 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-file-alt text-white text-sm"></i>
+                    </div>
+                    <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100">Summary Output</h2>
+                </div>
+                {% if summary_output and summary_output.summary %}
+                <div class="flex space-x-2">
+                    <button onclick="downloadAll()" class="p-2 bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 rounded-lg hover:bg-indigo-200 dark:hover:bg-indigo-800 transition-colors" title="Download All">
+                        <i class="fas fa-download"></i>
+                    </button>
+                    <button onclick="printSummary()" class="p-2 bg-purple-100 dark:bg-purple-900 text-purple-600 dark:text-purple-300 rounded-lg hover:bg-purple-200 dark:hover:bg-purple-800 transition-colors" title="Print">
+                        <i class="fas fa-print"></i>
+                    </button>
+                </div>
+                {% endif %}
+            </div>
+
+            {% if summary_output and summary_output.summary %}
+            <div id="summaryOutput" class="space-y-6 slide-up">
+                <!-- Summary Section -->
+                <div class="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-gray-700 dark:to-gray-600 rounded-xl p-6 border border-blue-200 dark:border-gray-600">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-bold text-indigo-700 dark:text-indigo-300 flex items-center">
+                            <i class="fas fa-file-text mr-2"></i>
+                            Chapter Summary
+                        </h3>
+                        <div class="flex space-x-2">
+                            <button onclick="copyToClipboard('chapterSummaryContent')" class="p-2 bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors" title="Copy">
+                                <i class="fas fa-copy"></i>
+                            </button>
+                            <button onclick="downloadText('chapterSummaryContent', 'chapter_summary.txt')" class="p-2 bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors" title="Download">
+                                <i class="fas fa-download"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="bg-white dark:bg-gray-800 rounded-lg p-4 max-h-80 overflow-y-auto border border-gray-200 dark:border-gray-600" id="chapterSummaryContent">
+                        <p class="text-gray-700 dark:text-gray-200 leading-relaxed whitespace-pre-wrap">{{ summary_output.summary }}</p>
+                    </div>
+                </div>
+
+                {% if summary_output.key_points %}
+                <!-- Key Points Section -->
+                <div class="bg-gradient-to-r from-green-50 to-emerald-50 dark:from-gray-700 dark:to-gray-600 rounded-xl p-6 border border-green-200 dark:border-gray-600">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-bold text-green-700 dark:text-green-300 flex items-center">
+                            <i class="fas fa-list-ul mr-2"></i>
+                            Key Points
+                        </h3>
+                        <div class="flex space-x-2">
+                            <button onclick="copyToClipboard('keyPointsContent')" class="p-2 bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors" title="Copy">
+                                <i class="fas fa-copy"></i>
+                            </button>
+                            <button onclick="downloadText('keyPointsContent', 'key_points.txt')" class="p-2 bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors" title="Download">
+                                <i class="fas fa-download"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="bg-white dark:bg-gray-800 rounded-lg p-4 max-h-60 overflow-y-auto border border-gray-200 dark:border-gray-600" id="keyPointsContent">
+                        <ul class="space-y-3">
+                            {% for point in summary_output.key_points %}
+                            <li class="flex items-start space-x-3">
+                                <div class="w-2 h-2 bg-green-500 rounded-full mt-2 flex-shrink-0"></div>
+                                <span class="text-gray-700 dark:text-gray-200">{{ point }}</span>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Summary Stats -->
+                <div class="bg-gradient-to-r from-purple-50 to-pink-50 dark:from-gray-700 dark:to-gray-600 rounded-xl p-6 border border-purple-200 dark:border-gray-600">
+                    <h3 class="text-lg font-bold text-purple-700 dark:text-purple-300 flex items-center mb-4">
+                        <i class="fas fa-chart-bar mr-2"></i>
+                        Summary Statistics
+                    </h3>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <div class="text-center">
+                            <div class="text-2xl font-bold text-purple-600 dark:text-purple-400" id="summaryWordCount">{{ summary_output.summary.split()|length }}</div>
+                            <div class="text-sm text-gray-600 dark:text-gray-400">Words</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-2xl font-bold text-purple-600 dark:text-purple-400" id="summaryCharCount">{{ summary_output.summary|length }}</div>
+                            <div class="text-sm text-gray-600 dark:text-gray-400">Characters</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-2xl font-bold text-purple-600 dark:text-purple-400">{{ summary_output.key_points|length if summary_output.key_points else 0 }}</div>
+                            <div class="text-sm text-gray-600 dark:text-gray-400">Key Points</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-2xl font-bold text-purple-600 dark:text-purple-400">{{ (summary_output.summary.split()|length / 60)|round|int }}</div>
+                            <div class="text-sm text-gray-600 dark:text-gray-400">Read Time (min)</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% elif not error_message %}
+            <div id="welcomeMessage" class="text-center py-16 fade-in">
+                <div class="w-24 h-24 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <i class="fas fa-book-open text-white text-3xl"></i>
+                </div>
+                <h3 class="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-4">Welcome to BookSummaryBot!</h3>
+                <p class="text-gray-600 dark:text-gray-400 mb-6 max-w-md mx-auto">Transform any book chapter into a clear, concise summary with AI-powered analysis. Perfect for students, researchers, and book lovers.</p>
+                <div class="flex flex-wrap justify-center gap-4 text-sm text-gray-500 dark:text-gray-400">
+                    <div class="flex items-center space-x-2">
+                        <i class="fas fa-magic text-indigo-500"></i>
+                        <span>AI-Powered</span>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <i class="fas fa-bolt text-yellow-500"></i>
+                        <span>Fast Processing</span>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <i class="fas fa-shield-alt text-green-500"></i>
+                        <span>Secure</span>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </section>
+    </main>
+
+    <footer class="relative z-10 bg-white/80 dark:bg-gray-800/80 backdrop-blur-md shadow-lg border-t border-gray-200/20 dark:border-gray-700/20 p-6 text-center">
+        <div class="max-w-4xl mx-auto">
+            <div class="flex flex-col md:flex-row items-center justify-between space-y-4 md:space-y-0">
+                <div class="flex items-center space-x-4 text-sm text-gray-600 dark:text-gray-400">
+                    <span>Made with ❤️ by Muhammad Sami Asghar Mughal</span>
+                    <span class="hidden md:inline">•</span>
+                    <span>Day 84 of #100DaysOfAI-Agents</span>
+                </div>
+                <div class="flex items-center space-x-6 text-sm text-gray-500 dark:text-gray-400">
+                    <a href="#" class="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
+                        <i class="fab fa-github mr-1"></i> GitHub
+                    </a>
+                    <a href="#" class="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
+                        <i class="fab fa-twitter mr-1"></i> Twitter
+                    </a>
+                    <a href="#" class="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
+                        <i class="fab fa-linkedin mr-1"></i> LinkedIn
+                    </a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Enhanced Theme Toggle
+        document.getElementById('themeToggle').addEventListener('click', function() {
+            document.documentElement.classList.toggle('dark');
+            const isDarkMode = document.documentElement.classList.contains('dark');
+            localStorage.setItem('theme', isDarkMode ? 'dark' : 'light');
+            
+            const icon = this.querySelector('i');
+            icon.classList.toggle('fa-moon', !isDarkMode);
+            icon.classList.toggle('fa-sun', isDarkMode);
+            
+            // Add animation effect
+            this.style.transform = 'scale(0.95)';
+            setTimeout(() => {
+                this.style.transform = 'scale(1)';
+            }, 150);
+        });
+
+        // Apply theme on load
+        function applyTheme() {
+            const savedTheme = localStorage.getItem('theme');
+            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            const isDark = savedTheme === 'dark' || (!savedTheme && prefersDark);
+            
+            if (isDark) {
+                document.documentElement.classList.add('dark');
+                const icon = document.getElementById('themeToggle').querySelector('i');
+                icon.classList.add('fa-sun');
+                icon.classList.remove('fa-moon');
+            }
+        }
+        applyTheme();
+
+        // Character counter for textarea
+        const textarea = document.getElementById('chapter_text');
+        const charCount = document.getElementById('charCount');
+        
+        textarea.addEventListener('input', function() {
+            const count = this.value.length;
+            charCount.textContent = count.toLocaleString();
+            
+            // Change color based on length
+            if (count > 10000) {
+                charCount.classList.add('text-red-500');
+                charCount.classList.remove('text-gray-400');
+            } else if (count > 5000) {
+                charCount.classList.add('text-yellow-500');
+                charCount.classList.remove('text-gray-400', 'text-red-500');
+            } else {
+                charCount.classList.add('text-gray-400');
+                charCount.classList.remove('text-yellow-500', 'text-red-500');
+            }
+        });
+
+        // File upload handling
+        function handleFileSelect(input) {
+            const file = input.files[0];
+            if (file) {
+                const fileInfo = document.getElementById('fileInfo');
+                const fileName = document.getElementById('fileName');
+                
+                fileName.textContent = file.name;
+                fileInfo.classList.remove('hidden');
+                
+                // Add animation
+                fileInfo.style.opacity = '0';
+                fileInfo.style.transform = 'translateY(-10px)';
+                setTimeout(() => {
+                    fileInfo.style.opacity = '1';
+                    fileInfo.style.transform = 'translateY(0)';
+                }, 100);
+            }
+        }
+
+        function clearFile() {
+            document.getElementById('file_upload').value = '';
+            document.getElementById('fileInfo').classList.add('hidden');
+        }
+
+        // Enhanced form submission
+        document.getElementById('summaryForm').addEventListener('submit', function(e) {
+            // Show loading spinner with animation
+            const spinner = document.getElementById('loadingSpinner');
+            spinner.classList.remove('hidden');
+            spinner.style.opacity = '0';
+            setTimeout(() => {
+                spinner.style.opacity = '1';
+            }, 100);
+            
+            // Hide previous content with animation
+            const elementsToHide = ['summaryOutput', 'errorMessage', 'welcomeMessage'];
+            elementsToHide.forEach(id => {
+                const element = document.getElementById(id);
+                if (element) {
+                    element.style.opacity = '0';
+                    element.style.transform = 'translateY(20px)';
+                    setTimeout(() => {
+                        element.classList.add('hidden');
+                    }, 300);
+                }
+            });
+        });
+
+        // Enhanced copy to clipboard with toast notification
+        function copyToClipboard(elementId) {
+            const element = document.getElementById(elementId);
+            let textToCopy = element.innerText;
+            
+            if (elementId === 'keyPointsContent') {
+                textToCopy = Array.from(element.querySelectorAll('li')).map(li => `• ${li.innerText}`).join('\n');
+            }
+            
+            navigator.clipboard.writeText(textToCopy).then(() => {
+                showToast('Content copied to clipboard!', 'success');
+            }).catch(err => {
+                console.error('Failed to copy: ', err);
+                showToast('Failed to copy content', 'error');
+            });
+        }
+
+        // Enhanced download function
+        function downloadText(elementId, filename) {
+            const element = document.getElementById(elementId);
+            let textToSave = element.innerText;
+            
+            if (elementId === 'keyPointsContent') {
+                textToSave = Array.from(element.querySelectorAll('li')).map(li => `• ${li.innerText}`).join('\n');
+            }
+            
+            const blob = new Blob([textToSave], { type: 'text/plain' });
+            const anchor = document.createElement('a');
+            anchor.download = filename;
+            anchor.href = window.URL.createObjectURL(blob);
+            anchor.click();
+            window.URL.revokeObjectURL(anchor.href);
+            
+            showToast(`Downloaded ${filename}`, 'success');
+        }
+
+        // Download all content
+        function downloadAll() {
+            const summary = document.getElementById('chapterSummaryContent').innerText;
+            const keyPoints = document.getElementById('keyPointsContent') ? 
+                Array.from(document.getElementById('keyPointsContent').querySelectorAll('li')).map(li => `• ${li.innerText}`).join('\n') : '';
+            
+            const content = `BOOK CHAPTER SUMMARY\n` +
+                          `====================\n\n` +
+                          `SUMMARY:\n${summary}\n\n` +
+                          `KEY POINTS:\n${keyPoints}\n\n` +
+                          `Generated by BookSummaryBot\n` +
+                          `Date: ${new Date().toLocaleString()}`;
+            
+            const blob = new Blob([content], { type: 'text/plain' });
+            const anchor = document.createElement('a');
+            anchor.download = `book_summary_${new Date().toISOString().split('T')[0]}.txt`;
+            anchor.href = window.URL.createObjectURL(blob);
+            anchor.click();
+            window.URL.revokeObjectURL(anchor.href);
+            
+            showToast('Downloaded complete summary', 'success');
+        }
+
+        // Print summary
+        function printSummary() {
+            const printWindow = window.open('', '_blank');
+            const summary = document.getElementById('chapterSummaryContent').innerText;
+            const keyPoints = document.getElementById('keyPointsContent') ? 
+                Array.from(document.getElementById('keyPointsContent').querySelectorAll('li')).map(li => `• ${li.innerText}`).join('\n') : '';
+            
+            printWindow.document.write(`
+                <html>
+                    <head>
+                        <title>Book Chapter Summary</title>
+                        <style>
+                            body { font-family: Arial, sans-serif; margin: 40px; line-height: 1.6; }
+                            h1 { color: #4f46e5; border-bottom: 2px solid #4f46e5; padding-bottom: 10px; }
+                            h2 { color: #059669; margin-top: 30px; }
+                            .summary { background: #f8fafc; padding: 20px; border-radius: 8px; margin: 20px 0; }
+                            .key-points { background: #f0fdf4; padding: 20px; border-radius: 8px; margin: 20px 0; }
+                            .footer { margin-top: 40px; text-align: center; color: #6b7280; font-size: 12px; }
+                        </style>
+                    </head>
+                    <body>
+                        <h1>📚 Book Chapter Summary</h1>
+                        <div class="summary">
+                            <h2>Summary</h2>
+                            <p>${summary}</p>
+                        </div>
+                        ${keyPoints ? `
+                        <div class="key-points">
+                            <h2>Key Points</h2>
+                            <p>${keyPoints}</p>
+                        </div>
+                        ` : ''}
+                        <div class="footer">
+                            Generated by BookSummaryBot on ${new Date().toLocaleString()}
+                        </div>
+                    </body>
+                </html>
+            `);
+            printWindow.document.close();
+            printWindow.print();
+        }
+
+        // Toast notification system
+        function showToast(message, type = 'info') {
+            const toast = document.createElement('div');
+            toast.className = `fixed top-4 right-4 z-50 px-6 py-3 rounded-lg shadow-lg text-white font-medium transform translate-x-full transition-transform duration-300 ${
+                type === 'success' ? 'bg-green-500' : 
+                type === 'error' ? 'bg-red-500' : 
+                'bg-blue-500'
+            }`;
+            toast.textContent = message;
+            
+            document.body.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.style.transform = 'translateX(0)';
+            }, 100);
+            
+            setTimeout(() => {
+                toast.style.transform = 'translateX(100%)';
+                setTimeout(() => {
+                    document.body.removeChild(toast);
+                }, 300);
+            }, 3000);
+        }
+
+        // Smooth scrolling for better UX
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Add loading animation to buttons
+        document.querySelectorAll('button').forEach(button => {
+            button.addEventListener('click', function() {
+                if (!this.classList.contains('fa-spin')) {
+                    this.style.transform = 'scale(0.95)';
+                    setTimeout(() => {
+                        this.style.transform = 'scale(1)';
+                    }, 150);
+                }
+            });
+        });
+
+        // Auto-resize textarea
+        textarea.addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = this.scrollHeight + 'px';
+        });
+
+        // Initialize textarea height
+        textarea.style.height = 'auto';
+        textarea.style.height = textarea.scrollHeight + 'px';
+    </script>
+</body>
+</html>

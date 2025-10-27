@@ -1,0 +1,25 @@
+Please summarize this book chapter and respond with a JSON object:
+
+Chapter: {chapter_text}
+
+Format: {{"summary": "your summary here", "key_points": ["point1", "point2"]}}
+
+Example Output (Concise):
+```json
+{
+  "summary": "This chapter introduces the concept of habit stacking, a technique where a new habit is added on top of an existing one. It emphasizes that successful habit formation relies on making the new habit obvious and attractive. The author provides practical examples of how to implement habit stacking in daily routines, highlighting its effectiveness in building consistent behaviors.",
+  "key_points": [
+    "Habit stacking definition and mechanism",
+    "Importance of making habits obvious and attractive",
+    "Practical application examples"
+  ]
+}
+```
+
+Example Output (Bullet Points):
+```json
+{
+  "summary": "- Habit stacking: Attaching a new habit to an existing one.\n- Make new habits obvious and attractive to increase adherence.\n- Use the 'I will [BEHAVIOR] at [TIME] in [LOCATION]' formula.\n- This method leverages existing neural pathways for easier integration.\n- Small, consistent actions lead to significant long-term results.\n- Be specific with habit placement for better success.\n- Examples include exercising after coffee or reading before bed.",
+  "key_points": []
+}
+```
