@@ -1,0 +1,16 @@
+/* Custom styles to match Day 84 theme */
+@keyframes pulse-slow { from { transform: scale(0.98);} 50% { transform: scale(1.02);} to { transform: scale(0.98);} }
+.animate-pulse-slow { animation: pulse-slow 8s infinite ease-in-out; }
+body { font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial; }
+.container { max-width: 1100px; margin: 0 auto; }
+.gradient-bg { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+.glass-effect { backdrop-filter: blur(16px); background: rgba(255, 255, 255, 0.1); }
+.hover-lift { transition: all 0.3s ease; }
+.hover-lift:hover { transform: translateY(-2px); box-shadow: 0 10px 25px rgba(0,0,0,0.08); }
+.fade-in { animation: fadeIn 0.6s ease-out; }
+.slide-up { animation: slideUp 0.6s ease-out; }
+.text-gradient { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+.btn-glow { box-shadow: 0 0 20px rgba(102, 126, 234, 0.22); }
+.btn-glow:hover { box-shadow: 0 0 30px rgba(102, 126, 234, 0.32); }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }

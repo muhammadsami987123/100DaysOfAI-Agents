@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DreamInterpreterAgent</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap">
+  <link rel="stylesheet" href="/static/main.css">
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+  </style>
+</head>
+<body class="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 text-gray-900 dark:text-gray-100">
+  <div class="fixed inset-0 overflow-hidden pointer-events-none">
+    <div class="absolute -top-40 -right-40 w-80 h-80 bg-purple-300 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse-slow"></div>
+    <div class="absolute -bottom-40 -left-40 w-80 h-80 bg-blue-300 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse-slow" style="animation-delay: 2s;"></div>
+  </div>
+
+  <header class="relative z-10 bg-white/80 dark:bg-gray-800/80 backdrop-blur-md shadow-lg border-b border-gray-200/20 dark:border-gray-700/20 p-4 flex justify-between items-center">
+    <div class="flex items-center space-x-3">
+      <div class="w-10 h-10 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center">
+        <i class="fas fa-bed text-white text-lg"></i>
+      </div>
+      <h1 class="text-3xl font-bold text-gradient">DreamInterpreterAgent</h1>
+    </div>
+    <div class="flex items-center space-x-4">
+      <button id="themeToggle" class="p-3 rounded-xl bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 transition-all duration-300 hover-lift">
+        <i class="fas fa-moon text-gray-700 dark:text-gray-300 text-lg"></i>
+      </button>
+      <div class="hidden md:flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-400">
+        <i class="fas fa-robot text-indigo-500"></i>
+        <span>AI-Powered</span>
+      </div>
+    </div>
+  </header>
+
+  <main class="relative z-10 flex-grow container mx-auto p-4 flex flex-col lg:flex-row gap-6 max-w-7xl">
+    <!-- Input Section -->
+    <section class="lg:w-1/2 bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm shadow-xl rounded-2xl p-8 flex flex-col space-y-6 hover-lift">
+      <div class="flex items-center space-x-3 mb-4">
+        <div class="w-8 h-8 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-lg flex items-center justify-center">
+          <i class="fas fa-edit text-white text-sm"></i>
+        </div>
+        <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100">Describe your dream</h2>
+      </div>
+      <form id="dreamForm" action="/interpret" method="post" class="flex flex-col space-y-6">
+        <div class="space-y-2">
+          <label for="dream_text" class="flex items-center text-sm font-semibold text-gray-700 dark:text-gray-300">
+            <i class="fas fa-keyboard mr-2 text-indigo-500"></i>
+            Tell me about your dream:
+          </label>
+          <div class="relative">
+            <textarea id="dream_text" name="dream_text" rows="8" 
+              class="w-full rounded-xl border-2 border-gray-200 dark:border-gray-600 shadow-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 dark:focus:ring-indigo-800 bg-gray-50 dark:bg-gray-700 text-gray-800 dark:text-gray-100 p-4 transition-all duration-300 resize-none"
+              placeholder="Describe your dream..."></textarea>
+            <div class="absolute bottom-3 right-3 text-xs text-gray-400">
+              <span id="charCount">0</span> chars
+            </div>
+          </div>
+        </div>
+
+        <div class="space-y-2">
+          <label class="flex items-center text-sm font-semibold text-gray-700 dark:text-gray-300">
+            <i class="fas fa-robot mr-2 text-purple-500"></i>
+            Choose AI Model:
+          </label>
+          <div class="grid grid-cols-2 gap-3">
+            <label class="relative cursor-pointer">
+              <input type="radio" name="llm_choice" value="gemini" 
+                {% if selected_llm == "gemini" or (not selected_llm and default_llm=='gemini') %}checked{% endif %} 
+                class="sr-only peer">
+              <div class="p-4 rounded-xl border-2 border-gray-200 dark:border-gray-600 peer-checked:border-indigo-500 peer-checked:bg-indigo-50 dark:peer-checked:bg-indigo-900/20 transition-all duration-300">
+                <div class="flex items-center space-x-3">
+                  <i class="fas fa-gem text-indigo-500"></i>
+                  <div>
+                    <div class="font-semibold text-sm">Gemini 2.0</div>
+                    <div class="text-xs text-gray-500">Fast & Free</div>
+                  </div>
+                </div>
+              </div>
+            </label>
+            <label class="relative cursor-pointer">
+              <input type="radio" name="llm_choice" value="openai" 
+                {% if selected_llm == "openai" %}checked{% endif %} 
+                class="sr-only peer">
+              <div class="p-4 rounded-xl border-2 border-gray-200 dark:border-gray-600 peer-checked:border-indigo-500 peer-checked:bg-indigo-50 dark:peer-checked:bg-indigo-900/20 transition-all duration-300">
+                <div class="flex items-center space-x-3">
+                  <i class="fas fa-brain text-purple-500"></i>
+                  <div>
+                    <div class="font-semibold text-sm">GPT-4</div>
+                    <div class="text-xs text-gray-500">Premium</div>
+                  </div>
+                </div>
+              </div>
+            </label>
+          </div>
+        </div>
+
+        <div class="flex space-x-3">
+          <button type="submit" class="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-semibold py-4 px-6 rounded-xl transition-all duration-300 flex items-center justify-center space-x-3 btn-glow hover-lift">
+            <i class="fas fa-magic text-lg"></i>
+            <span>Interpret My Dream</span>
+            <i class="fas fa-arrow-right"></i>
+          </button>
+          <button type="button" id="clearBtn" class="w-1/3 bg-white dark:bg-gray-700 border rounded-xl py-4 px-4">Clear</button>
+        </div>
+      </form>
+      {% if error_message %}
+      <div id="errorMessage" class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 px-6 py-4 rounded-xl flex items-center space-x-3" role="alert">
+        <i class="fas fa-exclamation-triangle text-red-500"></i>
+        <div>
+          <strong class="font-semibold">Error!</strong>
+          <span class="block sm:inline">{{ error_message }}</span>
+        </div>
+      </div>
+      {% endif %}
+    </section>
+
+    <!-- Output Section -->
+    <section class="lg:w-1/2 bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm shadow-xl rounded-2xl p-8 flex flex-col space-y-6 hover-lift">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center space-x-3">
+          <div class="w-8 h-8 bg-gradient-to-r from-green-500 to-emerald-600 rounded-lg flex items-center justify-center">
+            <i class="fas fa-file-alt text-white text-sm"></i>
+          </div>
+          <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100">Interpretation</h2>
+        </div>
+        {% if result and result.interpretation %}
+        <div class="flex space-x-2">
+          <button onclick="downloadAll()" class="p-2 bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 rounded-lg hover:bg-indigo-200 dark:hover:bg-indigo-800 transition-colors" title="Download All">
+            <i class="fas fa-download"></i>
+          </button>
+          <button onclick="printInterpretation()" class="p-2 bg-purple-100 dark:bg-purple-900 text-purple-600 dark:text-purple-300 rounded-lg hover:bg-purple-200 dark:hover:bg-purple-800 transition-colors" title="Print">
+            <i class="fas fa-print"></i>
+          </button>
+        </div>
+        {% endif %}
+      </div>
+
+      {% if result and result.interpretation %}
+      <div id="interpretationOutput" class="space-y-6 slide-up">
+        <div class="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-gray-700 dark:to-gray-600 rounded-xl p-6 border border-blue-200 dark:border-gray-600">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="text-lg font-bold text-indigo-700 dark:text-indigo-300 flex items-center">
+              <i class="fas fa-file-text mr-2"></i>
+              Dream Interpretation
+            </h3>
+            <div class="flex space-x-2">
+              <button onclick="copyToClipboard('interpretationText')" class="p-2 bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors" title="Copy">
+                <i class="fas fa-copy"></i>
+              </button>
+              <button onclick="downloadText('interpretationText','interpretation.txt')" class="p-2 bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors" title="Download">
+                <i class="fas fa-download"></i>
+              </button>
+            </div>
+          </div>
+          <div class="bg-white dark:bg-gray-800 rounded-lg p-4 max-h-80 overflow-y-auto border border-gray-200 dark:border-gray-600" id="interpretationText">
+            <p class="text-gray-700 dark:text-gray-200 leading-relaxed whitespace-pre-wrap">{{ result.interpretation }}</p>
+          </div>
+        </div>
+
+        {% if result.symbols %}
+        <div class="bg-gradient-to-r from-green-50 to-emerald-50 dark:from-gray-700 dark:to-gray-600 rounded-xl p-6 border border-green-200 dark:border-gray-600">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="text-lg font-bold text-green-700 dark:text-green-300 flex items-center">
+              <i class="fas fa-list-ul mr-2"></i>
+              Key symbols
+            </h3>
+            <div class="flex space-x-2">
+              <button onclick="copyToClipboard('symbolsContent')" class="p-2 bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors" title="Copy">
+                <i class="fas fa-copy"></i>
+              </button>
+            </div>
+          </div>
+          <div class="bg-white dark:bg-gray-800 rounded-lg p-4 max-h-60 overflow-y-auto border border-gray-200 dark:border-gray-600" id="symbolsContent">
+            <ul class="space-y-3">
+              {% for s in result.symbols %}
+              <li class="flex items-start space-x-3">
+                <div class="w-2 h-2 bg-green-500 rounded-full mt-2 flex-shrink-0"></div>
+                <span class="text-gray-700 dark:text-gray-200"><strong>{{ s.symbol }}</strong>: {{ s.meaning }}</span>
+              </li>
+              {% endfor %}
+            </ul>
+          </div>
+        </div>
+        {% endif %}
+
+        {% if result.message %}
+        <div class="bg-gradient-to-r from-yellow-50 to-pink-50 dark:from-gray-700 dark:to-gray-600 rounded-xl p-6 border border-yellow-200 dark:border-gray-600">
+          <h3 class="text-lg font-bold text-yellow-700 dark:text-yellow-300 mb-2">Positive takeaway</h3>
+          <div class="bg-white dark:bg-gray-800 rounded-lg p-4">{{ result.message }}</div>
+        </div>
+        {% endif %}
+      </div>
+      {% else %}
+      <div id="welcomeMessage" class="text-center py-16 fade-in">
+        <div class="w-24 h-24 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-6">
+          <i class="fas fa-bed text-white text-3xl"></i>
+        </div>
+        <h3 class="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-4">Welcome to DreamInterpreterAgent</h3>
+        <p class="text-gray-600 dark:text-gray-400 mb-6 max-w-md mx-auto">Share a dream and get a gentle, symbolic interpretation. Choose Gemini or OpenAI for model selection.</p>
+      </div>
+      {% endif %}
+    </section>
+  </main>
+
+  <footer class="relative z-10 bg-white/80 dark:bg-gray-800/80 backdrop-blur-md shadow-lg border-t border-gray-200/20 dark:border-gray-700/20 p-6 text-center">
+    <div class="max-w-4xl mx-auto">
+      <div class="flex flex-col md:flex-row items-center justify-between space-y-4 md:space-y-0">
+        <div class="flex items-center space-x-4 text-sm text-gray-600 dark:text-gray-400">
+          <span>Made with ❤️ • Day 85 of #100DaysOfAI-Agents</span>
+        </div>
+        <div class="flex items-center space-x-6 text-sm text-gray-500 dark:text-gray-400">
+          <a href="#" class="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
+            <i class="fab fa-github mr-1"></i> GitHub
+          </a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // Theme Toggle
+    document.getElementById('themeToggle').addEventListener('click', function() {
+      document.documentElement.classList.toggle('dark');
+      const isDarkMode = document.documentElement.classList.contains('dark');
+      localStorage.setItem('theme', isDarkMode ? 'dark' : 'light');
+      const icon = this.querySelector('i');
+      icon.classList.toggle('fa-moon', !isDarkMode);
+      icon.classList.toggle('fa-sun', isDarkMode);
+      this.style.transform = 'scale(0.95)';
+      setTimeout(() => { this.style.transform = 'scale(1)'; }, 150);
+    });
+
+    function applyTheme() {
+      const savedTheme = localStorage.getItem('theme');
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      const isDark = savedTheme === 'dark' || (!savedTheme && prefersDark);
+      if (isDark) {
+        document.documentElement.classList.add('dark');
+        const icon = document.getElementById('themeToggle').querySelector('i');
+        icon.classList.add('fa-sun');
+        icon.classList.remove('fa-moon');
+      }
+    }
+    applyTheme();
+
+    // Char counter
+    const textarea = document.getElementById('dream_text');
+    const charCount = document.getElementById('charCount');
+    textarea.addEventListener('input', function() { charCount.textContent = this.value.length.toLocaleString(); });
+
+    // Clear button
+    document.getElementById('clearBtn').addEventListener('click', function(){ document.getElementById('dream_text').value=''; charCount.textContent='0'; });
+
+    // Copy / Download helpers
+    function copyToClipboard(id){
+      const el = document.getElementById(id);
+      if(!el) return;
+      const text = el.innerText || el.textContent || '';
+      navigator.clipboard.writeText(text).then(()=> alert('Copied to clipboard'));
+    }
+    function downloadText(id, filename){
+      const el = document.getElementById(id);
+      if(!el) return;
+      const text = el.innerText || el.textContent || '';
+      const blob = new Blob([text], {type:'text/plain'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a'); a.href = url; a.download = filename; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+    }
+    function downloadAll(){ downloadText('interpretationText','dream_interpretation.txt'); }
+    function printInterpretation(){ window.print(); }
+  </script>
+</body>
+</html>
