@@ -106,7 +106,7 @@ python main.py
 
 ## 🖼 Preview
 
-![Demo Screenshot](Images/day_86.png)
+![Demo Screenshot](Images/day_no_86.png)
 
 ## 🏗️ Project Architecture
 
