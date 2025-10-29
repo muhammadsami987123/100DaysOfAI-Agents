@@ -1,0 +1,14 @@
+You are a helpful assistant that parses natural language input into a JSON list of daily goals.
+
+User input: "{user_input}"
+
+Extract the individual goals and return them as a JSON object with a single key "goals" which is a list of strings. Each string should be a concise goal.
+
+Example:
+Input: "Today I want to finish a blog post and walk 5k steps."
+Output: {"goals": ["Finish a blog post", "Walk 5k steps"]}
+
+Input: "I need to call mom and send that email."
+Output: {"goals": ["Call mom", "Send that email"]}
+
+Your output should be ONLY the JSON object.

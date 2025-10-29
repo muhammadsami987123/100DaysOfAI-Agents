@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DailyGoalTracker</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap">
+  <link rel="stylesheet" href="/static/main.css">
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+  </style>
+</head>
+<body class="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 text-gray-900 dark:text-gray-100">
+  <div class="fixed inset-0 overflow-hidden pointer-events-none">
+    <div class="absolute -top-40 -right-40 w-80 h-80 bg-purple-300 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse-slow"></div>
+    <div class="absolute -bottom-40 -left-40 w-80 h-80 bg-blue-300 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse-slow" style="animation-delay: 2s;"></div>
+  </div>
+
+  <header class="relative z-10 bg-white/80 dark:bg-gray-800/80 backdrop-blur-md shadow-lg border-b border-gray-200/20 dark:border-gray-700/20 p-4 flex justify-between items-center">
+    <div class="flex items-center space-x-3">
+      <div class="w-10 h-10 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center">
+        <i class="fas fa-clipboard-check text-white text-lg"></i>
+      </div>
+      <h1 class="text-3xl font-bold text-gradient">DailyGoalTracker</h1>
+    </div>
+    <div class="flex items-center space-x-4">
+      <button id="themeToggle" class="p-3 rounded-xl bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 transition-all duration-300 hover-lift">
+        <i class="fas fa-moon text-gray-700 dark:text-gray-300 text-lg"></i>
+      </button>
+      <div class="hidden md:flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-400">
+        <i class="fas fa-robot text-indigo-500"></i>
+        <span>AI-Powered</span>
+      </div>
+    </div>
+  </header>
+
+  <main class="relative z-10 flex-grow container mx-auto p-4 flex flex-col lg:flex-row gap-6 max-w-7xl">
+    <!-- Input Section -->
+    <section class="lg:w-1/2 bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm shadow-xl rounded-2xl p-8 flex flex-col space-y-6 hover-lift">
+      <div class="flex items-center space-x-3 mb-4">
+        <div class="w-8 h-8 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-lg flex items-center justify-center">
+          <i class="fas fa-plus-circle text-white text-sm"></i>
+        </div>
+        <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100">Log Your Daily Goals</h2>
+      </div>
+      <form id="goalForm" action="/add_goal" method="post" class="flex flex-col space-y-6">
+        <div class="space-y-2">
+          <label for="goal_input" class="flex items-center text-sm font-semibold text-gray-700 dark:text-gray-300">
+            <i class="fas fa-keyboard mr-2 text-indigo-500"></i>
+            What are your goals for today?
+          </label>
+          <div class="relative">
+            <textarea id="goal_input" name="goal_input" rows="4" 
+              class="w-full rounded-xl border-2 border-gray-200 dark:border-gray-600 shadow-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 dark:focus:ring-indigo-800 bg-gray-50 dark:bg-gray-700 text-gray-800 dark:text-gray-100 p-4 transition-all duration-300 resize-none"
+              placeholder="e.g., 'Finish a blog post and walk 5k steps'"></textarea>
+            <div class="absolute bottom-3 right-3 text-xs text-gray-400">
+              <span id="charCount">0</span> chars
+            </div>
+          </div>
+        </div>
+
+        <div class="space-y-2">
+          <label class="flex items-center text-sm font-semibold text-gray-700 dark:text-gray-300">
+            <i class="fas fa-robot mr-2 text-purple-500"></i>
+            Choose AI Model:
+          </label>
+          <div class="grid grid-cols-2 gap-3">
+            <label class="relative cursor-pointer">
+              <input type="radio" name="llm_choice" value="gemini" 
+                {% if selected_llm == "gemini" or (not selected_llm and default_llm=='gemini') %}checked{% endif %} 
+                class="sr-only peer">
+              <div class="p-4 rounded-xl border-2 border-gray-200 dark:border-gray-600 peer-checked:border-indigo-500 peer-checked:bg-indigo-50 dark:peer-checked:bg-indigo-900/20 transition-all duration-300">
+                <div class="flex items-center space-x-3">
+                  <i class="fas fa-gem text-indigo-500"></i>
+                  <div>
+                    <div class="font-semibold text-sm">Gemini 2.0</div>
+                    <div class="text-xs text-gray-500">Fast & Free</div>
+                  </div>
+                </div>
+              </div>
+            </label>
+            <label class="relative cursor-pointer">
+              <input type="radio" name="llm_choice" value="openai" 
+                {% if selected_llm == "openai" %}checked{% endif %} 
+                class="sr-only peer">
+              <div class="p-4 rounded-xl border-2 border-gray-200 dark:border-gray-600 peer-checked:border-indigo-500 peer-checked:bg-indigo-50 dark:peer-checked:bg-indigo-900/20 transition-all duration-300">
+                <div class="flex items-center space-x-3">
+                  <i class="fas fa-brain text-purple-500"></i>
+                  <div>
+                    <div class="font-semibold text-sm">GPT-4</div>
+                    <div class="text-xs text-gray-500">Premium</div>
+                  </div>
+                </div>
+              </div>
+            </label>
+          </div>
+        </div>
+
+        <button type="submit" class="w-full bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-bold py-3 px-6 rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300 flex items-center justify-center space-x-2">
+          <i class="fas fa-plus-square"></i>
+          <span>Add Goals</span>
+        </button>
+      </form>
+
+      {% if error_message %}
+        <div class="bg-red-100 dark:bg-red-900/20 border border-red-200 dark:border-red-700 text-red-800 dark:text-red-300 p-4 rounded-xl mt-4 flex items-center space-x-3">
+          <i class="fas fa-exclamation-triangle text-red-500"></i>
+          <p class="text-sm font-medium">{{ error_message }}</p>
+        </div>
+      {% endif %}
+    </section>
+
+    <!-- Output Section -->
+    <section class="lg:w-1/2 bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm shadow-xl rounded-2xl p-8 flex flex-col space-y-6 hover-lift">
+      <div class="flex items-center space-x-3 mb-4">
+        <div class="w-8 h-8 bg-gradient-to-r from-purple-500 to-pink-600 rounded-lg flex items-center justify-center">
+          <i class="fas fa-list-check text-white text-sm"></i>
+        </div>
+        <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100">Today's Goals</h2>
+      </div>
+
+      {% if today_goals %}
+        <ul class="space-y-3">
+          {% for goal in today_goals %}
+            <li class="flex items-center justify-between bg-gray-50 dark:bg-gray-700 p-4 rounded-xl shadow-sm">
+              <div class="flex items-center space-x-3">
+                <form action="/update_goal_status" method="post" class="inline-block">
+                  <input type="hidden" name="goal_id" value="{{ goal.id }}">
+                  <input type="hidden" name="completed" value="{{ 'false' if goal.completed else 'true' }}">
+                  <button type="submit" class="text-lg {% if goal.completed %}text-green-500{% else %}text-gray-400 hover:text-green-500{% endif %} transition-colors duration-200">
+                    <i class="{% if goal.completed %}fas fa-check-circle{% else %}far fa-circle{% endif %}"></i>
+                  </button>
+                </form>
+                <span class="text-lg {% if goal.completed %}line-through text-gray-500 dark:text-gray-400{% else %}text-gray-800 dark:text-gray-100{% endif %}">{{ goal.text }}</span>
+              </div>
+              <span class="text-xs text-gray-400">{{ goal.timestamp.split('T')[1].split('.')[0] }}</span>
+            </li>
+          {% endfor %}
+        </ul>
+        <form action="/generate_review" method="post" class="mt-6">
+          <input type="hidden" name="llm_choice" value="{{ selected_llm if selected_llm else default_llm }}">
+          <button type="submit" class="w-full bg-gradient-to-r from-purple-500 to-pink-600 text-white font-bold py-3 px-6 rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300 flex items-center justify-center space-x-2">
+            <i class="fas fa-star"></i>
+            <span>Generate Daily Review</span>
+          </button>
+        </form>
+      {% else %}
+        <p class="text-gray-500 dark:text-gray-400 text-center py-8">No goals logged for today yet. Start by adding some!</p>
+      {% endif %}
+
+      {% if review_result %}
+        <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 p-6 rounded-xl mt-6 space-y-4">
+          <h3 class="text-xl font-bold text-blue-800 dark:text-blue-200 flex items-center space-x-2">
+            <i class="fas fa-trophy text-blue-500"></i>
+            <span>Daily Review</span>
+          </h3>
+          <div class="prose dark:prose-invert text-gray-800 dark:text-gray-100">
+            <p>{{ review_result.summary | safe }}</p>
+          </div>
+          <div class="flex justify-end space-x-3 mt-4">
+            <button onclick="copyToClipboard('{{ review_result.summary | escape }}')" class="px-4 py-2 bg-gray-200 dark:bg-gray-600 text-gray-800 dark:text-gray-100 rounded-lg text-sm font-medium hover:bg-gray-300 dark:hover:bg-gray-500 transition-colors duration-200">
+              <i class="fas fa-copy mr-2"></i>Copy
+            </button>
+            <button onclick="downloadReview('{{ review_result.summary | escape }}')" class="px-4 py-2 bg-gray-200 dark:bg-gray-600 text-gray-800 dark:text-gray-100 rounded-lg text-sm font-medium hover:bg-gray-300 dark:hover:bg-gray-500 transition-colors duration-200">
+              <i class="fas fa-download mr-2"></i>Download
+            </button>
+          </div>
+        </div>
+      {% endif %}
+    </section>
+  </main>
+
+  <footer class="relative z-10 p-6 text-center text-gray-600 dark:text-gray-400 text-sm">
+    <p>&copy; 2023 DailyGoalTracker. All rights reserved.</p>
+  </footer>
+
+  <script>
+    // Theme toggle
+    const themeToggle = document.getElementById('themeToggle');
+    const htmlTag = document.documentElement;
+
+    themeToggle.addEventListener('click', () => {
+      if (htmlTag.classList.contains('dark')) {
+        htmlTag.classList.remove('dark');
+        localStorage.setItem('theme', 'light');
+      } else {
+        htmlTag.classList.add('dark');
+        localStorage.setItem('theme', 'dark');
+      }
+    });
+
+    // Set theme on load
+    if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+      htmlTag.classList.add('dark');
+    } else {
+      htmlTag.classList.remove('dark');
+    }
+
+    // Character count for textarea
+    const goalInput = document.getElementById('goal_input');
+    const charCount = document.getElementById('charCount');
+
+    if (goalInput) {
+      goalInput.addEventListener('input', () => {
+        charCount.textContent = goalInput.value.length;
+      });
+    }
+
+    // Copy to clipboard function
+    function copyToClipboard(text) {
+      navigator.clipboard.writeText(text).then(() => {
+        alert('Review copied to clipboard!');
+      }).catch(err => {
+        console.error('Failed to copy: ', err);
+      });
+    }
+
+    // Download review function
+    function downloadReview(text) {
+      const blob = new Blob([text], { type: 'text/plain' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'daily_review.txt';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    }
+  </script>
+</body>
+</html>
