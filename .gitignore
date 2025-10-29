@@ -241,9 +241,9 @@ recordings/
 videos/
 
 # Image files (for image processing agents)
-*.jpg
+# *.jpg
 *.jpeg
-*.png
+# *.png
 *.gif
 *.bmp
 *.tiff
