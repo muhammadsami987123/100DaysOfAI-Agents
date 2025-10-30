@@ -1,0 +1,8 @@
+fastapi
+httpx
+jinja2
+uvicorn
+tailwindcss
+openai
+google-generativeai
+python-dotenv
