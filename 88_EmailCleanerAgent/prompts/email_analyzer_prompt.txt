@@ -1,0 +1,8 @@
+Analyze the following email and classify it into one of the following categories:
+- Important
+- Promotional
+- Spam
+
+Email Snippet: {email_snippet}
+
+Classification:

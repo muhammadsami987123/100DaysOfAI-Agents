@@ -1,0 +1,9 @@
+# Environments
+.env
+.venv
+venv/
+__pycache__/
+
+# Credentials
+client_secret.json
+gmail_credentials.json
