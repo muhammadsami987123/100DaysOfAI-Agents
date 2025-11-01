@@ -125,8 +125,8 @@ Build 100 useful, functional, and diverse AI agents in 100 days. Each agent will
 | 85  | DreamInterpreterAgent  | Interpret dreams using GPT                                      |
 | 86  | DailyGoalTracker       | Log and review daily goals                                      |
 | 87  | GitHubRepoAnalyzer     | Analyze repo codebase                                           |
-| 88  | JarvisBrowserAssistant | Control browser tabs/windows                                    |
-| 89  | EmailCleanerAgent      | Delete or archive spam emails                                   |
+| 88  | EmailCleanerAgent |    Delete or archive spam emails                                 |
+| 89  |  JarvisBrowserAssistant     |     Control browser tabs/windows                               |
 | 90  | VideoChapterAgent      | Split videos into chapters by transcript                        |
 | 91  | APIRequesterAgent      | Send GET/POST API calls via input                               |
 | 92  | JarvisMusicController  | Play/pause/next music with voice                                |
