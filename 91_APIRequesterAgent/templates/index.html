@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>APIRequesterAgent</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap">
+  <link rel="stylesheet" href="/static/main.css">
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+  </style>
+</head>
+<body class="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 text-gray-900 dark:text-gray-100">
+  <div class="fixed inset-0 overflow-hidden pointer-events-none">
+    <div class="absolute -top-40 -right-40 w-80 h-80 bg-purple-300 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse-slow"></div>
+    <div class="absolute -bottom-40 -left-40 w-80 h-80 bg-blue-300 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse-slow" style="animation-delay: 2s;"></div>
+  </div>
+
+  <header class="relative z-10 bg-white/80 dark:bg-gray-800/80 backdrop-blur-md shadow-lg border-b border-gray-200/20 dark:border-gray-700/20 p-4 flex justify-between items-center">
+    <div class="flex items-center space-x-3">
+      <div class="w-10 h-10 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center">
+        <i class="fas fa-globe text-white text-lg"></i>
+      </div>
+      <h1 class="text-3xl font-bold text-gradient">APIRequesterAgent</h1>
+    </div>
+    <div class="flex items-center space-x-4">
+      <button id="themeToggle" class="p-3 rounded-xl bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 transition-all duration-300 hover-lift">
+        <i class="fas fa-moon text-gray-700 dark:text-gray-300 text-lg"></i>
+      </button>
+      <div class="hidden md:flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-400">
+        <i class="fas fa-robot text-indigo-500"></i>
+        <span>AI-Powered</span>
+      </div>
+    </div>
+  </header>
+
+  <main class="relative z-10 flex-grow container mx-auto p-4 flex flex-col lg:flex-row gap-6 max-w-7xl">
+    <!-- Input Section -->
+    <section class="lg:w-1/2 bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm shadow-xl rounded-2xl p-8 flex flex-col space-y-6 hover-lift">
+      <div class="flex items-center space-x-3 mb-4">
+        <div class="w-8 h-8 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-lg flex items-center justify-center">
+          <i class="fas fa-paper-plane text-white text-sm"></i>
+        </div>
+        <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100">Send API Request</h2>
+      </div>
+      <form id="apiForm" action="/send_request" method="post" class="flex flex-col space-y-6">
+        <div class="space-y-2">
+          <label for="url" class="flex items-center text-sm font-semibold text-gray-700 dark:text-gray-300">
+            <i class="fas fa-link mr-2 text-indigo-500"></i>
+            API URL:
+          </label>
+          <input type="text" id="url" name="url" value="{{ url if url else '' }}" required
+            class="w-full rounded-xl border-2 border-gray-200 dark:border-gray-600 shadow-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 dark:focus:ring-indigo-800 bg-gray-50 dark:bg-gray-700 text-gray-800 dark:text-gray-100 p-3 transition-all duration-300"
+            placeholder="https://api.example.com/data">
+        </div>
+
+        <div class="space-y-2">
+          <label for="method" class="flex items-center text-sm font-semibold text-gray-700 dark:text-gray-300">
+            <i class="fas fa-code-branch mr-2 text-purple-500"></i>
+            HTTP Method:
+          </label>
+          <select id="method" name="method" required
+            class="w-full rounded-xl border-2 border-gray-200 dark:border-gray-600 shadow-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 dark:focus:ring-indigo-800 bg-gray-50 dark:bg-gray-700 text-gray-800 dark:text-gray-100 p-3 transition-all duration-300">
+            <option value="GET" {% if method == "GET" %}selected{% endif %}>GET</option>
+            <option value="POST" {% if method == "POST" %}selected{% endif %}>POST</option>
+            <option value="PUT" {% if method == "PUT" %}selected{% endif %}>PUT</option>
+            <option value="DELETE" {% if method == "DELETE" %}selected{% endif %}>DELETE</option>
+          </select>
+        </div>
+
+        <div class="space-y-2">
+          <label for="headers" class="flex items-center text-sm font-semibold text-gray-700 dark:text-gray-300">
+            <i class="fas fa-heading mr-2 text-green-500"></i>
+            Headers (JSON):
+          </label>
+          <textarea id="headers" name="headers" rows="4"
+            class="w-full rounded-xl border-2 border-gray-200 dark:border-gray-600 shadow-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 dark:focus:ring-indigo-800 bg-gray-50 dark:bg-gray-700 text-gray-800 dark:text-gray-100 p-4 transition-all duration-300 resize-none"
+            placeholder="{ \"Content-Type\": \"application/json\", \"Authorization\": \"Bearer token123\" }">{{ headers if headers else '' }}</textarea>
+        </div>
+
+        <div class="space-y-2">
+          <label for="body" class="flex items-center text-sm font-semibold text-gray-700 dark:text-gray-300">
+            <i class="fas fa-file-code mr-2 text-orange-500"></i>
+            Body (JSON for POST/PUT):
+          </label>
+          <textarea id="body" name="body" rows="6"
+            class="w-full rounded-xl border-2 border-gray-200 dark:border-gray-600 shadow-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 dark:focus:ring-indigo-800 bg-gray-50 dark:bg-gray-700 text-gray-800 dark:text-gray-100 p-4 transition-all duration-300 resize-none"
+            placeholder="{ \"name\": \"Jani\", \"age\": 25 }">{{ body if body else '' }}</textarea>
+        </div>
+
+        <div class="space-y-2">
+          <label class="flex items-center text-sm font-semibold text-gray-700 dark:text-gray-300">
+            <i class="fas fa-robot mr-2 text-purple-500"></i>
+            Choose AI Model (for future enhancements):
+          </label>
+          <div class="grid grid-cols-2 gap-3">
+            <label class="relative cursor-pointer">
+              <input type="radio" name="llm_choice" value="gemini"
+                {% if selected_llm == "gemini" or (not selected_llm and default_llm=='gemini') %}checked{% endif %}
+                class="sr-only peer">
+              <div class="p-4 rounded-xl border-2 border-gray-200 dark:border-gray-600 peer-checked:border-indigo-500 peer-checked:bg-indigo-50 dark:peer-checked:bg-indigo-900/20 transition-all duration-300">
+                <div class="flex items-center space-x-3">
+                  <i class="fas fa-gem text-indigo-500"></i>
+                  <div>
+                    <div class="font-semibold text-sm">Gemini 2.0</div>
+                    <div class="text-xs text-gray-500">Fast & Free</div>
+                  </div>
+                </div>
+              </div>
+            </label>
+            <label class="relative cursor-pointer">
+              <input type="radio" name="llm_choice" value="openai"
+                {% if selected_llm == "openai" %}checked{% endif %}
+                class="sr-only peer">
+              <div class="p-4 rounded-xl border-2 border-gray-200 dark:border-gray-600 peer-checked:border-indigo-500 peer-checked:bg-indigo-50 dark:peer-checked:bg-indigo-900/20 transition-all duration-300">
+                <div class="flex items-center space-x-3">
+                  <i class="fas fa-brain text-purple-500"></i>
+                  <div>
+                    <div class="font-semibold text-sm">GPT-4</div>
+                    <div class="text-xs text-gray-500">Premium</div>
+                  </div>
+                </div>
+              </div>
+            </label>
+          </div>
+        </div>
+
+        <button type="submit" class="w-full bg-gradient-to-r from-indigo-600 to-purple-700 text-white font-bold py-3 px-6 rounded-xl shadow-lg hover:from-indigo-700 hover:to-purple-800 transition-all duration-300 transform hover:scale-105 flex items-center justify-center space-x-2">
+          <i class="fas fa-paper-plane"></i>
+          <span>Send Request</span>
+        </button>
+      </form>
+
+      {% if error_message %}
+      <div class="bg-red-100 dark:bg-red-900 border border-red-400 dark:border-red-700 text-red-700 dark:text-red-300 px-4 py-3 rounded-xl relative" role="alert">
+        <strong class="font-bold">Error!</strong>
+        <span class="block sm:inline">{{ error_message }}</span>
+      </div>
+      {% endif %}
+    </section>
+
+    <!-- Output Section -->
+    <section class="lg:w-1/2 bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm shadow-xl rounded-2xl p-8 flex flex-col space-y-6 hover-lift">
+      <div class="flex items-center space-x-3 mb-4">
+        <div class="w-8 h-8 bg-gradient-to-r from-green-500 to-teal-600 rounded-lg flex items-center justify-center">
+          <i class="fas fa-terminal text-white text-sm"></i>
+        </div>
+        <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100">API Response</h2>
+      </div>
+
+      {% if result %}
+      <div class="bg-gray-100 dark:bg-gray-700 rounded-xl p-4 space-y-4">
+        <div>
+          <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100">Status Code:</h3>
+          <span class="font-mono text-sm {% if result.status_code >= 200 and result.status_code < 300 %}text-green-600 dark:text-green-400{% elif result.status_code >= 400 and result.status_code < 500 %}text-red-600 dark:text-red-400{% else %}text-yellow-600 dark:text-yellow-400{% endif %}">{{ result.status_code }}</span>
+        </div>
+        <div>
+          <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100">Response Time:</h3>
+          <span class="font-mono text-sm text-blue-600 dark:text-blue-400">{{ result.response_time }}</span>
+        </div>
+        <div>
+          <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100">Response Body:</h3>
+          <pre class="bg-gray-200 dark:bg-gray-800 text-gray-800 dark:text-gray-200 p-4 rounded-lg overflow-x-auto text-sm"><code class="language-json">{{ result.response_json }}</code></pre>
+        </div>
+      </div>
+      {% else %}
+      <div class="bg-blue-50 dark:bg-gray-700/30 border border-blue-200 dark:border-gray-600 text-blue-700 dark:text-blue-300 px-4 py-3 rounded-xl" role="alert">
+        <p class="font-bold">No Request Sent Yet</p>
+        <p class="text-sm">Fill in the details and click "Send Request" to see the API response here.</p>
+      </div>
+      {% endif %}
+
+      <div class="flex items-center space-x-3 mb-4 mt-8">
+        <div class="w-8 h-8 bg-gradient-to-r from-orange-500 to-red-600 rounded-lg flex items-center justify-center">
+          <i class="fas fa-history text-white text-sm"></i>
+        </div>
+        <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100">Request History</h2>
+      </div>
+      <div class="bg-gray-100 dark:bg-gray-700 rounded-xl p-4 space-y-4 max-h-96 overflow-y-auto">
+        {% if history %}
+          {% for entry in history | reverse %}
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-4 border border-gray-200 dark:border-gray-600">
+              <div class="flex justify-between items-center mb-2">
+                <span class="font-semibold text-indigo-600 dark:text-indigo-400">{{ entry.request.method }}</span>
+                <span class="text-xs text-gray-500 dark:text-gray-400">{{ entry.timestamp | format_datetime }}</span>
+              </div>
+              <p class="text-sm text-gray-700 dark:text-gray-300 break-all">URL: <span class="font-mono">{{ entry.request.url }}</span></p>
+              <p class="text-sm text-gray-700 dark:text-gray-300">Status: <span class="font-mono {% if entry.response.status_code >= 200 and entry.response.status_code < 300 %}text-green-600{% elif entry.response.status_code >= 400 and entry.response.status_code < 500 %}text-red-600{% else %}text-yellow-600{% endif %}">{{ entry.response.status_code }}</span></p>
+              <details class="mt-2">
+                <summary class="cursor-pointer text-sm font-medium text-blue-600 dark:text-blue-400 hover:underline">View Details</summary>
+                <div class="mt-2 text-xs bg-gray-50 dark:bg-gray-700 p-3 rounded-md">
+                  <h4 class="font-semibold mb-1">Headers:</h4>
+                  <pre class="whitespace-pre-wrap break-all">{{ entry.request.headers | tojson(indent=2) }}</pre>
+                  <h4 class="font-semibold mt-2 mb-1">Body:</h4>
+                  <pre class="whitespace-pre-wrap break-all">{{ entry.request.body | tojson(indent=2) }}</pre>
+                  <h4 class="font-semibold mt-2 mb-1">Response:</h4>
+                  <pre class="whitespace-pre-wrap break-all">{{ entry.response.response_data | tojson(indent=2) }}</pre>
+                </div>
+              </details>
+            </div>
+          {% endfor %}
+        {% else %}
+          <p class="text-gray-500 dark:text-gray-400">No request history yet.</p>
+        {% endif %}
+      </div>
+    </section>
+  </main>
+
+  <footer class="relative z-10 p-4 text-center text-gray-600 dark:text-gray-400 text-sm mt-8">
+    <p>&copy; 2025 APIRequesterAgent. All rights reserved.</p>
+  </footer>
+
+  <script>
+    // Theme toggle
+    const themeToggle = document.getElementById('themeToggle');
+    const htmlTag = document.documentElement;
+
+    // On page load or when changing themes, best to add inline in `head` to avoid FOUC
+    if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+      htmlTag.classList.add('dark')
+    } else {
+      htmlTag.classList.remove('dark')
+    }
+
+    themeToggle.addEventListener('click', () => {
+      if (htmlTag.classList.contains('dark')) {
+        htmlTag.classList.remove('dark');
+        localStorage.theme = 'light';
+      } else {
+        htmlTag.classList.add('dark');
+        localStorage.theme = 'dark';
+      }
+    });
+
+    // Format timestamp for history
+    function formatDatetime(timestamp) {
+      const date = new Date(timestamp * 1000);
+      return date.toLocaleString();
+    }
+
+    // Add this to your Jinja2 environment in web_app.py
+    // app.jinja_env.filters['format_datetime'] = format_datetime
+    // app.jinja_env.filters['tojson'] = json.dumps
+
+  </script>
+</body>
+</html>
