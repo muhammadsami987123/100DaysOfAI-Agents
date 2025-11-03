@@ -1,0 +1,6 @@
+SpeechRecognition
+PyAudio
+pygame
+pydub
+python-dotenv
+google-generativeai
