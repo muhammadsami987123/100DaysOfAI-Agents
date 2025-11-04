@@ -1,0 +1,8 @@
+python-dotenv
+SpeechRecognition
+pyautogui
+mss
+Pillow
+google-generativeai
+openai
+colorama

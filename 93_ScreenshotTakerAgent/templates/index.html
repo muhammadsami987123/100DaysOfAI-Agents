@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ScreenshotTakerAgent</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>ScreenshotTakerAgent</h1>
+        <p>Speak commands to control the agent.</p>
+        <button id="startButton">Start Listening</button>
+        <p id="status">Status: Idle</p>
+        <p>Last Command: <span id="lastCommand">None</span></p>
+        <p>Agent Response: <span id="agentResponse">None</span></p>
+    </div>
+
+    <script>
+        const startButton = document.getElementById('startButton');
+        const statusSpan = document.getElementById('status');
+        const lastCommandSpan = document.getElementById('lastCommand');
+        const agentResponseSpan = document.getElementById('agentResponse');
+
+        startButton.addEventListener('click', async () => {
+            statusSpan.textContent = "Status: Listening...";
+            agentResponseSpan.textContent = "None";
+
+            // In a real application, you'd send a signal to the backend to start listening
+            // and then receive updates. For this minimal example, we'll simulate.
+            lastCommandSpan.textContent = "Simulating voice command...";
+            
+            // Simulate sending a command to the backend
+            const simulatedCommand = "take screenshot"; // Replace with actual voice recognition output
+            const response = await fetch('/command', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ command: simulatedCommand }),
+            });
+
+            const result = await response.json();
+            if (result.status === "success") {
+                lastCommandSpan.textContent = simulatedCommand;
+                agentResponseSpan.textContent = result.message;
+            } else {
+                agentResponseSpan.textContent = result.message;
+            }
+            statusSpan.textContent = "Status: Idle";
+        });
+    </script>
+</body>
+</html>
