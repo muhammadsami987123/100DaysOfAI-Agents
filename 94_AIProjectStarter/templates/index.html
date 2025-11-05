@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AIProjectStarter - Scaffold GPT Projects</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="/static/main.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        .gradient-bg { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        .hover-lift { transition: all 0.3s ease; }
+        .hover-lift:hover { transform: translateY(-2px); box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+        .fade-in { animation: fadeIn 0.6s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    </style>
+</head>
+<body class="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 text-gray-900 dark:text-gray-100">
+    <!-- Animated Background -->
+    <div class="fixed inset-0 overflow-hidden pointer-events-none">
+        <div class="absolute -top-40 -right-40 w-80 h-80 bg-purple-300 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse"></div>
+        <div class="absolute -bottom-40 -left-40 w-80 h-80 bg-blue-300 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse" style="animation-delay: 2s;"></div>
+    </div>
+
+    <header class="relative z-10 bg-white/80 dark:bg-gray-800/80 backdrop-blur-md shadow-lg border-b border-gray-200/20 dark:border-gray-700/20 p-4">
+        <div class="container mx-auto flex justify-between items-center">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center">
+                    <i class="fas fa-rocket text-white text-lg"></i>
+                </div>
+                <h1 class="text-3xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">AIProjectStarter</h1>
+            </div>
+            <div class="flex items-center space-x-4">
+                <button id="themeToggle" class="p-3 rounded-xl bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 transition-all duration-300">
+                    <i class="fas fa-moon dark:hidden text-gray-700 text-lg"></i>
+                    <i class="fas fa-sun hidden dark:block text-gray-300 text-lg"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="relative z-10 container mx-auto p-4 max-w-6xl mt-8">
+        <!-- Success/Error Messages -->
+        {% if result and result.success %}
+        <div class="mb-6 p-4 bg-green-100 dark:bg-green-900 border border-green-400 dark:border-green-700 text-green-700 dark:text-green-300 rounded-lg fade-in">
+            <div class="flex items-center">
+                <i class="fas fa-check-circle mr-2"></i>
+                <div>
+                    <strong>Success!</strong> {{ result.message }}
+                    {% if result.project_path %}
+                    <div class="mt-2 text-sm">
+                        <strong>Path:</strong> <code class="bg-green-200 dark:bg-green-800 px-2 py-1 rounded">{{ result.project_path }}</code>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        {% if error_message %}
+        <div class="mb-6 p-4 bg-red-100 dark:bg-red-900 border border-red-400 dark:border-red-700 text-red-700 dark:text-red-300 rounded-lg fade-in">
+            <div class="flex items-center">
+                <i class="fas fa-exclamation-circle mr-2"></i>
+                <strong>Error:</strong> {{ error_message }}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Main Form -->
+        <div class="bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm shadow-xl rounded-2xl p-8 hover-lift fade-in">
+            <div class="flex items-center space-x-3 mb-6">
+                <div class="w-8 h-8 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-wizard text-white text-sm"></i>
+                </div>
+                <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100">Create New GPT Project</h2>
+            </div>
+
+            <form id="projectForm" action="/scaffold" method="post" class="space-y-6">
+                <!-- Project Name -->
+                <div>
+                    <label for="project_name" class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                        <i class="fas fa-tag mr-2 text-indigo-500"></i>Project Name:
+                    </label>
+                    <input type="text" id="project_name" name="project_name" required
+                        class="w-full rounded-xl border-2 border-gray-200 dark:border-gray-600 shadow-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 dark:focus:ring-indigo-800 bg-gray-50 dark:bg-gray-700 text-gray-800 dark:text-gray-100 p-3 transition-all duration-300"
+                        placeholder="e.g., DailyMotivationAgent">
+                </div>
+
+                <!-- Project Type -->
+                <div>
+                    <label for="project_type" class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                        <i class="fas fa-project-diagram mr-2 text-indigo-500"></i>Project Type:
+                    </label>
+                    <select id="project_type" name="project_type" required
+                        class="w-full rounded-xl border-2 border-gray-200 dark:border-gray-600 shadow-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 dark:focus:ring-indigo-800 bg-gray-50 dark:bg-gray-700 text-gray-800 dark:text-gray-100 p-3 transition-all duration-300">
+                        <option value="web_app">Web App (FastAPI)</option>
+                        <option value="api">API Agent</option>
+                        <option value="chatbot">Chatbot</option>
+                        <option value="cli">CLI Agent</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+
+                <!-- LLM Preference -->
+                <div>
+                    <label for="llm_preference" class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                        <i class="fas fa-brain mr-2 text-indigo-500"></i>Preferred LLM:
+                    </label>
+                    <select id="llm_preference" name="llm_preference"
+                        class="w-full rounded-xl border-2 border-gray-200 dark:border-gray-600 shadow-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 dark:focus:ring-indigo-800 bg-gray-50 dark:bg-gray-700 text-gray-800 dark:text-gray-100 p-3 transition-all duration-300">
+                        <option value="gemini">Gemini 2.0-flash (Default)</option>
+                        <option value="openai">OpenAI GPT-4.1</option>
+                    </select>
+                </div>
+
+                <!-- Features -->
+                <div>
+                    <label for="features" class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                        <i class="fas fa-cogs mr-2 text-indigo-500"></i>Optional Features (comma-separated):
+                    </label>
+                    <input type="text" id="features" name="features"
+                        class="w-full rounded-xl border-2 border-gray-200 dark:border-gray-600 shadow-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 dark:focus:ring-indigo-800 bg-gray-50 dark:bg-gray-700 text-gray-800 dark:text-gray-100 p-3 transition-all duration-300"
+                        placeholder="e.g., logging, file_storage, frontend">
+                    <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                        Available: logging, file_storage, json_storage, file_upload, frontend
+                    </p>
+                </div>
+
+                <!-- Output Directory (Optional) -->
+                <div>
+                    <label for="output_dir" class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                        <i class="fas fa-folder mr-2 text-indigo-500"></i>Output Directory (optional):
+                    </label>
+                    <input type="text" id="output_dir" name="output_dir"
+                        class="w-full rounded-xl border-2 border-gray-200 dark:border-gray-600 shadow-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 dark:focus:ring-indigo-800 bg-gray-50 dark:bg-gray-700 text-gray-800 dark:text-gray-100 p-3 transition-all duration-300"
+                        placeholder="Leave empty for Downloads folder">
+                    <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                        Default: Your Downloads folder{% if default_output_dir %} ({{ default_output_dir }}){% endif %}
+                    </p>
+                </div>
+
+                <!-- LLM Choice for Scaffolding -->
+                <div>
+                    <label for="llm_choice" class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                        <i class="fas fa-robot mr-2 text-indigo-500"></i>LLM for Scaffolding:
+                    </label>
+                    <select id="llm_choice" name="llm_choice"
+                        class="w-full rounded-xl border-2 border-gray-200 dark:border-gray-600 shadow-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 dark:focus:ring-indigo-800 bg-gray-50 dark:bg-gray-700 text-gray-800 dark:text-gray-100 p-3 transition-all duration-300">
+                        <option value="gemini" {% if default_llm == "gemini" %}selected{% endif %}>Gemini</option>
+                        <option value="openai" {% if default_llm == "openai" %}selected{% endif %}>OpenAI</option>
+                    </select>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="flex space-x-4 pt-4">
+                    <button type="submit" 
+                        class="flex-1 bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-semibold py-3 px-6 rounded-xl hover:from-indigo-600 hover:to-purple-700 transition-all duration-300 hover-lift shadow-lg">
+                        <i class="fas fa-magic mr-2"></i>Scaffold Project
+                    </button>
+                    <button type="button" id="previewBtn"
+                        class="flex-1 bg-gradient-to-r from-blue-500 to-cyan-600 text-white font-semibold py-3 px-6 rounded-xl hover:from-blue-600 hover:to-cyan-700 transition-all duration-300 hover-lift shadow-lg">
+                        <i class="fas fa-eye mr-2"></i>Preview Structure
+                    </button>
+                </div>
+            </form>
+
+            <!-- Preview Section -->
+            {% if preview_data %}
+            <div id="previewSection" class="mt-8 p-6 bg-gray-50 dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 fade-in">
+                <h3 class="text-xl font-bold text-gray-800 dark:text-gray-100 mb-4">
+                    <i class="fas fa-sitemap mr-2 text-indigo-500"></i>Project Structure Preview
+                </h3>
+                <div class="space-y-4 font-mono text-sm">
+                    <div class="text-gray-600 dark:text-gray-400">
+                        <strong>Project Name:</strong> <span class="text-indigo-600 dark:text-indigo-400">{{ preview_data.project_name }}</span><br>
+                        <strong>Folder Name:</strong> <span class="text-indigo-600 dark:text-indigo-400">{{ preview_data.folder_name }}</span>
+                    </div>
+                    <div class="mt-4">
+                        <strong class="text-gray-800 dark:text-gray-200">Folder Structure:</strong>
+                        <div class="mt-2 p-4 bg-gray-800 dark:bg-gray-950 text-green-400 rounded-lg overflow-x-auto">
+                            <pre>{{ preview_data.folder_name }}/<br>{% for folder, files in preview_data.structure.items() %}{% if folder %}├── {{ folder }}/<br>{% endif %}{% for file in files %}{% if folder %}│   {% else %}{% endif %}├── {{ file }}<br>{% endfor %}{% endfor %}</pre>
+                        </div>
+                    </div>
+                    <div class="mt-4 text-sm text-gray-600 dark:text-gray-400">
+                        <strong>Files to be generated:</strong> {{ preview_data.boilerplate.keys() | length }} files
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Info Section -->
+        <div class="mt-8 bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm shadow-xl rounded-2xl p-8 hover-lift fade-in">
+            <h3 class="text-xl font-bold text-gray-800 dark:text-gray-100 mb-4">
+                <i class="fas fa-info-circle mr-2 text-blue-500"></i>How It Works
+            </h3>
+            <div class="space-y-3 text-gray-700 dark:text-gray-300">
+                <p>AIProjectStarter helps you quickly scaffold new GPT-based projects with:</p>
+                <ul class="list-disc list-inside space-y-2 ml-4">
+                    <li>Ready-to-use folder structure</li>
+                    <li>Boilerplate Python code (FastAPI, CLI, or API agent)</li>
+                    <li>LLM service integration (Gemini 2.0-flash or OpenAI GPT-4.1)</li>
+                    <li>README template with setup instructions</li>
+                    <li>.env template for API keys</li>
+                    <li>.gitignore for Python projects</li>
+                </ul>
+                <p class="mt-4 text-sm text-gray-600 dark:text-gray-400">
+                    <strong>Note:</strong> Make sure to set your API keys in the generated .env file before running the project.
+                </p>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Theme toggle
+        const themeToggle = document.getElementById('themeToggle');
+        const html = document.documentElement;
+        
+        // Check for saved theme preference
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme) {
+            html.classList.toggle('dark', savedTheme === 'dark');
+        }
+
+        themeToggle.addEventListener('click', () => {
+            html.classList.toggle('dark');
+            const isDark = html.classList.contains('dark');
+            localStorage.setItem('theme', isDark ? 'dark' : 'light');
+        });
+
+        // Preview button
+        document.getElementById('previewBtn')?.addEventListener('click', async (e) => {
+            e.preventDefault();
+            const form = document.getElementById('projectForm');
+            const formData = new FormData(form);
+            
+            // Create preview form data
+            const previewFormData = new FormData();
+            previewFormData.append('project_name', formData.get('project_name'));
+            previewFormData.append('project_type', formData.get('project_type'));
+            previewFormData.append('llm_preference', formData.get('llm_preference'));
+            previewFormData.append('features', formData.get('features'));
+            previewFormData.append('llm_choice', formData.get('llm_choice'));
+
+            try {
+                const response = await fetch('/preview', {
+                    method: 'POST',
+                    body: previewFormData
+                });
+                const html = await response.text();
+                document.open();
+                document.write(html);
+                document.close();
+            } catch (error) {
+                console.error('Preview error:', error);
+                alert('Error generating preview. Please try again.');
+            }
+        });
+    </script>
+</body>
+</html>
+

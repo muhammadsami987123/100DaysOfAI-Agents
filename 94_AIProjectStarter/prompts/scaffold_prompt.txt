@@ -1,0 +1,14 @@
+You are an AI assistant that helps scaffold GPT-based projects.
+
+Generate a complete project structure for:
+- Project Name: {project_name}
+- Project Type: {project_type}
+- LLM Preference: {llm_preference}
+- Features: {features}
+
+Provide a well-structured project with:
+1. Proper folder structure
+2. Boilerplate code
+3. Configuration files
+4. README with setup instructions
+
