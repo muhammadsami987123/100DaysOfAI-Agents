@@ -1,0 +1,804 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CustomPromptAgent</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap">
+  <link rel="stylesheet" href="/static/main.css">
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+  </style>
+</head>
+<body class="min-h-screen bg-gradient-to-br from-slate-50 via-indigo-50 to-purple-100 dark:from-slate-950 dark:via-slate-900 dark:to-purple-950 text-slate-900 dark:text-slate-100">
+  <div class="fixed inset-0 pointer-events-none overflow-hidden">
+    <div class="absolute -top-32 -left-20 w-80 h-80 bg-indigo-400/30 dark:bg-indigo-500/20 rounded-full blur-3xl animate-float"></div>
+    <div class="absolute -bottom-36 -right-24 w-96 h-96 bg-purple-400/20 dark:bg-purple-500/20 rounded-full blur-3xl animate-float" style="animation-delay: 2s"></div>
+  </div>
+
+  <header class="relative z-10 border-b border-white/20 dark:border-slate-800 bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl">
+    <div class="max-w-7xl mx-auto px-5 py-4 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
+      <div class="flex items-center gap-3">
+        <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 text-white flex items-center justify-center shadow-lg shadow-indigo-500/40">
+          <i class="fas fa-pen-fancy text-xl"></i>
+        </div>
+        <div>
+          <h1 class="text-3xl font-bold tracking-tight">CustomPromptAgent</h1>
+          <p class="text-sm text-slate-500 dark:text-slate-400">Dynamic prompt builder for Gemini 2.0-flash & GPT-4.1</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-3">
+        <button id="themeToggle" class="rounded-xl px-4 py-2 bg-slate-900/80 text-white dark:bg-slate-100 dark:text-slate-900 shadow hover:shadow-lg transition-transform hover:-translate-y-0.5">
+          <i class="fas fa-moon"></i>
+        </button>
+        <div class="hidden md:flex items-center gap-2 text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400">
+          <i class="fas fa-robot text-indigo-500"></i>
+          <span>AI-Powered Workflow</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="relative z-10 max-w-7xl mx-auto px-5 py-8 space-y-8">
+    <div class="grid lg:grid-cols-2 gap-6 items-start">
+      <!-- Builder Form -->
+      <section class="bg-white/80 dark:bg-slate-900/80 backdrop-blur rounded-3xl shadow-xl shadow-indigo-500/10 border border-white/40 dark:border-slate-800 p-6 space-y-6">
+        <div class="flex items-center gap-3">
+          <span class="inline-flex items-center justify-center w-10 h-10 rounded-2xl bg-indigo-500 text-white shadow-md">
+            <i class="fas fa-sliders-h"></i>
+          </span>
+          <div>
+            <h2 class="text-2xl font-semibold">Prompt Blueprint</h2>
+            <p class="text-sm text-slate-500 dark:text-slate-400">Define role, task, audience, tone, and context</p>
+          </div>
+        </div>
+
+        {% if error_message %}
+        <div class="rounded-2xl border border-rose-200 dark:border-rose-900 bg-rose-50/80 dark:bg-rose-950/40 px-4 py-3 text-sm text-rose-700 dark:text-rose-300 flex items-start gap-3">
+          <i class="fas fa-circle-exclamation mt-0.5"></i>
+          <div>
+            <strong class="font-semibold">Something went wrong.</strong>
+            <p>{{ error_message }}</p>
+          </div>
+        </div>
+        {% endif %}
+
+        <form id="promptForm" action="/build" method="post" class="space-y-5">
+          <input type="hidden" name="csrf_token" value=""> <!-- placeholder for future security hooks -->
+          <div class="space-y-2">
+            <label class="flex items-center gap-2 text-sm font-medium text-slate-600 dark:text-slate-300">
+              <i class="fas fa-user-tag text-indigo-500"></i>
+              Role
+            </label>
+            <div class="relative">
+              <input id="role" name="role" type="text" placeholder="e.g., Marketing Strategist, Technical Writer" value="{{ form_data.role if form_data else '' }}" class="field-input" autocomplete="off">
+              <button type="button" class="voice-btn" data-target="role" title="Dictate role"><i class="fas fa-microphone"></i></button>
+            </div>
+          </div>
+
+          <div class="space-y-2">
+            <label class="flex items-center gap-2 text-sm font-medium text-slate-600 dark:text-slate-300">
+              <i class="fas fa-list-check text-indigo-500"></i>
+              Task
+            </label>
+            <div class="relative">
+              <textarea id="task" name="task" rows="2" placeholder="e.g., Craft a launch announcement for a new AI product" class="field-input" autocomplete="off">{{ form_data.task if form_data else '' }}</textarea>
+              <button type="button" class="voice-btn" data-target="task" title="Dictate task"><i class="fas fa-microphone"></i></button>
+            </div>
+          </div>
+
+          <div class="grid sm:grid-cols-2 gap-4">
+            <div class="space-y-2">
+              <label class="flex items-center gap-2 text-sm font-medium text-slate-600 dark:text-slate-300">
+                <i class="fas fa-align-left text-indigo-500"></i>
+                Output Format
+              </label>
+              <div class="relative">
+                <input id="output_format" name="output_format" type="text" list="formatSuggestions" placeholder="e.g., Bullet list, JSON schema, Executive summary" value="{{ form_data.output_format if form_data else '' }}" class="field-input">
+                <datalist id="formatSuggestions">
+                  <option value="Paragraph"></option>
+                  <option value="Bullet points"></option>
+                  <option value="Numbered outline"></option>
+                  <option value="JSON"></option>
+                  <option value="Table"></option>
+                  <option value="Slide deck outline"></option>
+                </datalist>
+                <button type="button" class="voice-btn" data-target="output_format" title="Dictate format"><i class="fas fa-microphone"></i></button>
+              </div>
+            </div>
+
+            <div class="space-y-2">
+              <label class="flex items-center gap-2 text-sm font-medium text-slate-600 dark:text-slate-300">
+                <i class="fas fa-wave-square text-indigo-500"></i>
+                Tone
+              </label>
+              <div class="relative">
+                <input id="tone" name="tone" type="text" placeholder="e.g., Friendly, insightful, persuasive" value="{{ form_data.tone if form_data else '' }}" class="field-input">
+                <button type="button" class="voice-btn" data-target="tone" title="Dictate tone"><i class="fas fa-microphone"></i></button>
+              </div>
+            </div>
+          </div>
+
+          <div class="space-y-2">
+            <label class="flex items-center gap-2 text-sm font-medium text-slate-600 dark:text-slate-300">
+              <i class="fas fa-bullseye text-indigo-500"></i>
+              Target Audience (optional)
+            </label>
+            <div class="relative">
+              <input id="target_audience" name="target_audience" type="text" placeholder="e.g., Early-stage SaaS founders" value="{{ form_data.target_audience if form_data else '' }}" class="field-input">
+              <button type="button" class="voice-btn" data-target="target_audience" title="Dictate audience"><i class="fas fa-microphone"></i></button>
+            </div>
+          </div>
+
+          <div class="space-y-2">
+            <label class="flex items-center gap-2 text-sm font-medium text-slate-600 dark:text-slate-300">
+              <i class="fas fa-note-sticky text-indigo-500"></i>
+              Additional Context & Constraints
+            </label>
+            <div class="relative">
+              <textarea id="additional_context" name="additional_context" rows="3" placeholder="e.g., Include a CTA, mention integrations, limit to 150 words" class="field-input">{{ form_data.additional_context if form_data else '' }}</textarea>
+              <button type="button" class="voice-btn" data-target="additional_context" title="Dictate additional context"><i class="fas fa-microphone"></i></button>
+            </div>
+          </div>
+
+          <div class="grid sm:grid-cols-2 gap-4">
+            <div class="space-y-2">
+              <span class="flex items-center gap-2 text-sm font-medium text-slate-600 dark:text-slate-300">
+                <i class="fas fa-brain text-indigo-500"></i>
+                Default LLM
+              </span>
+              <div class="grid grid-cols-2 gap-2">
+                <label class="llm-option">
+                  <input type="radio" name="llm_choice" value="gemini" {% if selected_llm == "gemini" %}checked{% endif %} class="sr-only">
+                  <div class="llm-card">
+                    <i class="fas fa-gem"></i>
+                    <span>Gemini 2.0</span>
+                  </div>
+                </label>
+                <label class="llm-option">
+                  <input type="radio" name="llm_choice" value="openai" {% if selected_llm == "openai" %}checked{% endif %} class="sr-only">
+                  <div class="llm-card">
+                    <i class="fas fa-robot"></i>
+                    <span>GPT-4.1</span>
+                  </div>
+                </label>
+              </div>
+            </div>
+
+            <div class="space-y-2">
+              <label for="enhancement_type" class="flex items-center gap-2 text-sm font-medium text-slate-600 dark:text-slate-300">
+                <i class="fas fa-wand-magic-sparkles text-indigo-500"></i>
+                Enhancement Focus
+              </label>
+              <select id="enhancement_type" name="enhancement_type" class="field-input">
+                <option value="general" selected>Balanced</option>
+                <option value="technical">Technical Clarity</option>
+                <option value="creative">Creative Flair</option>
+                <option value="strategic">Strategic / Business</option>
+                <option value="educational">Educational</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="flex flex-wrap gap-3 pt-2">
+            <button type="submit" class="btn-primary">
+              <i class="fas fa-play mr-2"></i>Build with Server
+            </button>
+            <button type="button" id="enhanceBtn" class="btn-secondary">
+              <i class="fas fa-wand-magic-sparkles mr-2"></i>Enhance with AI
+            </button>
+            <button type="button" id="saveTemplateBtn" class="btn-secondary">
+              <i class="fas fa-save mr-2"></i>Save Template
+            </button>
+            <button type="button" id="clearBtn" class="btn-ghost">
+              <i class="fas fa-eraser mr-2"></i>Reset
+            </button>
+          </div>
+        </form>
+
+        <div id="messageBanner" class="hidden"></div>
+      </section>
+
+      <!-- Live Preview -->
+      <section class="bg-white/80 dark:bg-slate-900/80 backdrop-blur rounded-3xl shadow-xl shadow-purple-500/10 border border-white/40 dark:border-slate-800 p-6 space-y-6">
+        <div class="flex items-start justify-between">
+          <div>
+            <h2 class="text-2xl font-semibold">Live Prompt Preview</h2>
+            <p class="text-sm text-slate-500 dark:text-slate-400">Updated instantly as you refine the inputs</p>
+          </div>
+          <div class="flex items-center gap-2">
+            <button type="button" id="copyPromptBtn" class="icon-btn" title="Copy to clipboard"><i class="fas fa-copy"></i></button>
+            <button type="button" id="downloadTxtBtn" class="icon-btn" title="Download as .txt"><i class="fas fa-file-arrow-down"></i></button>
+            <button type="button" id="downloadJsonBtn" class="icon-btn" title="Download JSON"><i class="fas fa-code"></i></button>
+          </div>
+        </div>
+
+        <div class="rounded-2xl border border-slate-200 dark:border-slate-700 bg-white/90 dark:bg-slate-950/60 shadow-inner p-5 space-y-4">
+          <div class="flex items-center justify-between text-xs uppercase tracking-wide text-slate-400">
+            <span>Prompt</span>
+            <span id="charCounter">0 characters</span>
+          </div>
+          <div id="promptPreview" class="whitespace-pre-wrap leading-relaxed text-slate-800 dark:text-slate-100 text-sm min-h-[160px]"></div>
+        </div>
+
+        <div class="grid sm:grid-cols-2 gap-4" id="metadataGrid">
+          <div class="meta-card">
+            <span class="meta-label">Role</span>
+            <p id="metaRole" class="meta-value">—</p>
+          </div>
+          <div class="meta-card">
+            <span class="meta-label">Task</span>
+            <p id="metaTask" class="meta-value">—</p>
+          </div>
+          <div class="meta-card">
+            <span class="meta-label">Tone</span>
+            <p id="metaTone" class="meta-value">—</p>
+          </div>
+          <div class="meta-card">
+            <span class="meta-label">Audience</span>
+            <p id="metaAudience" class="meta-value">—</p>
+          </div>
+          <div class="meta-card sm:col-span-2">
+            <span class="meta-label">Output Format</span>
+            <p id="metaFormat" class="meta-value">—</p>
+          </div>
+        </div>
+
+        <div id="enhancedPanel" class="hidden space-y-3">
+          <div class="flex items-center gap-2 text-sm text-indigo-500">
+            <i class="fas fa-wand-magic-sparkles"></i>
+            <span>Enhanced Prompt</span>
+          </div>
+          <div class="rounded-2xl border border-indigo-200 dark:border-indigo-700 bg-indigo-50/70 dark:bg-slate-900/80 p-4 text-sm text-slate-800 dark:text-slate-100 whitespace-pre-wrap" id="enhancedPrompt"></div>
+        </div>
+
+        {% if result and result.prompt %}
+        <div class="rounded-2xl border border-emerald-200/70 dark:border-emerald-700/60 bg-emerald-50/70 dark:bg-emerald-900/30 p-4 text-sm space-y-2">
+          <div class="flex items-center gap-2 text-emerald-600 dark:text-emerald-300">
+            <i class="fas fa-server"></i>
+            <span>Server Build Result</span>
+          </div>
+          <p class="text-slate-700 dark:text-slate-200 whitespace-pre-wrap">{{ result.prompt }}</p>
+        </div>
+        {% endif %}
+      </section>
+    </div>
+
+    <!-- Saved Templates -->
+    <section class="bg-white/80 dark:bg-slate-900/80 backdrop-blur rounded-3xl shadow-lg border border-white/40 dark:border-slate-800 p-6 space-y-6">
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <h3 class="text-xl font-semibold">Template Library</h3>
+          <p class="text-sm text-slate-500 dark:text-slate-400">Load, edit, and manage your saved prompt templates</p>
+        </div>
+        <div class="flex items-center gap-2">
+          <input type="text" id="templateNameInput" placeholder="Template name" class="field-input w-52">
+          <button type="button" id="quickSaveBtn" class="btn-primary">
+            <i class="fas fa-save mr-2"></i>Quick Save
+          </button>
+        </div>
+      </div>
+
+      <div id="templatesEmptyState" class="hidden rounded-2xl border border-dashed border-slate-300 dark:border-slate-700 px-6 py-10 text-center text-slate-500 dark:text-slate-400">
+        <i class="fas fa-folder-open text-2xl mb-3"></i>
+        <p class="font-medium">No templates yet</p>
+        <p class="text-sm">Build a prompt and save it for future reuse.</p>
+      </div>
+
+      <div id="templatesList" class="space-y-3"></div>
+    </section>
+
+    <!-- Example Prompt Structures -->
+    <section class="bg-white/60 dark:bg-slate-900/60 backdrop-blur rounded-3xl border border-white/30 dark:border-slate-800 p-6">
+      <h3 class="text-xl font-semibold mb-4 flex items-center gap-2">
+        <i class="fas fa-lightbulb text-amber-500"></i>
+        Example Prompt Structures
+      </h3>
+      <div class="grid md:grid-cols-3 gap-4 text-sm">
+        <article class="example-card">
+          <h4 class="example-title"><i class="fas fa-bullhorn"></i> Marketing Launch</h4>
+          <p>"You are a persuasive SaaS marketing strategist. Craft a launch announcement email for our new AI meeting assistant aimed at remote team leads. Use a confident, upbeat tone and provide a 3-bullet value summary followed by a short CTA."</p>
+        </article>
+        <article class="example-card">
+          <h4 class="example-title"><i class="fas fa-chalkboard-teacher"></i> Learning Path</h4>
+          <p>"You are an experienced data science mentor. Design a 4-week learning roadmap for intermediate Python developers who want to master LLM fine-tuning. Include weekly goals, daily exercises, and evaluation checkpoints in table format."</p>
+        </article>
+        <article class="example-card">
+          <h4 class="example-title"><i class="fas fa-users"></i> Interview Prep</h4>
+          <p>"You are a senior engineering interviewer. Develop a set of 10 behavioral interview questions for a lead ML engineer candidate. Use a concise, professional tone and provide an evaluation rubric in JSON with criteria and red flags."</p>
+        </article>
+      </div>
+    </section>
+  </main>
+
+  <footer class="relative z-10 bg-white/70 dark:bg-slate-900/70 backdrop-blur border-t border-white/20 dark:border-slate-800">
+    <div class="max-w-7xl mx-auto px-5 py-4 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-500 dark:text-slate-400">
+      <span>Day 95 • #100DaysOfAI-Agents • Custom Prompt Builder</span>
+      <div class="flex items-center gap-3">
+        <a href="#" class="hover:text-indigo-500 transition-colors"><i class="fab fa-github mr-1"></i>GitHub</a>
+        <span class="hidden sm:inline">Crafted with FastAPI, Tailwind, and Web Speech API</span>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    const formEl = document.getElementById('promptForm');
+    const roleEl = document.getElementById('role');
+    const taskEl = document.getElementById('task');
+    const outputFormatEl = document.getElementById('output_format');
+    const toneEl = document.getElementById('tone');
+    const targetAudienceEl = document.getElementById('target_audience');
+    const additionalContextEl = document.getElementById('additional_context');
+    const enhancementTypeEl = document.getElementById('enhancement_type');
+    const llmRadios = formEl.querySelectorAll('input[name="llm_choice"]');
+
+    const promptPreviewEl = document.getElementById('promptPreview');
+    const charCounterEl = document.getElementById('charCounter');
+    const metaRoleEl = document.getElementById('metaRole');
+    const metaTaskEl = document.getElementById('metaTask');
+    const metaToneEl = document.getElementById('metaTone');
+    const metaAudienceEl = document.getElementById('metaAudience');
+    const metaFormatEl = document.getElementById('metaFormat');
+    const enhancedPanelEl = document.getElementById('enhancedPanel');
+    const enhancedPromptEl = document.getElementById('enhancedPrompt');
+
+    const saveTemplateBtn = document.getElementById('saveTemplateBtn');
+    const quickSaveBtn = document.getElementById('quickSaveBtn');
+    const templateNameInput = document.getElementById('templateNameInput');
+    const templatesListEl = document.getElementById('templatesList');
+    const templatesEmptyEl = document.getElementById('templatesEmptyState');
+    const messageBannerEl = document.getElementById('messageBanner');
+
+    const copyPromptBtn = document.getElementById('copyPromptBtn');
+    const downloadTxtBtn = document.getElementById('downloadTxtBtn');
+    const downloadJsonBtn = document.getElementById('downloadJsonBtn');
+    const enhanceBtn = document.getElementById('enhanceBtn');
+    const clearBtn = document.getElementById('clearBtn');
+
+    // Data from server (Jinja2 templates - these disable linter checks intentionally)
+    // noinspection JSCheckFunctionSignatures
+    const serverResult = {%- if result %} {{ result | tojson | safe }} {%- else %} null {%- endif %};
+    const serverFormData = {%- if form_data %} {{ form_data | tojson | safe }} {%- else %} null {%- endif %};
+    const savedTemplatesInitial = {%- if saved_templates %} {{ saved_templates | tojson | safe }} {%- else %} [] {%- endif %};
+    const defaultLLM = "{{ default_llm or 'gemini' }}";
+    const selectedLLMDefault = "{{ selected_llm or default_llm or 'gemini' }}";
+
+    function getSelectedLLM() {
+      const checked = Array.from(llmRadios).find(radio => radio.checked);
+      return checked ? checked.value : defaultLLM;
+    }
+
+    function showMessage(type, text) {
+      messageBannerEl.className = '';
+      const base = 'rounded-2xl px-4 py-3 text-sm flex items-start gap-3 mt-4';
+      if (type === 'success') {
+        messageBannerEl.className = base + ' border border-emerald-200 dark:border-emerald-800 bg-emerald-50/80 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300';
+        messageBannerEl.innerHTML = '<i class="fas fa-circle-check"></i><div><strong>Done.</strong><p>' + text + '</p></div>';
+      } else if (type === 'error') {
+        messageBannerEl.className = base + ' border border-rose-200 dark:border-rose-900 bg-rose-50/80 dark:bg-rose-950/30 text-rose-700 dark:text-rose-300';
+        messageBannerEl.innerHTML = '<i class="fas fa-circle-exclamation"></i><div><strong>Heads up.</strong><p>' + text + '</p></div>';
+      } else {
+        messageBannerEl.className = 'hidden';
+        messageBannerEl.innerHTML = '';
+      }
+    }
+
+    function getFormState() {
+      return {
+        role: roleEl.value.trim(),
+        task: taskEl.value.trim(),
+        output_format: outputFormatEl.value.trim(),
+        tone: toneEl.value.trim(),
+        target_audience: targetAudienceEl.value.trim(),
+        additional_context: additionalContextEl.value.trim(),
+      };
+    }
+
+    function composePrompt(state) {
+      const parts = [];
+      if (state.role) {
+        parts.push('You are a ' + state.role.toLowerCase() + '.');
+      }
+      if (state.task) {
+        parts.push('Your task is to ' + state.task.toLowerCase() + '.');
+      }
+      if (state.tone) {
+        const tones = state.tone.split(',').map(t => t.trim()).filter(Boolean);
+        if (tones.length) {
+          parts.push('Use a ' + tones.join(', ').toLowerCase() + ' tone.');
+        }
+      }
+      if (state.target_audience) {
+        parts.push('Target your response to ' + state.target_audience.toLowerCase() + '.');
+      }
+      if (state.output_format) {
+        parts.push('Format your response as ' + state.output_format.toLowerCase() + '.');
+      }
+      if (state.additional_context) {
+        parts.push('Additional context: ' + state.additional_context);
+      }
+
+      let finalPrompt = parts.join(' ');
+      if (!finalPrompt.trim()) {
+        finalPrompt = 'You are a helpful AI assistant. Please provide a clear and useful response.';
+      }
+
+      return {
+        prompt: finalPrompt,
+        metadata: {
+          role: state.role,
+          task: state.task,
+          output_format: state.output_format,
+          tone: state.tone,
+          target_audience: state.target_audience,
+          additional_context: state.additional_context,
+          created_at: new Date().toISOString(),
+        }
+      };
+    }
+
+    function updatePreview(fromServer = false) {
+      const state = getFormState();
+      const data = composePrompt(state);
+      promptPreviewEl.textContent = data.prompt;
+      charCounterEl.textContent = data.prompt.length + ' characters';
+      metaRoleEl.textContent = data.metadata.role || '—';
+      metaTaskEl.textContent = data.metadata.task || '—';
+      metaToneEl.textContent = data.metadata.tone || '—';
+      metaAudienceEl.textContent = data.metadata.target_audience || '—';
+      metaFormatEl.textContent = data.metadata.output_format || '—';
+      if (!fromServer) {
+        enhancedPanelEl.classList.add('hidden');
+        enhancedPromptEl.textContent = '';
+      }
+      return data;
+    }
+
+    function renderTemplates(templates) {
+      templatesListEl.innerHTML = '';
+      if (!templates.length) {
+        templatesEmptyEl.classList.remove('hidden');
+        return;
+      }
+      templatesEmptyEl.classList.add('hidden');
+
+      templates.forEach(template => {
+        const item = document.createElement('div');
+        item.className = 'template-item';
+        const savedAt = template.saved_at ? new Date(template.saved_at).toLocaleString() : '—';
+        item.innerHTML = '<div><p class="font-semibold text-sm">' + template.name + '</p><p class="text-xs text-slate-500 dark:text-slate-400">Saved ' + savedAt + '</p></div><div class="flex items-center gap-2 text-xs"><button class="template-action" data-action="load" data-name="' + template.name + '"><i class="fas fa-upload mr-1"></i>Load</button><button class="template-action" data-action="download" data-name="' + template.name + '"><i class="fas fa-file-arrow-down mr-1"></i>Download</button><button class="template-action danger" data-action="delete" data-name="' + template.name + '"><i class="fas fa-trash mr-1"></i>Remove</button></div>';
+        templatesListEl.appendChild(item);
+      });
+    }
+
+    async function refreshTemplates() {
+      try {
+        const res = await fetch('/api/templates');
+        if (!res.ok) throw new Error('Failed to fetch templates');
+        const data = await res.json();
+        renderTemplates(data.templates || []);
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    async function saveTemplate(name) {
+      const trimmed = name.trim();
+      if (!trimmed) {
+        showMessage('error', 'Please provide a template name before saving.');
+        return;
+      }
+      const formData = new FormData();
+      const state = getFormState();
+      formData.append('template_name', trimmed);
+      formData.append('role', state.role);
+      formData.append('task', state.task);
+      formData.append('output_format', state.output_format);
+      formData.append('tone', state.tone);
+      formData.append('target_audience', state.target_audience);
+      formData.append('additional_context', state.additional_context);
+
+      try {
+        const res = await fetch('/save_template', { method: 'POST', body: formData });
+        const data = await res.json();
+        if (!data.success) throw new Error(data.message || 'Unable to save template');
+        showMessage('success', data.message || 'Template saved.');
+        templateNameInput.value = data.template_name || trimmed;
+        await refreshTemplates();
+      } catch (err) {
+        showMessage('error', err.message);
+      }
+    }
+
+    async function loadTemplate(name) {
+      const formData = new FormData();
+      formData.append('template_name', name);
+      try {
+        const res = await fetch('/load_template', { method: 'POST', body: formData });
+        const data = await res.json();
+        if (!data.success) throw new Error(data.message || 'Template not found');
+        const tpl = data.template;
+        if (tpl && tpl.metadata) {
+          roleEl.value = tpl.metadata.role || '';
+          taskEl.value = tpl.metadata.task || '';
+          outputFormatEl.value = tpl.metadata.output_format || '';
+          toneEl.value = tpl.metadata.tone || '';
+          targetAudienceEl.value = tpl.metadata.target_audience || '';
+          additionalContextEl.value = tpl.metadata.additional_context || '';
+          updatePreview();
+          showMessage('success', 'Template loaded into the builder.');
+        }
+      } catch (err) {
+        showMessage('error', err.message);
+      }
+    }
+
+    async function deleteTemplate(name) {
+      if (!confirm('Delete template "' + name + '"?')) {
+        return;
+      }
+      const formData = new FormData();
+      formData.append('template_name', name);
+      try {
+        const res = await fetch('/delete_template', { method: 'POST', body: formData });
+        const data = await res.json();
+        if (!data.success) throw new Error(data.message || 'Failed to delete template');
+        showMessage('success', data.message || 'Template removed.');
+        await refreshTemplates();
+      } catch (err) {
+        showMessage('error', err.message);
+      }
+    }
+
+    function downloadAs(filename, content) {
+      const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const anchor = document.createElement('a');
+      anchor.href = url;
+      anchor.download = filename;
+      document.body.appendChild(anchor);
+      anchor.click();
+      document.body.removeChild(anchor);
+      URL.revokeObjectURL(url);
+    }
+
+    async function enhancePrompt() {
+      const currentPrompt = promptPreviewEl.textContent.trim();
+      if (!currentPrompt || currentPrompt === 'You are a helpful AI assistant. Please provide a clear and useful response.') {
+        showMessage('error', 'Please fill in the prompt blueprint first before enhancing.');
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append('prompt', currentPrompt);
+      formData.append('enhancement_type', enhancementTypeEl.value || 'general');
+      formData.append('llm_choice', getSelectedLLM());
+
+      enhanceBtn.disabled = true;
+      enhanceBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Enhancing...';
+
+      try {
+        const res = await fetch('/enhance', { method: 'POST', body: formData });
+        if (!res.ok) {
+          const errData = await res.json();
+          throw new Error(errData.error || `Server error: ${res.status}`);
+        }
+        
+        const data = await res.json();
+        
+        if (data.success === false) {
+          throw new Error(data.error || 'Enhancement failed');
+        }
+        
+        const enhancedText = data.enhanced_prompt || data.summary || currentPrompt;
+        enhancedPromptEl.textContent = enhancedText;
+        enhancedPanelEl.classList.remove('hidden');
+        showMessage('success', 'Prompt enhanced! Check the "Enhanced Prompt" section.');
+      } catch (err) {
+        console.error('Enhancement error:', err);
+        showMessage('error', 'Enhancement failed: ' + (err.message || 'Unknown error. Check API keys in .env'));
+      } finally {
+        enhanceBtn.disabled = false;
+        enhanceBtn.innerHTML = '<i class="fas fa-wand-magic-sparkles mr-2"></i>Enhance with AI';
+      }
+    }
+
+    function clearForm() {
+      formEl.reset();
+      templateNameInput.value = '';
+      showMessage(null, '');
+      updatePreview();
+    }
+
+    // Voice input using Web Speech API
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    let recognitionInstance = null;
+    let activeFieldId = null;
+
+    function stopRecognition() {
+      if (recognitionInstance) {
+        recognitionInstance.stop();
+        recognitionInstance = null;
+      }
+      document.querySelectorAll('.voice-btn.active').forEach(btn => btn.classList.remove('active'));
+    }
+
+    function startVoiceForField(fieldId, button) {
+      if (!SpeechRecognition) {
+        showMessage('error', 'Speech recognition not supported in this browser.');
+        return;
+      }
+      if (recognitionInstance) {
+        stopRecognition();
+      }
+      activeFieldId = fieldId;
+      const recognition = new SpeechRecognition();
+      recognition.lang = 'en-US';
+      recognition.interimResults = false;
+      recognition.maxAlternatives = 1;
+
+      recognition.onresult = (event) => {
+        const transcript = Array.from(event.results).map(result => result[0].transcript).join(' ');
+        const field = document.getElementById(activeFieldId);
+        if (field) {
+          field.value = (field.value + ' ' + transcript).trim();
+          updatePreview();
+        }
+      };
+      recognition.onerror = (event) => {
+        showMessage('error', 'Voice input error: ' + event.error);
+      };
+      recognition.onend = () => {
+        if (button) {
+          button.classList.remove('active');
+        }
+      };
+
+      recognition.start();
+      recognitionInstance = recognition;
+      if (button) {
+        button.classList.add('active');
+      }
+    }
+
+    document.querySelectorAll('.voice-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const target = btn.getAttribute('data-target');
+        if (btn.classList.contains('active')) {
+          stopRecognition();
+          btn.classList.remove('active');
+        } else {
+          stopRecognition();
+          startVoiceForField(target, btn);
+        }
+      });
+    });
+
+    if (SpeechRecognition) {
+      window.addEventListener('beforeunload', stopRecognition);
+    }
+
+    // Theme toggle
+    const themeToggle = document.getElementById('themeToggle');
+    function applyTheme(theme) {
+      if (theme === 'dark') {
+        document.documentElement.classList.add('dark');
+        themeToggle.innerHTML = '<i class="fas fa-sun"></i>';
+      } else {
+        document.documentElement.classList.remove('dark');
+        themeToggle.innerHTML = '<i class="fas fa-moon"></i>';
+      }
+    }
+    const storedTheme = localStorage.getItem('cpa-theme');
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    applyTheme(storedTheme || (prefersDark ? 'dark' : 'light'));
+    themeToggle.addEventListener('click', () => {
+      const isDark = document.documentElement.classList.toggle('dark');
+      localStorage.setItem('cpa-theme', isDark ? 'dark' : 'light');
+      themeToggle.innerHTML = isDark ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
+    });
+
+    // Event bindings
+    [roleEl, taskEl, outputFormatEl, toneEl, targetAudienceEl, additionalContextEl].forEach(el => {
+      el.addEventListener('input', () => updatePreview());
+    });
+
+    formEl.addEventListener('submit', () => {
+      showMessage(null, '');
+    });
+
+    saveTemplateBtn.addEventListener('click', () => {
+      const name = templateNameInput.value || 'Custom Prompt ' + new Date().toLocaleString();
+      saveTemplate(name);
+    });
+
+    quickSaveBtn.addEventListener('click', () => {
+      const name = templateNameInput.value || 'Prompt ' + new Date().toISOString().slice(0, 16).replace('T', ' ');
+      saveTemplate(name);
+    });
+
+    templatesListEl.addEventListener('click', (event) => {
+      const button = event.target.closest('.template-action');
+      if (!button) return;
+      const name = button.getAttribute('data-name');
+      const action = button.getAttribute('data-action');
+      if (action === 'load') {
+        loadTemplate(name);
+      } else if (action === 'delete') {
+        deleteTemplate(name);
+      } else if (action === 'download') {
+        downloadTemplate(name);
+      }
+    });
+
+    copyPromptBtn.addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText(promptPreviewEl.textContent);
+        showMessage('success', 'Prompt copied to clipboard.');
+      } catch (err) {
+        showMessage('error', 'Clipboard access denied.');
+      }
+    });
+
+    downloadTxtBtn.addEventListener('click', () => {
+      const data = updatePreview(true);
+      downloadAs('custom_prompt.txt', data.prompt);
+    });
+
+    downloadJsonBtn.addEventListener('click', () => {
+      const data = updatePreview(true);
+      downloadAs('custom_prompt.json', JSON.stringify(data, null, 2));
+    });
+
+    enhanceBtn.addEventListener('click', enhancePrompt);
+    clearBtn.addEventListener('click', clearForm);
+
+    async function downloadTemplate(name) {
+      const formData = new FormData();
+      formData.append('template_name', name);
+      try {
+        const res = await fetch('/load_template', { method: 'POST', body: formData });
+        const data = await res.json();
+        if (!data.success) throw new Error(data.message || 'Template not found');
+        const content = JSON.stringify(data.template, null, 2);
+        downloadAs(name + '.json', content);
+      } catch (err) {
+        showMessage('error', err.message);
+      }
+    }
+
+    // Initialize state from server if available
+    function hydrateFromServer() {
+      if (serverFormData) {
+        roleEl.value = serverFormData.role || '';
+        taskEl.value = serverFormData.task || '';
+        outputFormatEl.value = serverFormData.output_format || '';
+        toneEl.value = serverFormData.tone || '';
+        targetAudienceEl.value = serverFormData.target_audience || '';
+        additionalContextEl.value = serverFormData.additional_context || '';
+      }
+      if (selectedLLMDefault) {
+        const radio = Array.from(llmRadios).find(r => r.value === selectedLLMDefault);
+        if (radio) {
+          radio.checked = true;
+        }
+      }
+      updatePreview(true);
+      renderTemplates(savedTemplatesInitial || []);
+      if (serverResult && serverResult.prompt) {
+        promptPreviewEl.textContent = serverResult.prompt;
+        charCounterEl.textContent = serverResult.prompt.length + ' characters';
+      }
+    }
+
+    hydrateFromServer();
+
+    // Periodically auto-save template name if user typed
+    templateNameInput.addEventListener('keydown', () => {
+      messageBannerEl.classList.add('hidden');
+    });
+  </script>
+</body>
+</html>
