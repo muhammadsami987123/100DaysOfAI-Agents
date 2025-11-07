@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BookmarkManager - Smart Bookmark Management</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        [x-cloak] {
+            display: none !important;
+        }
+        .slide-enter {
+            animation: slideIn 0.3s ease-out;
+        }
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        .fade-enter {
+            animation: fadeIn 0.3s ease-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white min-h-screen">
+    <div x-data="bookmarkManager()" @init="init()" class="min-h-screen" x-cloak>
+        <!-- Header -->
+        <header class="bg-slate-800/50 backdrop-blur-md border-b border-slate-700/50 sticky top-0 z-50">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <div class="p-2 bg-blue-500 rounded-lg">
+                            <i class="fas fa-bookmark text-xl"></i>
+                        </div>
+                        <div>
+                            <h1 class="text-2xl font-bold bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">BookmarkManager</h1>
+                            <p class="text-xs text-slate-400">Smart Bookmark Management</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-4">
+                        <button @click="openExportImport = true" class="p-2 hover:bg-slate-700 rounded-lg transition duration-200" title="Export/Import">
+                            <i class="fas fa-download text-slate-300"></i>
+                        </button>
+                        <button @click="activeTab = 'stats'" class="p-2 hover:bg-slate-700 rounded-lg transition duration-200" title="Statistics">
+                            <i class="fas fa-chart-bar text-slate-300"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Container -->
+        <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <!-- Tabs Navigation -->
+            <div class="flex flex-wrap gap-2 mb-8 border-b border-slate-700/50">
+                <button @click="activeTab = 'add'" :class="activeTab === 'add' ? 'text-blue-400 border-b-2 border-blue-400' : 'text-slate-400 hover:text-slate-300'" class="pb-3 px-4 font-medium transition duration-200">
+                    <i class="fas fa-plus mr-2"></i>Add Bookmark
+                </button>
+                <button @click="activeTab = 'browse'" :class="activeTab === 'browse' ? 'text-blue-400 border-b-2 border-blue-400' : 'text-slate-400 hover:text-slate-300'" class="pb-3 px-4 font-medium transition duration-200">
+                    <i class="fas fa-list mr-2"></i>Browse Bookmarks
+                </button>
+                <button @click="activeTab = 'search'" :class="activeTab === 'search' ? 'text-blue-400 border-b-2 border-blue-400' : 'text-slate-400 hover:text-slate-300'" class="pb-3 px-4 font-medium transition duration-200">
+                    <i class="fas fa-search mr-2"></i>Search
+                </button>
+                <button @click="activeTab = 'stats'" :class="activeTab === 'stats' ? 'text-blue-400 border-b-2 border-blue-400' : 'text-slate-400 hover:text-slate-300'" class="pb-3 px-4 font-medium transition duration-200">
+                    <i class="fas fa-chart-bar mr-2"></i>Statistics
+                </button>
+            </div>
+
+            <!-- Add Bookmark Tab -->
+            <div x-show="activeTab === 'add'" class="slide-enter">
+                <div class="max-w-2xl mx-auto">
+                    <div class="bg-slate-800/30 backdrop-blur border border-slate-700/50 rounded-xl p-8 shadow-2xl">
+                        <h2 class="text-2xl font-bold mb-6 flex items-center gap-2">
+                            <i class="fas fa-plus text-blue-400"></i>Add New Bookmark
+                        </h2>
+                        
+                        <form @submit.prevent="addBookmark" class="space-y-6">
+                            <div>
+                                <label class="block text-sm font-medium text-slate-300 mb-2">URL</label>
+                                <input 
+                                    type="url" 
+                                    x-model="form.url" 
+                                    placeholder="https://example.com"
+                                    required
+                                    class="w-full px-4 py-3 bg-slate-700/50 border border-slate-600 rounded-lg focus:outline-none focus:border-blue-500 transition"
+                                >
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-slate-300 mb-2">Title</label>
+                                <input 
+                                    type="text" 
+                                    x-model="form.title" 
+                                    placeholder="Bookmark title"
+                                    required
+                                    class="w-full px-4 py-3 bg-slate-700/50 border border-slate-600 rounded-lg focus:outline-none focus:border-blue-500 transition"
+                                >
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-slate-300 mb-2">Tags (comma-separated)</label>
+                                <input 
+                                    type="text" 
+                                    x-model="form.tags" 
+                                    placeholder="design, tools, web"
+                                    class="w-full px-4 py-3 bg-slate-700/50 border border-slate-600 rounded-lg focus:outline-none focus:border-blue-500 transition"
+                                >
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-slate-300 mb-2">Category</label>
+                                <select 
+                                    x-model="form.category"
+                                    class="w-full px-4 py-3 bg-slate-700/50 border border-slate-600 rounded-lg focus:outline-none focus:border-blue-500 transition"
+                                >
+                                    <option value="uncategorized">Uncategorized</option>
+                                    <option value="design">Design</option>
+                                    <option value="development">Development</option>
+                                    <option value="productivity">Productivity</option>
+                                    <option value="learning">Learning</option>
+                                    <option value="reference">Reference</option>
+                                    <option value="entertainment">Entertainment</option>
+                                </select>
+                            </div>
+
+                            <button 
+                                type="submit" 
+                                :disabled="isLoading"
+                                class="w-full px-6 py-3 bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg font-semibold transition duration-200 shadow-lg"
+                            >
+                                <i class="fas fa-check mr-2" x-show="!isLoading"></i>
+                                <i class="fas fa-spinner animate-spin mr-2" x-show="isLoading"></i>
+                                <span x-show="!isLoading">Add Bookmark</span>
+                                <span x-show="isLoading">Adding...</span>
+                            </button>
+
+                            <div x-show="message" class="p-4 rounded-lg" :class="messageType === 'success' ? 'bg-green-500/20 border border-green-500/50 text-green-300' : 'bg-red-500/20 border border-red-500/50 text-red-300'">
+                                <i :class="messageType === 'success' ? 'fas fa-check-circle mr-2' : 'fas fa-exclamation-circle mr-2'"></i>
+                                <span x-text="message"></span>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Browse Bookmarks Tab -->
+            <div x-show="activeTab === 'browse'" class="slide-enter">
+                <div class="space-y-6">
+                    <!-- Filter Section -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="bg-slate-800/30 backdrop-blur border border-slate-700/50 rounded-xl p-4">
+                            <label class="block text-sm font-medium text-slate-300 mb-2">Filter by Tag</label>
+                            <select @change="filterByTag" class="w-full px-4 py-2 bg-slate-700/50 border border-slate-600 rounded-lg focus:outline-none focus:border-blue-500">
+                                <option value="">All Tags</option>
+                                <template x-for="tag in tags" :key="tag">
+                                    <option :value="tag" x-text="tag"></option>
+                                </template>
+                            </select>
+                        </div>
+                        <div class="bg-slate-800/30 backdrop-blur border border-slate-700/50 rounded-xl p-4">
+                            <label class="block text-sm font-medium text-slate-300 mb-2">Filter by Category</label>
+                            <select @change="filterByCategory" class="w-full px-4 py-2 bg-slate-700/50 border border-slate-600 rounded-lg focus:outline-none focus:border-blue-500">
+                                <option value="">All Categories</option>
+                                <template x-for="cat in categories" :key="cat">
+                                    <option :value="cat" x-text="cat"></option>
+                                </template>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Bookmarks Grid -->
+                    <div x-show="bookmarks.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <template x-for="bookmark in bookmarks" :key="bookmark.id">
+                            <div class="bg-slate-800/30 backdrop-blur border border-slate-700/50 rounded-xl p-6 hover:border-slate-600 transition duration-200 shadow-lg">
+                                <div class="flex items-start justify-between mb-4">
+                                    <h3 class="text-lg font-semibold text-white flex-1 line-clamp-2" x-text="bookmark.title"></h3>
+                                    <button 
+                                        @click="deleteBookmark(bookmark.id)" 
+                                        class="ml-2 p-2 text-red-400 hover:bg-red-500/20 rounded-lg transition"
+                                        title="Delete"
+                                    >
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                                
+                                <a :href="bookmark.url" target="_blank" rel="noopener noreferrer" class="text-sm text-blue-400 hover:text-blue-300 break-all mb-4 line-clamp-2" x-text="bookmark.url"></a>
+                                
+                                <div class="flex flex-wrap gap-2 mb-4">
+                                    <span class="px-3 py-1 text-xs bg-slate-700/50 text-slate-300 rounded-full" x-text="bookmark.category"></span>
+                                    <template x-for="tag in bookmark.tags" :key="tag">
+                                        <span class="px-3 py-1 text-xs bg-blue-500/20 text-blue-300 rounded-full" x-text="tag"></span>
+                                    </template>
+                                </div>
+                                
+                                <p class="text-xs text-slate-400">Added: <span x-text="new Date(bookmark.created_at).toLocaleDateString()"></span></p>
+                            </div>
+                        </template>
+                    </div>
+
+                    <div x-show="bookmarks.length === 0" class="text-center py-12">
+                        <i class="fas fa-inbox text-4xl text-slate-600 mb-4"></i>
+                        <p class="text-slate-400 text-lg">No bookmarks found</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Search Tab -->
+            <div x-show="activeTab === 'search'" class="slide-enter">
+                <div class="max-w-2xl mx-auto">
+                    <div class="bg-slate-800/30 backdrop-blur border border-slate-700/50 rounded-xl p-8 shadow-2xl">
+                        <h2 class="text-2xl font-bold mb-6 flex items-center gap-2">
+                            <i class="fas fa-search text-blue-400"></i>Search Bookmarks
+                        </h2>
+
+                        <form @submit.prevent="searchBookmarks" class="space-y-6">
+                            <div>
+                                <label class="block text-sm font-medium text-slate-300 mb-2">Search Query</label>
+                                <input 
+                                    type="text" 
+                                    x-model="searchQuery" 
+                                    placeholder="e.g., 'design tools' or 'AI learning'"
+                                    class="w-full px-4 py-3 bg-slate-700/50 border border-slate-600 rounded-lg focus:outline-none focus:border-blue-500 transition"
+                                >
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-slate-300 mb-2">Search Method</label>
+                                    <select x-model="searchMethod" class="w-full px-4 py-2 bg-slate-700/50 border border-slate-600 rounded-lg focus:outline-none focus:border-blue-500">
+                                        <option value="semantic">Semantic (AI)</option>
+                                        <option value="basic">Basic Text Search</option>
+                                    </select>
+                                </div>
+                                <div x-show="searchMethod === 'semantic'">
+                                    <label class="block text-sm font-medium text-slate-300 mb-2">AI Model</label>
+                                    <select x-model="llmChoice" class="w-full px-4 py-2 bg-slate-700/50 border border-slate-600 rounded-lg focus:outline-none focus:border-blue-500">
+                                        <option value="gemini">Gemini 2.0-flash</option>
+                                        <option value="openai">OpenAI GPT-4</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <button 
+                                type="submit" 
+                                :disabled="isLoading || !searchQuery"
+                                class="w-full px-6 py-3 bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg font-semibold transition duration-200 shadow-lg"
+                            >
+                                <i class="fas fa-search mr-2" x-show="!isLoading"></i>
+                                <i class="fas fa-spinner animate-spin mr-2" x-show="isLoading"></i>
+                                <span x-show="!isLoading">Search</span>
+                                <span x-show="isLoading">Searching...</span>
+                            </button>
+                        </form>
+
+                        <!-- Search Results -->
+                        <div x-show="searchResults !== null" class="mt-8">
+                            <h3 class="text-lg font-semibold mb-4">
+                                Search Results 
+                                <span class="text-blue-400" x-text="`(${searchResults?.count || 0})`"></span>
+                                <span class="text-xs text-slate-400 ml-2" x-text="`${searchResults?.method}`"></span>
+                            </h3>
+
+                            <div x-show="searchResults?.bookmarks?.length > 0" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <template x-for="bookmark in searchResults.bookmarks" :key="bookmark.id">
+                                    <div class="bg-slate-700/30 border border-slate-600 rounded-lg p-4">
+                                        <h4 class="font-semibold text-white mb-2" x-text="bookmark.title"></h4>
+                                        <a :href="bookmark.url" target="_blank" class="text-sm text-blue-400 hover:text-blue-300 break-all" x-text="bookmark.url"></a>
+                                        <div class="flex flex-wrap gap-2 mt-3">
+                                            <template x-for="tag in bookmark.tags" :key="tag">
+                                                <span class="px-2 py-1 text-xs bg-blue-500/20 text-blue-300 rounded" x-text="tag"></span>
+                                            </template>
+                                        </div>
+                                    </div>
+                                </template>
+                            </div>
+
+                            <div x-show="!searchResults?.bookmarks?.length" class="text-center py-8 text-slate-400">
+                                <i class="fas fa-search text-2xl mb-2"></i>
+                                <p>No results found for your search</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Statistics Tab -->
+            <div x-show="activeTab === 'stats'" class="slide-enter">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                    <div class="bg-gradient-to-br from-blue-500/20 to-blue-600/20 border border-blue-500/30 rounded-xl p-6 backdrop-blur">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-slate-400 text-sm">Total Bookmarks</p>
+                                <p class="text-3xl font-bold text-blue-300" x-text="stats.total_bookmarks || 0"></p>
+                            </div>
+                            <i class="fas fa-bookmark text-4xl text-blue-400/30"></i>
+                        </div>
+                    </div>
+                    <div class="bg-gradient-to-br from-cyan-500/20 to-cyan-600/20 border border-cyan-500/30 rounded-xl p-6 backdrop-blur">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-slate-400 text-sm">Total Tags</p>
+                                <p class="text-3xl font-bold text-cyan-300" x-text="stats.total_tags || 0"></p>
+                            </div>
+                            <i class="fas fa-tags text-4xl text-cyan-400/30"></i>
+                        </div>
+                    </div>
+                    <div class="bg-gradient-to-br from-purple-500/20 to-purple-600/20 border border-purple-500/30 rounded-xl p-6 backdrop-blur">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-slate-400 text-sm">Total Categories</p>
+                                <p class="text-3xl font-bold text-purple-300" x-text="stats.total_categories || 0"></p>
+                            </div>
+                            <i class="fas fa-layer-group text-4xl text-purple-400/30"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="bg-slate-800/30 backdrop-blur border border-slate-700/50 rounded-xl p-6">
+                        <h3 class="text-lg font-semibold mb-4 flex items-center gap-2">
+                            <i class="fas fa-tags text-cyan-400"></i>Tags
+                        </h3>
+                        <div class="flex flex-wrap gap-2">
+                            <template x-for="tag in stats.tags" :key="tag">
+                                <span class="px-3 py-1 text-sm bg-cyan-500/20 text-cyan-300 rounded-full" x-text="tag"></span>
+                            </template>
+                        </div>
+                    </div>
+
+                    <div class="bg-slate-800/30 backdrop-blur border border-slate-700/50 rounded-xl p-6">
+                        <h3 class="text-lg font-semibold mb-4 flex items-center gap-2">
+                            <i class="fas fa-layer-group text-purple-400"></i>Categories
+                        </h3>
+                        <div class="flex flex-wrap gap-2">
+                            <template x-for="cat in stats.categories" :key="cat">
+                                <span class="px-3 py-1 text-sm bg-purple-500/20 text-purple-300 rounded-full" x-text="cat"></span>
+                            </template>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Export/Import Modal -->
+        <div x-show="openExportImport" class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50" @click="openExportImport = false">
+            <div @click.stop class="bg-slate-800 border border-slate-700 rounded-xl p-8 max-w-2xl w-full mx-4 shadow-2xl">
+                <h2 class="text-2xl font-bold mb-6 flex items-center gap-2">
+                    <i class="fas fa-exchange-alt text-blue-400"></i>Export / Import
+                </h2>
+
+                <div class="space-y-6">
+                    <!-- Export -->
+                    <div>
+                        <h3 class="text-lg font-semibold mb-3">Export Bookmarks</h3>
+                        <button @click="exportBookmarks" class="px-6 py-3 bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 rounded-lg font-semibold transition duration-200">
+                            <i class="fas fa-download mr-2"></i>Download as JSON
+                        </button>
+                    </div>
+
+                    <!-- Import -->
+                    <div>
+                        <h3 class="text-lg font-semibold mb-3">Import Bookmarks</h3>
+                        <input type="file" @change="importBookmarks" accept=".json" class="block w-full text-sm text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-500 file:text-white hover:file:bg-blue-600">
+                    </div>
+                </div>
+
+                <button @click="openExportImport = false" class="mt-6 px-6 py-2 bg-slate-700 hover:bg-slate-600 rounded-lg font-semibold transition duration-200">
+                    Close
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function bookmarkManager() {
+            return {
+                activeTab: 'browse',
+                isLoading: false,
+                message: '',
+                messageType: '',
+                form: {
+                    url: '',
+                    title: '',
+                    tags: '',
+                    category: 'uncategorized'
+                },
+                bookmarks: [],
+                tags: [],
+                categories: [],
+                stats: {
+                    total_bookmarks: 0,
+                    total_tags: 0,
+                    total_categories: 0,
+                    tags: [],
+                    categories: []
+                },
+                searchQuery: '',
+                searchResults: null,
+                searchMethod: 'semantic',
+                llmChoice: 'gemini',
+                openExportImport: false,
+
+                async init() {
+                    console.log('Initializing BookmarkManager...');
+                    await this.loadBookmarks();
+                    await this.loadStats();
+                    await this.loadTags();
+                    await this.loadCategories();
+                    console.log('Initialization complete');
+                },
+
+                async loadBookmarks() {
+                    try {
+                        const response = await fetch('/api/bookmarks/all');
+                        const data = await response.json();
+                        if (data.success) {
+                            this.bookmarks = data.bookmarks;
+                        }
+                    } catch (error) {
+                        console.error('Error loading bookmarks:', error);
+                    }
+                },
+
+                async loadStats() {
+                    try {
+                        const response = await fetch('/api/stats');
+                        const data = await response.json();
+                        if (data.success) {
+                            this.stats = data;
+                        }
+                    } catch (error) {
+                        console.error('Error loading stats:', error);
+                    }
+                },
+
+                async loadTags() {
+                    try {
+                        const response = await fetch('/api/tags');
+                        const data = await response.json();
+                        if (data.success) {
+                            this.tags = data.tags;
+                        }
+                    } catch (error) {
+                        console.error('Error loading tags:', error);
+                    }
+                },
+
+                async loadCategories() {
+                    try {
+                        const response = await fetch('/api/categories');
+                        const data = await response.json();
+                        if (data.success) {
+                            this.categories = data.categories;
+                        }
+                    } catch (error) {
+                        console.error('Error loading categories:', error);
+                    }
+                },
+
+                async addBookmark() {
+                    this.isLoading = true;
+                    const formData = new FormData();
+                    formData.append('url', this.form.url);
+                    formData.append('title', this.form.title);
+                    formData.append('tags', this.form.tags);
+                    formData.append('category', this.form.category);
+
+                    try {
+                        const response = await fetch('/api/bookmarks/add', {
+                            method: 'POST',
+                            body: formData
+                        });
+                        const data = await response.json();
+
+                        if (data.success) {
+                            this.message = data.message;
+                            this.messageType = 'success';
+                            this.form = {
+                                url: '',
+                                title: '',
+                                tags: '',
+                                category: 'uncategorized'
+                            };
+                            await this.loadBookmarks();
+                            await this.loadStats();
+                            await this.loadTags();
+                            await this.loadCategories();
+                        } else {
+                            this.message = data.message || 'Error adding bookmark';
+                            this.messageType = 'error';
+                        }
+
+                        setTimeout(() => this.message = '', 4000);
+                    } catch (error) {
+                        this.message = 'Error adding bookmark';
+                        this.messageType = 'error';
+                        console.error('Error:', error);
+                        setTimeout(() => this.message = '', 4000);
+                    } finally {
+                        this.isLoading = false;
+                    }
+                },
+
+                async deleteBookmark(id) {
+                    if (!confirm('Delete this bookmark?')) return;
+
+                    try {
+                        const response = await fetch(`/api/bookmarks/${id}`, {
+                            method: 'DELETE'
+                        });
+                        const data = await response.json();
+
+                        if (data.success) {
+                            await this.loadBookmarks();
+                            await this.loadStats();
+                        }
+                    } catch (error) {
+                        console.error('Error deleting bookmark:', error);
+                    }
+                },
+
+                async filterByTag(event) {
+                    const tag = event.target.value;
+                    if (!tag) {
+                        await this.loadBookmarks();
+                        return;
+                    }
+
+                    try {
+                        const response = await fetch(`/api/bookmarks/by-tag?tag=${encodeURIComponent(tag)}`);
+                        const data = await response.json();
+                        if (data.success) {
+                            this.bookmarks = data.bookmarks;
+                        }
+                    } catch (error) {
+                        console.error('Error filtering by tag:', error);
+                    }
+                },
+
+                async filterByCategory(event) {
+                    const category = event.target.value;
+                    if (!category) {
+                        await this.loadBookmarks();
+                        return;
+                    }
+
+                    try {
+                        const response = await fetch(`/api/bookmarks/by-category?category=${encodeURIComponent(category)}`);
+                        const data = await response.json();
+                        if (data.success) {
+                            this.bookmarks = data.bookmarks;
+                        }
+                    } catch (error) {
+                        console.error('Error filtering by category:', error);
+                    }
+                },
+
+                async searchBookmarks() {
+                    this.isLoading = true;
+                    const formData = new FormData();
+                    formData.append('query', this.searchQuery);
+                    formData.append('method', this.searchMethod);
+                    formData.append('llm_choice', this.llmChoice);
+
+                    try {
+                        const response = await fetch('/api/bookmarks/search', {
+                            method: 'POST',
+                            body: formData
+                        });
+                        const data = await response.json();
+                        this.searchResults = data;
+                    } catch (error) {
+                        console.error('Error searching bookmarks:', error);
+                    } finally {
+                        this.isLoading = false;
+                    }
+                },
+
+                async exportBookmarks() {
+                    try {
+                        const response = await fetch('/api/export', {
+                            method: 'POST'
+                        });
+                        const data = await response.json();
+
+                        if (data.success) {
+                            const dataStr = JSON.stringify(data.data, null, 2);
+                            const dataBlob = new Blob([dataStr], { type: 'application/json' });
+                            const url = URL.createObjectURL(dataBlob);
+                            const link = document.createElement('a');
+                            link.href = url;
+                            link.download = `bookmarks-${new Date().toISOString().split('T')[0]}.json`;
+                            link.click();
+                            URL.revokeObjectURL(url);
+                        }
+                    } catch (error) {
+                        console.error('Error exporting bookmarks:', error);
+                    }
+                },
+
+                async importBookmarks(event) {
+                    const file = event.target.files?.[0];
+                    if (!file) return;
+
+                    const reader = new FileReader();
+                    reader.onload = async (e) => {
+                        try {
+                            const data = JSON.parse(e.target?.result);
+                            const response = await fetch('/api/import', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json'
+                                },
+                                body: JSON.stringify(data)
+                            });
+                            const result = await response.json();
+
+                            if (result.success) {
+                                alert('Bookmarks imported successfully!');
+                                await this.loadBookmarks();
+                                await this.loadStats();
+                                await this.loadTags();
+                                await this.loadCategories();
+                            } else {
+                                alert('Error importing bookmarks');
+                            }
+                        } catch (error) {
+                            alert('Invalid JSON file');
+                            console.error('Error:', error);
+                        }
+                    };
+                    reader.readAsText(file);
+                    event.target.value = '';
+                }
+            }
+        }
+
+        // Initialize when DOM is ready
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM Content Loaded, Alpine should initialize');
+        });
+    </script>
+</body>
+</html>
+
