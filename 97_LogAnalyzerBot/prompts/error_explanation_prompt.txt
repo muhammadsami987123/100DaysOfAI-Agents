@@ -1,0 +1,20 @@
+You are a technical expert helping developers understand log errors.
+
+Error Message:
+{error_message}
+
+Context:
+- Log Level: {log_level}
+- Source: {source}
+- Frequency: {frequency} occurrence(s)
+{additional_context}
+
+Please provide:
+
+1. **What This Error Means**: Clear explanation in simple terms
+2. **Common Causes**: Top 3-5 reasons this error typically occurs
+3. **How to Fix**: Step-by-step troubleshooting guide
+4. **Prevention**: How to avoid this error in the future
+
+Keep explanations clear and actionable for developers of all skill levels.
+

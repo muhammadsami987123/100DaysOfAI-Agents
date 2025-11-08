@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LogAnalyzerBot - AI-Powered Log Analysis</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header>
+            <h1>🔍 LogAnalyzerBot</h1>
+            <p class="subtitle">AI-Powered System & Error Log Analysis</p>
+        </header>
+
+        <!-- Upload Section -->
+        <div class="card">
+            <div class="card-header">📤 Upload Logs</div>
+            <div class="upload-section">
+                <!-- File Upload -->
+                <div>
+                    <div class="upload-box" id="fileUploadBox">
+                        <div class="upload-icon">📁</div>
+                        <p><strong>Click to upload</strong> or drag and drop</p>
+                        <p style="font-size: 0.9rem; color: var(--text-secondary);">
+                            Supported: .log, .txt, .json (Max 10MB)
+                        </p>
+                    </div>
+                    <input type="file" id="logFile" accept=".log,.txt,.json">
+                </div>
+
+                <!-- Paste Content -->
+                <div>
+                    <textarea 
+                        id="logContent" 
+                        placeholder="Or paste your log content here...&#10;&#10;Example:&#10;2025-01-15 10:30:45 ERROR [db_handler] Connection timeout&#10;2025-01-15 10:30:46 WARNING [auth_service] Failed login attempt"
+                    ></textarea>
+                    <button class="btn btn-primary" id="uploadContentBtn" style="margin-top: 1rem; width: 100%;">
+                        📝 Analyze Pasted Content
+                    </button>
+                </div>
+            </div>
+            <div id="uploadStatus" class="hidden" style="margin-top: 1rem;"></div>
+        </div>
+
+        <!-- Analysis Filters -->
+        <div class="card hidden" id="analysisSection">
+            <div class="card-header">🔧 Analysis Filters</div>
+            
+            <div class="filters">
+                <div class="filter-group">
+                    <label>Start Date</label>
+                    <input type="datetime-local" id="startDate">
+                </div>
+
+                <div class="filter-group">
+                    <label>End Date</label>
+                    <input type="datetime-local" id="endDate">
+                </div>
+
+                <div class="filter-group">
+                    <label>Keyword Search</label>
+                    <input type="text" id="keyword" placeholder="Search in logs...">
+                </div>
+            </div>
+
+            <div class="filter-group" style="margin: 1rem 0;">
+                <label>Log Levels</label>
+                <div style="display: flex; gap: 1rem; flex-wrap: wrap; margin-top: 0.5rem;">
+                    <label style="display: flex; align-items: center; gap: 0.5rem;">
+                        <input type="checkbox" name="logLevels" value="CRITICAL" checked>
+                        CRITICAL
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 0.5rem;">
+                        <input type="checkbox" name="logLevels" value="ERROR" checked>
+                        ERROR
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 0.5rem;">
+                        <input type="checkbox" name="logLevels" value="WARNING" checked>
+                        WARNING
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 0.5rem;">
+                        <input type="checkbox" name="logLevels" value="INFO">
+                        INFO
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 0.5rem;">
+                        <input type="checkbox" name="logLevels" value="DEBUG">
+                        DEBUG
+                    </label>
+                </div>
+            </div>
+
+            <div style="display: flex; align-items: center; gap: 0.5rem; margin: 1rem 0;">
+                <input type="checkbox" id="includeAI" checked>
+                <label for="includeAI">Include AI Insights (requires Groq API key)</label>
+            </div>
+
+            <button class="btn btn-primary" id="analyzeBtn" style="width: 100%;">
+                🚀 Analyze Logs
+            </button>
+
+            <div id="analysisStatus" class="hidden" style="margin-top: 1rem; text-align: center;"></div>
+        </div>
+
+        <!-- Results Section -->
+        <div id="resultsSection" class="hidden">
+            <!-- Statistics -->
+            <div class="card">
+                <div class="card-header">📊 Summary Statistics</div>
+                <div class="results-grid">
+                    <div class="stat-card info">
+                        <div class="stat-label">Total Entries</div>
+                        <div class="stat-value" id="totalEntries">0</div>
+                    </div>
+                    <div class="stat-card error">
+                        <div class="stat-label">Errors</div>
+                        <div class="stat-value" id="totalErrors">0</div>
+                    </div>
+                    <div class="stat-card warning">
+                        <div class="stat-label">Warnings</div>
+                        <div class="stat-value" id="totalWarnings">0</div>
+                    </div>
+                    <div class="stat-card critical">
+                        <div class="stat-label">Critical</div>
+                        <div class="stat-value" id="totalCritical">0</div>
+                    </div>
+                </div>
+
+                <div style="margin-top: 1.5rem; display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                    <div>
+                        <div class="stat-label">Most Frequent Error</div>
+                        <div style="margin-top: 0.5rem; font-size: 0.95rem; color: var(--text-secondary);" id="frequentError">
+                            -
+                        </div>
+                    </div>
+                    <div>
+                        <div class="stat-label">Affected Modules</div>
+                        <div style="margin-top: 0.5rem; font-size: 0.95rem; color: var(--text-secondary);" id="affectedModules">
+                            -
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Known Issues -->
+            <div class="card">
+                <div class="card-header">⚠️ Identified Issues & Suggestions</div>
+                <div class="issues-list" id="issuesList">
+                    <p>No issues detected</p>
+                </div>
+            </div>
+
+            <!-- Timeline -->
+            <div class="card">
+                <div class="card-header">⏱️ Event Timeline</div>
+                <div class="timeline" id="timelineList">
+                    <p>No events</p>
+                </div>
+            </div>
+
+            <!-- AI Insights -->
+            <div class="card hidden" id="aiInsightsCard">
+                <div class="card-header">🤖 AI-Powered Insights</div>
+                <div class="ai-insights" id="aiInsights">
+                    Loading insights...
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <footer style="text-align: center; margin-top: 3rem; padding: 2rem 0; color: var(--text-secondary); border-top: 1px solid var(--border-color);">
+            <p>LogAnalyzerBot - Day 97 of #100DaysOfAI-Agents</p>
+            <p style="font-size: 0.9rem; margin-top: 0.5rem;">
+                Powered by Groq AI | Built with FastAPI
+            </p>
+        </footer>
+    </div>
+
+    <script src="/static/script.js"></script>
+</body>
+</html>
+
