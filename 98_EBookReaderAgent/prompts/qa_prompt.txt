@@ -1,0 +1,18 @@
+Answer the following question based on the book content provided.
+
+Book: {book_title} by {book_author}
+
+Book Content:
+{book_content}
+
+Question: {question}
+
+Instructions:
+- Provide a clear, accurate answer based on the content above
+- If the answer is not in the provided content, indicate that
+- Cite relevant sections or concepts when possible
+- Be concise but thorough
+- If the question requires information not in the content, say so clearly
+
+Answer:
+

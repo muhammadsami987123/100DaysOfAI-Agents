@@ -1,0 +1,16 @@
+Extract {num_quotes} important, memorable, or impactful quotes from the following content from {book_title} ({context_title}).
+
+Content:
+{content}
+
+Select {num_quotes} quotes that are:
+- Particularly meaningful or insightful
+- Representative of the book's key themes
+- Memorable and well-phrased
+- Significant to understanding the book's message
+
+For each quote, provide:
+1. The exact quote in quotation marks
+2. Brief context about why it's significant (if available)
+
+Format your response clearly, with each quote on a separate line or section.

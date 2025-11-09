@@ -1,0 +1,14 @@
+Summarize the following chapter from a book in approximately 500 words.
+
+Chapter Title: {chapter_title}
+
+Chapter Content:
+{chapter_content}
+
+Provide a clear, concise summary that captures:
+1. Main points and key concepts
+2. Important details and examples
+3. Central themes or arguments
+4. Any significant conclusions or insights
+
+Format your response as a well-structured summary that would help someone understand the chapter's content without reading it in full.

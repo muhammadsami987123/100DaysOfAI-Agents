@@ -1,0 +1,15 @@
+Answer the following question based on the content from {book_title}, specifically from {context_title}.
+
+Question: {question}
+
+Relevant Content:
+{content}
+
+Provide a clear, accurate answer based on the content provided. Your answer should:
+1. Directly address the question
+2. Cite specific information from the content when possible
+3. Be concise but comprehensive
+4. If the answer cannot be found in the content, state that clearly
+
+If the question requires information not present in the provided content, explain what information is available and how it relates to the question.
+

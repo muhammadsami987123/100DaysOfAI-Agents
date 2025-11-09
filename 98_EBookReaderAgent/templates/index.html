@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EBookReaderAgent - AI-Powered eBook Reader</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header>
+            <h1>📚 EBookReaderAgent</h1>
+            <p class="subtitle">AI-Powered eBook Reader and Analyzer</p>
+        </header>
+
+        <!-- Upload Section -->
+        <div class="card">
+            <div class="card-header">📤 Load Book</div>
+            
+            <!-- Input Method Toggle -->
+            <div class="input-method-toggle">
+                <button class="toggle-btn active" id="toggleFile" data-method="file">
+                    📁 Upload File
+                </button>
+                <button class="toggle-btn" id="toggleUrl" data-method="url">
+                    🔗 Enter URL
+                </button>
+            </div>
+
+            <!-- File Upload -->
+            <div class="input-section" id="fileInputSection">
+                <div class="upload-box" id="fileUploadBox">
+                    <div class="upload-icon">📁</div>
+                    <p><strong>Click to upload</strong> or drag and drop</p>
+                    <p class="upload-hint">
+                        Supported: PDF, ePub (Max 50MB)
+                    </p>
+                </div>
+                <input type="file" id="bookFile" accept=".pdf,.epub" style="display: none;">
+            </div>
+
+            <!-- URL Input -->
+            <div class="input-section hidden" id="urlInputSection">
+                <div class="url-input-container">
+                    <input 
+                        type="url" 
+                        id="bookUrl" 
+                        class="url-input"
+                        placeholder="https://example.com/book.pdf"
+                        autocomplete="off"
+                    >
+                    <button class="btn btn-primary" id="loadUrlBtn">
+                        🔗 Load from URL
+                    </button>
+                </div>
+                <p class="url-hint">
+                    Enter a public URL to a PDF or ePub file
+                </p>
+            </div>
+
+            <div id="uploadStatus" class="hidden" style="margin-top: 1rem;"></div>
+        </div>
+
+        <!-- Book Info Section -->
+        <div class="card hidden" id="bookInfoSection">
+            <div class="card-header">📖 Book Information</div>
+            <div id="bookInfo"></div>
+        </div>
+
+        <!-- Actions Section -->
+        <div class="card hidden" id="actionsSection">
+            <div class="card-header">⚡ Quick Actions</div>
+            <div class="action-buttons">
+                <button class="btn btn-primary" id="summarizeAllBtn">
+                    <span class="btn-icon">📝</span>
+                    <span>Summarize All Chapters</span>
+                </button>
+                <button class="btn btn-primary" id="getTakeawaysBtn">
+                    <span class="btn-icon">💡</span>
+                    <span>Get Key Takeaways</span>
+                </button>
+                <button class="btn btn-primary" id="getQuotesBtn">
+                    <span class="btn-icon">💬</span>
+                    <span>Get Important Quotes</span>
+                </button>
+                <button class="btn btn-primary" id="analyzeBookBtn">
+                    <span class="btn-icon">🔍</span>
+                    <span>Full Book Analysis</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Chapter Selection -->
+        <div class="card hidden" id="chapterSection">
+            <div class="card-header">📑 Chapters</div>
+            <div id="chaptersList"></div>
+        </div>
+
+        <!-- Question Section -->
+        <div class="card hidden" id="questionSection">
+            <div class="card-header">❓ Ask a Question</div>
+            <div class="question-input">
+                <input 
+                    type="text" 
+                    id="questionInput" 
+                    placeholder="Ask a question about the book..."
+                    class="question-text-input"
+                >
+                <select id="chapterSelect" class="chapter-select">
+                    <option value="">All Chapters</option>
+                </select>
+                <button class="btn btn-primary" id="askQuestionBtn">Ask</button>
+            </div>
+            <div id="questionAnswer" class="hidden" style="margin-top: 1rem;"></div>
+        </div>
+
+        <!-- Results Section -->
+        <div class="card hidden" id="resultsSection">
+            <div class="card-header" id="resultsHeader">
+                <span>Results</span>
+                <button class="btn-icon-only" id="clearResultsBtn" title="Clear results">✕</button>
+            </div>
+            <div id="resultsContent"></div>
+        </div>
+
+        <!-- Loading Overlay -->
+        <div class="loading-overlay hidden" id="loadingOverlay">
+            <div class="loading-spinner"></div>
+            <p id="loadingMessage">Processing...</p>
+        </div>
+    </div>
+
+    <script src="/static/script.js"></script>
+</body>
+</html>

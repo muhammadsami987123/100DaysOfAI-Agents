@@ -1,0 +1,15 @@
+Extract the top {num_takeaways} key takeaways from the following book summaries.
+
+Book: {book_title}
+
+Chapter Summaries:
+{chapter_summaries}
+
+Analyze the summaries and provide {num_takeaways} key insights, lessons, or important points from this book. 
+
+Format your response as a numbered list, with each takeaway being:
+- Clear and actionable
+- Supported by the content
+- Significant to understanding the book's main themes
+
+Make sure each takeaway is distinct and valuable.
