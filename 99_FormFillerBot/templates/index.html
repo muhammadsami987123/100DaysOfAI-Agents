@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FormFillerBot - Auto-Fill Web Forms Using Local Data</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap">
+    <link rel="stylesheet" href="/static/main.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        .gradient-bg { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        .hover-lift { transition: all 0.3s ease; }
+        .hover-lift:hover { transform: translateY(-2px); box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+        .fade-in { animation: fadeIn 0.6s ease-out; }
+        .slide-up { animation: slideUp 0.6s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        .text-gradient { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    </style>
+</head>
+<body class="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 text-gray-900 dark:text-gray-100">
+    <!-- Animated Background -->
+    <div class="fixed inset-0 overflow-hidden pointer-events-none">
+        <div class="absolute -top-40 -right-40 w-80 h-80 bg-purple-300 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse"></div>
+        <div class="absolute -bottom-40 -left-40 w-80 h-80 bg-blue-300 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse" style="animation-delay: 2s;"></div>
+    </div>
+
+    <header class="relative z-10 bg-white/80 dark:bg-gray-800/80 backdrop-blur-md shadow-lg border-b border-gray-200/20 dark:border-gray-700/20 p-4 flex justify-between items-center">
+        <div class="flex items-center space-x-3">
+            <div class="w-10 h-10 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center">
+                <i class="fas fa-robot text-white text-lg"></i>
+            </div>
+            <h1 class="text-3xl font-bold text-gradient">FormFillerBot</h1>
+        </div>
+        <div class="flex items-center space-x-4">
+            <button id="themeToggle" class="p-3 rounded-xl bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 transition-all duration-300">
+                <i class="fas fa-moon text-gray-700 dark:text-gray-300 text-lg"></i>
+            </button>
+        </div>
+    </header>
+
+    <main class="relative z-10 container mx-auto p-4 max-w-7xl">
+        <!-- Tabs -->
+        <div class="mb-6 flex space-x-4 border-b border-gray-200 dark:border-gray-700">
+            <button onclick="showTab('data')" id="tab-data" class="tab-button px-6 py-3 font-semibold text-indigo-600 dark:text-indigo-400 border-b-2 border-indigo-600 dark:border-indigo-400">
+                <i class="fas fa-database mr-2"></i>Manage Data
+            </button>
+            <button onclick="showTab('analyze')" id="tab-analyze" class="tab-button px-6 py-3 font-semibold text-gray-500 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400">
+                <i class="fas fa-search mr-2"></i>Analyze Form
+            </button>
+        </div>
+
+        <!-- Messages -->
+        {% if error_message %}
+        <div class="mb-4 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl text-red-700 dark:text-red-300 fade-in">
+            <i class="fas fa-exclamation-circle mr-2"></i>{{ error_message }}
+        </div>
+        {% endif %}
+        {% if success_message %}
+        <div class="mb-4 p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-xl text-green-700 dark:text-green-300 fade-in">
+            <i class="fas fa-check-circle mr-2"></i>{{ success_message }}
+        </div>
+        {% endif %}
+
+        <!-- Data Management Tab -->
+        <div id="tab-content-data" class="tab-content">
+            <div class="bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm shadow-xl rounded-2xl p-8 hover-lift">
+                <h2 class="text-2xl font-bold mb-6 text-gray-800 dark:text-gray-100">
+                    <i class="fas fa-user-circle mr-2 text-indigo-500"></i>Your Local Data
+                </h2>
+                <p class="text-sm text-gray-600 dark:text-gray-400 mb-6">
+                    All data is stored locally on your device. No cloud storage unless you explicitly choose it.
+                </p>
+
+                <form id="dataForm" action="/manage-data" method="post" class="space-y-8">
+                    <!-- Personal Information -->
+                    <div class="border-b border-gray-200 dark:border-gray-700 pb-6">
+                        <h3 class="text-xl font-semibold mb-4 text-gray-700 dark:text-gray-300">
+                            <i class="fas fa-user mr-2 text-blue-500"></i>Personal Information
+                        </h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">First Name</label>
+                                <input type="text" name="first_name" value="{{ user_data.personal_info.first_name or '' }}"
+                                    class="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 p-3 focus:ring-2 focus:ring-indigo-500">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Last Name</label>
+                                <input type="text" name="last_name" value="{{ user_data.personal_info.last_name or '' }}"
+                                    class="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 p-3 focus:ring-2 focus:ring-indigo-500">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Full Name</label>
+                                <input type="text" name="full_name" value="{{ user_data.personal_info.full_name or '' }}"
+                                    class="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 p-3 focus:ring-2 focus:ring-indigo-500">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Email</label>
+                                <input type="email" name="email" value="{{ user_data.personal_info.email or '' }}"
+                                    class="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 p-3 focus:ring-2 focus:ring-indigo-500">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Phone</label>
+                                <input type="tel" name="phone" value="{{ user_data.personal_info.phone or '' }}"
+                                    class="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 p-3 focus:ring-2 focus:ring-indigo-500">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Date of Birth</label>
+                                <input type="date" name="date_of_birth" value="{{ user_data.personal_info.date_of_birth or '' }}"
+                                    class="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 p-3 focus:ring-2 focus:ring-indigo-500">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Address</label>
+                                <input type="text" name="address" value="{{ user_data.personal_info.address or '' }}"
+                                    class="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 p-3 focus:ring-2 focus:ring-indigo-500">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">City</label>
+                                <input type="text" name="city" value="{{ user_data.personal_info.city or '' }}"
+                                    class="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 p-3 focus:ring-2 focus:ring-indigo-500">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">State</label>
+                                <input type="text" name="state" value="{{ user_data.personal_info.state or '' }}"
+                                    class="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 p-3 focus:ring-2 focus:ring-indigo-500">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Zip Code</label>
+                                <input type="text" name="zip_code" value="{{ user_data.personal_info.zip_code or '' }}"
+                                    class="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 p-3 focus:ring-2 focus:ring-indigo-500">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Country</label>
+                                <input type="text" name="country" value="{{ user_data.personal_info.country or '' }}"
+                                    class="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 p-3 focus:ring-2 focus:ring-indigo-500">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Professional Information -->
+                    <div class="border-b border-gray-200 dark:border-gray-700 pb-6">
+                        <h3 class="text-xl font-semibold mb-4 text-gray-700 dark:text-gray-300">
+                            <i class="fas fa-briefcase mr-2 text-green-500"></i>Professional Information
+                        </h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Job Title</label>
+                                <input type="text" name="job_title" value="{{ user_data.professional.job_title or '' }}"
+                                    class="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 p-3 focus:ring-2 focus:ring-indigo-500">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Company</label>
+                                <input type="text" name="company" value="{{ user_data.professional.company or '' }}"
+                                    class="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 p-3 focus:ring-2 focus:ring-indigo-500">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">LinkedIn</label>
+                                <input type="url" name="linkedin" value="{{ user_data.professional.linkedin or '' }}"
+                                    class="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 p-3 focus:ring-2 focus:ring-indigo-500">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">GitHub</label>
+                                <input type="url" name="github" value="{{ user_data.professional.github or '' }}"
+                                    class="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 p-3 focus:ring-2 focus:ring-indigo-500">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Portfolio</label>
+                                <input type="url" name="portfolio" value="{{ user_data.professional.portfolio or '' }}"
+                                    class="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 p-3 focus:ring-2 focus:ring-indigo-500">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Education -->
+                    <div class="border-b border-gray-200 dark:border-gray-700 pb-6">
+                        <h3 class="text-xl font-semibold mb-4 text-gray-700 dark:text-gray-300">
+                            <i class="fas fa-graduation-cap mr-2 text-purple-500"></i>Education
+                        </h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Degree</label>
+                                <input type="text" name="degree" value="{{ user_data.education.degree or '' }}"
+                                    class="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 p-3 focus:ring-2 focus:ring-indigo-500">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">University</label>
+                                <input type="text" name="university" value="{{ user_data.education.university or '' }}"
+                                    class="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 p-3 focus:ring-2 focus:ring-indigo-500">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Graduation Year</label>
+                                <input type="text" name="graduation_year" value="{{ user_data.education.graduation_year or '' }}"
+                                    class="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 p-3 focus:ring-2 focus:ring-indigo-500">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- LLM Selection -->
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            <i class="fas fa-robot mr-2 text-purple-500"></i>AI Model
+                        </label>
+                        <select name="llm_choice" class="w-full md:w-48 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 p-3 focus:ring-2 focus:ring-indigo-500">
+                            <option value="gemini" {% if default_llm == "gemini" %}selected{% endif %}>Gemini</option>
+                            <option value="openai" {% if default_llm == "openai" %}selected{% endif %}>OpenAI</option>
+                        </select>
+                    </div>
+
+                    <button type="submit" class="w-full md:w-auto px-8 py-3 bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-lg font-semibold hover:from-indigo-600 hover:to-purple-700 transition-all duration-300 hover-lift">
+                        <i class="fas fa-save mr-2"></i>Save Data
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Form Analysis Tab -->
+        <div id="tab-content-analyze" class="tab-content hidden">
+            <div class="bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm shadow-xl rounded-2xl p-8 hover-lift">
+                <h2 class="text-2xl font-bold mb-6 text-gray-800 dark:text-gray-100">
+                    <i class="fas fa-search mr-2 text-indigo-500"></i>Analyze Form Fields
+                </h2>
+                <p class="text-sm text-gray-600 dark:text-gray-400 mb-6">
+                    Paste form field information (JSON format) or HTML to analyze and get auto-fill suggestions.
+                </p>
+
+                <form id="analyzeForm" action="/analyze" method="post" class="space-y-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            Form Fields (JSON Format)
+                        </label>
+                        <textarea name="form_fields" rows="10" required
+                            class="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 p-4 font-mono text-sm focus:ring-2 focus:ring-indigo-500"
+                            placeholder='[{"id": "email", "name": "email", "type": "email", "label": "Email Address", "placeholder": "your@email.com"}, {"id": "name", "name": "full_name", "type": "text", "label": "Full Name"}]'></textarea>
+                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-2">
+                            Each field should have: id, name, type, label, placeholder (optional)
+                        </p>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            Form HTML (Optional - for context)
+                        </label>
+                        <textarea name="form_html" rows="5"
+                            class="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 p-4 font-mono text-sm focus:ring-2 focus:ring-indigo-500"
+                            placeholder="<form>...</form>"></textarea>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            <i class="fas fa-robot mr-2 text-purple-500"></i>AI Model
+                        </label>
+                        <select name="llm_choice" class="w-full md:w-48 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 p-3 focus:ring-2 focus:ring-indigo-500">
+                            <option value="gemini" {% if default_llm == "gemini" %}selected{% endif %}>Gemini</option>
+                            <option value="openai" {% if default_llm == "openai" %}selected{% endif %}>OpenAI</option>
+                        </select>
+                    </div>
+
+                    <button type="submit" class="w-full md:w-auto px-8 py-3 bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-lg font-semibold hover:from-indigo-600 hover:to-purple-700 transition-all duration-300 hover-lift">
+                        <i class="fas fa-magic mr-2"></i>Analyze Form
+                    </button>
+                </form>
+
+                <!-- Analysis Results -->
+                {% if analysis_result %}
+                <div class="mt-8 p-6 bg-indigo-50 dark:bg-indigo-900/20 rounded-xl border border-indigo-200 dark:border-indigo-800">
+                    <h3 class="text-xl font-semibold mb-4 text-gray-800 dark:text-gray-100">
+                        <i class="fas fa-check-circle mr-2 text-green-500"></i>Fill Suggestions
+                    </h3>
+                    {% if analysis_result.field_mappings %}
+                    <div class="space-y-4">
+                        {% for mapping in analysis_result.field_mappings %}
+                        <div class="p-4 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+                            <div class="flex items-start justify-between mb-2">
+                                <div>
+                                    <h4 class="font-semibold text-gray-800 dark:text-gray-100">{{ mapping.field_name }}</h4>
+                                    <p class="text-sm text-gray-600 dark:text-gray-400">{{ mapping.field_id }}</p>
+                                </div>
+                                <span class="px-3 py-1 rounded-full text-xs font-semibold
+                                    {% if mapping.confidence == 'high' %}bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300
+                                    {% elif mapping.confidence == 'medium' %}bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300
+                                    {% else %}bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300{% endif %}">
+                                    {{ mapping.confidence }} confidence
+                                </span>
+                            </div>
+                            <div class="mt-2">
+                                <p class="text-sm text-gray-700 dark:text-gray-300">
+                                    <strong>Suggested Value:</strong> 
+                                    <code class="px-2 py-1 bg-gray-100 dark:bg-gray-700 rounded">{{ mapping.suggested_value }}</code>
+                                </p>
+                                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                                    <strong>Source:</strong> {{ mapping.data_source }}
+                                </p>
+                                <p class="text-xs text-gray-600 dark:text-gray-400 mt-2">
+                                    <strong>Reasoning:</strong> {{ mapping.reasoning }}
+                                </p>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <p class="text-gray-600 dark:text-gray-400">No field mappings found.</p>
+                    {% endif %}
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Theme Toggle
+        const themeToggle = document.getElementById('themeToggle');
+        const html = document.documentElement;
+        
+        // Check for saved theme preference or default to light mode
+        const currentTheme = localStorage.getItem('theme') || 'light';
+        if (currentTheme === 'dark') {
+            html.classList.add('dark');
+            themeToggle.querySelector('i').classList.remove('fa-moon');
+            themeToggle.querySelector('i').classList.add('fa-sun');
+        }
+        
+        themeToggle.addEventListener('click', () => {
+            html.classList.toggle('dark');
+            const isDark = html.classList.contains('dark');
+            localStorage.setItem('theme', isDark ? 'dark' : 'light');
+            themeToggle.querySelector('i').classList.toggle('fa-moon');
+            themeToggle.querySelector('i').classList.toggle('fa-sun');
+        });
+
+        // Tab Switching
+        function showTab(tabName) {
+            // Hide all tab contents
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.add('hidden');
+            });
+            
+            // Remove active state from all tabs
+            document.querySelectorAll('.tab-button').forEach(button => {
+                button.classList.remove('text-indigo-600', 'dark:text-indigo-400', 'border-b-2', 'border-indigo-600', 'dark:border-indigo-400');
+                button.classList.add('text-gray-500', 'dark:text-gray-400');
+            });
+            
+            // Show selected tab content
+            document.getElementById(`tab-content-${tabName}`).classList.remove('hidden');
+            
+            // Activate selected tab
+            const activeTab = document.getElementById(`tab-${tabName}`);
+            activeTab.classList.remove('text-gray-500', 'dark:text-gray-400');
+            activeTab.classList.add('text-indigo-600', 'dark:text-indigo-400', 'border-b-2', 'border-indigo-600', 'dark:border-indigo-400');
+        }
+
+        // Form submission - no special handling needed, backend handles form fields directly
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            // Check if we have analysis results (meaning we should show analyze tab)
+            {% if analysis_result %}
+            showTab('analyze');
+            {% else %}
+            showTab('data');
+            {% endif %}
+        });
+    </script>
+</body>
+</html>
+

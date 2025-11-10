@@ -1,0 +1,10 @@
+import uvicorn
+from web_app import app
+from config import Config
+import os
+
+if __name__ == '__main__':
+    # Ensure required directories exist
+    os.makedirs(Config.DATA_DIR, exist_ok=True)
+    uvicorn.run(app, host="0.0.0.0", port=8000)
+
