@@ -1,0 +1,12 @@
+click
+vosk
+pyttsx3
+tinydb
+gpt4all
+speechrecognition
+pyaudio
+textblob
+psutil
+GitPython
+Pillow
+mss
